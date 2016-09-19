@@ -43,5 +43,5 @@
 				"path": "./syntaxes/z80-asm.tmLanguage"
 			}
 		]
-	},
+	}
 }

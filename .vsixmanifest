@@ -3,11 +3,11 @@
   <Metadata>
     <Identity Language="en-US" Id="z80-asm" Version="0.0.1" Publisher="Imanolea"/>
     <DisplayName>Z80 Assembly</DisplayName>
-    <Description xml:space="preserve">Z80 Assembly support for Visual Studio Code</Description>
+    <Description xml:space="preserve">Z80 Assembly for Visual Studio Code</Description>
     <Tags>assembly,z80,sinclair,zx spectrum,game boy</Tags>
     <Categories>Languages</Categories>
     <GalleryFlags>Public</GalleryFlags>
-    <License>extension/LICENSE.md</License>
+    <License>extension/LICENSE</License>
   </Metadata>
   <Installation>
     <InstallationTarget Id="Microsoft.VisualStudio.Code"/>
@@ -15,6 +15,6 @@
   <Dependencies/>
   <Assets>
     <Asset Type="Microsoft.VisualStudio.Code.Manifest" Path="extension/package.json" Addressable="true" />
-    <Asset Type="Microsoft.VisualStudio.Services.Content.Details" Path="extension/README.md" Addressable="true" /><Asset Type="Microsoft.VisualStudio.Services.Content.License" Path="extension/LICENSE.md" Addressable="true" />
+    <Asset Type="Microsoft.VisualStudio.Services.Content.Details" Path="extension/README.md" Addressable="true" /><Asset Type="Microsoft.VisualStudio.Services.Content.License" Path="extension/LICENSE" Addressable="true" />
   </Assets>
 </PackageManifest>
