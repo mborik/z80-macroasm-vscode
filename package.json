@@ -4,6 +4,7 @@
 	"description": "Z80 Assembly support for Visual Studio Code",
 	"version": "0.0.1",
 	"icon": "logo.png",
+	"author": "Imanol Barriuso (Imanolea)",
 	"publisher": "Imanolea",
 	"engines": {
 		"vscode": "^1.0.0"
@@ -18,7 +19,7 @@
 		"ZX spectrum",
 		"game boy"
 	],
-	"license": "SEE LICENSE IN LICENSE.md",
+	"license": "SEE LICENSE IN LICENSE",
 	"contributes": {
 		"languages": [
 			{
@@ -43,9 +44,4 @@
 			}
 		]
 	},
-	"__metadata": {
-		"id": "92b14394-54a7-11e6-beb8-9e71128cae77",
-		"publisherId": "99d92952-54a7-11e6-beb8-9e71128cae77",
-		"publisherDisplayName": "Imanol Barriuso (Imanolea)"
-	}
 }
