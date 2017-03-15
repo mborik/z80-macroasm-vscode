@@ -1,47 +1,47 @@
 {
-	"name": "z80-asm",
-	"displayName": "Z80 Assembly",
-	"description": "Z80 Assembly support for Visual Studio Code",
-	"version": "0.0.1",
-	"icon": "logo.png",
-	"author": "Imanol Barriuso (Imanolea)",
-	"publisher": "Imanolea",
-	"engines": {
-		"vscode": "^1.0.0"
-	},
-	"categories": [
-		"Languages"
-	],
-	"keywords": [
-		"assembly",
-		"z80",
-		"sinclair",
-		"ZX spectrum",
-		"game boy"
-	],
-	"license": "SEE LICENSE IN LICENSE",
-	"contributes": {
-		"languages": [
-			{
-				"id": "z80-asm",
-				"aliases": [
-					"Z80 Assembly"
-				],
-				"extensions": [
-					".asm",
-					".s",
-					".z80",
-					".$C"
-				],
-				"configuration": "./z80-asm.configuration.json"
-			}
-		],
-		"grammars": [
-			{
-				"language": "z80-asm",
-				"scopeName": "source.asm.z80",
-				"path": "./syntaxes/z80-asm.tmLanguage"
-			}
-		]
-	}
+    "name": "z80-asm",
+    "displayName": "Z80 Assembly",
+    "description": "Z80 Assembly support for Visual Studio Code",
+    "version": "0.0.2",
+    "icon": "logo.png",
+    "author": "Imanol Barriuso (Imanolea)",
+    "publisher": "Imanolea",
+    "engines": {
+        "vscode": "^1.0.0"
+    },
+    "categories": [
+        "Languages"
+    ],
+    "keywords": [
+        "assembly",
+        "z80",
+        "sinclair",
+        "ZX spectrum",
+        "game boy"
+    ],
+    "license": "SEE LICENSE IN LICENSE",
+    "contributes": {
+        "languages": [
+            {
+                "id": "z80-asm",
+                "aliases": [
+                    "Z80 Assembly"
+                ],
+                "extensions": [
+                    ".asm",
+                    ".s",
+                    ".z80",
+                    ".$C"
+                ],
+                "configuration": "./z80-asm.configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "z80-asm",
+                "scopeName": "source.asm.z80",
+                "path": "./syntaxes/z80-asm.tmLanguage"
+            }
+        ]
+    }
 }
