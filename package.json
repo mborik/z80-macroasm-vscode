@@ -20,11 +20,48 @@
     ],
     "license": "MIT",
     "contributes": {
+        "problemMatchers": [
+            {
+                "name": "errmatcher-as",
+                "owner": "z80-macroasm",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": [
+                    {
+                        "regexp": "^> > >(.*)\\(([0-9]+)\\): (error|warning):\\s+(.*)(\\x1B\\[K)?$",
+                        "file": 1,
+                        "line": 2,
+                        "severity": 3,
+                        "message": 4
+                    }
+                ]
+            },
+            {
+                "name": "errmatcher-sjasmplus",
+                "owner": "z80-macroasm",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": [
+                    {
+                        "regexp": "^(.*)\\(([0-9]+)\\): (error|warning):\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "severity": 3,
+                        "message": 4
+                    }
+                ]
+            }
+        ],
         "languages": [
             {
                 "id": "z80-macroasm",
                 "aliases": [
-                    "Z80 Macro-Assembler"
+                    "Z80 Macro-Assembler",
+                    "z80-asm"
                 ],
                 "extensions": [
                     ".a80",
