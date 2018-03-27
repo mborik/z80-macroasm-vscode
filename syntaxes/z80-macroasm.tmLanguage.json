@@ -40,7 +40,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(^|\\s+)(?i:(equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|include|insert|binary|end|output|fpos|page|slot|size))\\s"
+					"match": "(^|\\s+)(?i:(equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size))\\s"
 				},
 				{
 					"name": "keyword.control.z80asm",
@@ -91,6 +91,10 @@
 							"name": "meta.preprocessor.flag.z80asm"
 						}
 					}
+				},
+				{
+					"name": "keyword.control.operator.z80asm",
+					"match": "\\b(?i:high|low|not|mod|sh[lr])\\b"
 				},
 				{
 					"name": "keyword.mnemonic.z80asm",

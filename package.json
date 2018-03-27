@@ -2,12 +2,9 @@
     "name": "z80-macroasm",
     "displayName": "Z80 Macro-Assembler",
     "description": "Support for Z80 macro-assemblers in Visual Studio Code",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "icon": "logo.png",
     "publisher": "djb",
-    "engines": {
-        "vscode": "^1.0.0"
-    },
     "categories": [
         "Languages"
     ],
@@ -18,7 +15,20 @@
         "ZX-Spectrum",
         "macro"
     ],
+    "homepage": "https://github.com/mborik/z80-macroasm-vscode",
+    "bugs": "https://github.com/mborik/z80-macroasm-vscode/issues",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/mborik/z80-macroasm-vscode.git"
+    },
     "license": "MIT",
+    "engines": {
+        "vscode": "^1.20.0"
+    },
+    "activationEvents": [
+        "onLanguage:z80-macroasm"
+    ],
+    "main": "./out/src/extension",
     "contributes": {
         "problemMatchers": [
             {
@@ -86,5 +96,17 @@
                 "path": "./syntaxes/z80-macroasm.tmLanguage.json"
             }
         ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile"
+    },
+    "devDependencies": {
+        "typescript": "^2.8.1",
+        "vscode": "^1.1.14",
+        "@types/node": "^7.0.43"
     }
 }

@@ -1,3 +1,6 @@
+/node_modules
+/out
+
 # OS generated files #
 ######################
 .DS_Store

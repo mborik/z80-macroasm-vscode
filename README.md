@@ -7,6 +7,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
   - [Macroassembler AS](http://john.ccac.rwth-aachen.de:8000/as/)
   - [Pasmo](http://pasmo.speccy.org/)
 * problem matches for **SjASMPlus** and **Macroassembler AS** compilation output
+* label and symbol documenter on hover, defintion provider, completition proposer
 * snippets for macros and source control keywords
 
 ### Credits
