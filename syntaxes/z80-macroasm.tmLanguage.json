@@ -44,11 +44,11 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(^|\\s+)(?i:(cpu|device|encoding|charset|proc|macro|local|shared|public|rept|endm|endp|exitm|module|endmod(ule)?|define|undefine|export|disp|textarea|map|field|defarray))\\s"
+					"match": "(^|\\s+)(?i:(cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(ule)?|define|undefine|export|disp|textarea|map|field|defarray))\\s"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(^|\\s+)(?i:(assert|fatal|error|warning|message|display|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword|dup|block))\\s"
+					"match": "(^|\\s+)(?i:(assert|fatal|error|warning|message|display|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword))\\s"
 				},
 				{
 					"name": "keyword.control.z80asm",

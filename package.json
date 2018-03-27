@@ -14,8 +14,8 @@
     "keywords": [
         "assembly",
         "z80",
-        "sinclair",
-        "ZX spectrum",
+        "Sinclair",
+        "ZX-Spectrum",
         "macro"
     ],
     "license": "MIT",
@@ -29,10 +29,17 @@
                 "extensions": [
                     ".a80",
                     ".asm",
+                    ".inc",
                     ".s",
                     ".$C"
                 ],
                 "configuration": "./language.configuration.json"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "z80-macroasm",
+                "path": "./snippets/z80-macroasm.json"
             }
         ],
         "grammars": [

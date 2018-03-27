@@ -1,0 +1,67 @@
+{
+    "macro-as": {
+        "prefix": "macro",
+        "body": [
+            "${1:label}:\tmacro",
+            "\t\t$0",
+            "\tendm"
+        ],
+        "description": "AS/Pasmo macro"
+    },
+    "macro-sjasm": {
+        "prefix": "macro",
+        "body": [
+            "\tmacro ${1:name}",
+            "\t\t$0",
+            "\tendm"
+        ],
+        "description": "SjASM macro"
+    },
+    "rept": {
+        "prefix": "rept",
+        "body": [
+            "\trept ${1:n}",
+            "\t\t$0",
+            "\tendm"
+        ],
+        "description": "repeat macro"
+    },
+    "dup-sjasm": {
+        "prefix": "dup",
+        "body": [
+            "\tdup ${1:n}",
+            "\t\t$0",
+            "\tedup"
+        ],
+        "description": "SjASM repeat macro"
+    },
+    "module-sjasm": {
+        "prefix": "module",
+        "body": [
+            "\tmodule ${1:name}",
+            "\t\t$0",
+            "\tendmodule"
+        ],
+        "description": "SjASM module"
+    },
+    "align": {
+        "prefix": "align",
+        "body": "align\t${0|2,4,8,16,32,64,128,256,512,1024,2048,4096,8192,16384,32768|}",
+        "description": "align fills zero or more bytes until the new address modulo <expression>."
+    },
+    "cpu-as": {
+        "prefix": "cpu",
+        "body": [
+            "\t\tcpu\tz80undoc",
+            "\t\trelaxed\ton",
+            "\t\tpage\t0",
+            "$0"
+        ],
+        "description": "AS Macroassembler CPU definiton"
+    },
+    "device-sjasm": {
+        "prefix": "device",
+        "body": "device\t${0|none,zxspectrum48,zxspectrum128,scorpion256,atmturbo512|}",
+        "description": "SjASM device definition"
+    }
+}
