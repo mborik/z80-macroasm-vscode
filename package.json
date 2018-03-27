@@ -1,11 +1,10 @@
 {
-    "name": "z80-asm",
-    "displayName": "Z80 Assembly",
-    "description": "Z80 Assembly support for Visual Studio Code",
-    "version": "0.0.2",
+    "name": "z80-macroasm",
+    "displayName": "Z80 Macro-Assembler",
+    "description": "Support for Z80 macro-assemblers in Visual Studio Code",
+    "version": "0.1.0",
     "icon": "logo.png",
-    "author": "Imanol Barriuso (Imanolea)",
-    "publisher": "Imanolea",
+    "publisher": "djb",
     "engines": {
         "vscode": "^1.0.0"
     },
@@ -17,30 +16,30 @@
         "z80",
         "sinclair",
         "ZX spectrum",
-        "game boy"
+        "macro"
     ],
-    "license": "SEE LICENSE IN LICENSE",
+    "license": "MIT",
     "contributes": {
         "languages": [
             {
-                "id": "z80-asm",
+                "id": "z80-macroasm",
                 "aliases": [
-                    "Z80 Assembly"
+                    "Z80 Macro-Assembler"
                 ],
                 "extensions": [
+                    ".a80",
                     ".asm",
                     ".s",
-                    ".z80",
                     ".$C"
                 ],
-                "configuration": "./z80-asm.configuration.json"
+                "configuration": "./language.configuration.json"
             }
         ],
         "grammars": [
             {
-                "language": "z80-asm",
-                "scopeName": "source.asm.z80",
-                "path": "./syntaxes/z80-asm.tmLanguage"
+                "language": "z80-macroasm",
+                "scopeName": "source.z80asm",
+                "path": "./syntaxes/z80-macroasm.tmLanguage.json"
             }
         ]
     }

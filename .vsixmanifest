@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Language="en-US" Id="z80-asm" Version="0.0.1" Publisher="Imanolea"/>
-    <DisplayName>Z80 Assembly</DisplayName>
-    <Description xml:space="preserve">Z80 Assembly for Visual Studio Code</Description>
-    <Tags>assembly,z80,sinclair,zx spectrum,game boy</Tags>
+    <Identity Language="en-US" Id="z80-macroasm" Version="0.1.0" Publisher="djb"/>
+    <DisplayName>Z80 Macro-Assembler</DisplayName>
+    <Description xml:space="preserve">Support for Z80 macro-assemblers in Visual Studio Code</Description>
+    <Tags>assembly,z80,sinclair,zx spectrum,macro</Tags>
     <Categories>Languages</Categories>
     <GalleryFlags>Public</GalleryFlags>
     <License>extension/LICENSE</License>
@@ -15,6 +15,7 @@
   <Dependencies/>
   <Assets>
     <Asset Type="Microsoft.VisualStudio.Code.Manifest" Path="extension/package.json" Addressable="true" />
-    <Asset Type="Microsoft.VisualStudio.Services.Content.Details" Path="extension/README.md" Addressable="true" /><Asset Type="Microsoft.VisualStudio.Services.Content.License" Path="extension/LICENSE" Addressable="true" />
+    <Asset Type="Microsoft.VisualStudio.Services.Content.Details" Path="extension/README.md" Addressable="true" />
+    <Asset Type="Microsoft.VisualStudio.Services.Content.License" Path="extension/LICENSE" Addressable="true" />
   </Assets>
 </PackageManifest>
