@@ -4,7 +4,7 @@
     "description": "Support for Z80 macro-assemblers in Visual Studio Code",
     "version": "0.2.0",
     "icon": "logo.png",
-    "publisher": "djb",
+    "publisher": "mborik",
     "categories": [
         "Languages"
     ],
@@ -77,8 +77,7 @@
                     ".a80",
                     ".asm",
                     ".inc",
-                    ".s",
-                    ".$C"
+                    ".s"
                 ],
                 "configuration": "./language.configuration.json"
             }

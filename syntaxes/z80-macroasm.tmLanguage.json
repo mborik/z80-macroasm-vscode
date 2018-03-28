@@ -25,14 +25,14 @@
 		"comments": {
 			"patterns": [
 				{
+					"name": "comment.block.z80asm",
 					"begin": "/\\*",
-					"end": "\\*/",
-					"name": "comment.block.z80asm"
+					"end": "\\*/"
 				},
 				{
+					"name": "comment.line.z80asm",
 					"begin": ";",
-					"end": "\\n",
-					"name": "comment.line.z80asm"
+					"end": "\\n"
 				}
 			]
 		},
@@ -40,7 +40,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(^|\\s+)(?i:(equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size))\\s"
+					"match": "(^|\\s+)(?i:(equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|outradix))\\s"
 				},
 				{
 					"name": "keyword.control.z80asm",
@@ -69,12 +69,56 @@
 				{
 					"name": "string.quoted.single.z80asm",
 					"begin": "'",
-					"end": "'"
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.z80asm"
+						}
+					},
+					"end": "(\\')|((?:[^\\\\\\n])$)",
+					"endCaptures": {
+						"1": {
+							"name": "punctuation.definition.string.end.z80asm"
+						},
+						"2": {
+							"name": "invalid.illegal.newline.z80asm"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#string-character-escape"
+						}
+					]
 				},
 				{
 					"name": "string.quoted.double.z80asm",
 					"begin": "\"",
-					"end": "\""
+					"beginCaptures": {
+						"0": {
+							"name": "punctuation.definition.string.begin.z80asm"
+						}
+					},
+					"end": "(\")|((?:[^\\\\\\n])$)",
+					"endCaptures": {
+						"1": {
+							"name": "punctuation.definition.string.end.z80asm"
+						},
+						"2": {
+							"name": "invalid.illegal.newline.z80asm"
+						}
+					},
+					"patterns": [
+						{
+							"include": "#string-character-escape"
+						}
+					]
+				}
+			]
+		},
+		"string-character-escape": {
+			"patterns": [
+				{
+					"name": "constant.character.escape.z80asm",
+					"match": "\\\\(x[0-9A-Fa-f]{2}|[0-2][0-7]{0,2}|3[0-6][0-7]?|37[0-7]?|[4-7][0-7]?|.|$)"
 				}
 			]
 		},
@@ -93,7 +137,7 @@
 					}
 				},
 				{
-					"name": "keyword.control.operator.z80asm",
+					"name": "constant.numeric.operator.z80asm",
 					"match": "\\b(?i:high|low|not|mod|sh[lr])\\b"
 				},
 				{
@@ -118,23 +162,23 @@
 				},
 				{
 					"name": "constant.numeric.integer.hexadecimal.z80asm",
-					"match": "[\\b\\-][0-9a-fA-F]+[hH]\\b"
+					"match": "(\\-?[0-9a-fA-F]+[hH])\\b"
 				},
 				{
 					"name": "constant.numeric.integer.hexadecimal.z80asm",
-					"match": "[\\b\\-](0x)?[0-9a-fA-F]+\\b"
+					"match": "(\\-?0x[0-9a-fA-F]+)\\b"
 				},
 				{
 					"name": "constant.numeric.integer.binary.z80asm",
-					"match": "%[01]+"
+					"match": "%[01]+\\b"
 				},
 				{
 					"name": "constant.numeric.integer.binary.z80asm",
 					"match": "\\b[01]+[bB]\\b"
 				},
 				{
-					"match": "[\\b\\-]\\d+",
-					"name": "constant.numeric.integer.decimal.z80asm"
+					"name": "constant.numeric.integer.decimal.z80asm",
+					"match": "\\-?\\d+"
 				}
 			]
 		},
@@ -147,6 +191,10 @@
 							"name": "entity.name.function.z80asm"
 						}
 					}
+				},
+				{
+					"match": "\\b([a-zA-Z][\\w\\.]+)\\b",
+					"name": "variable.parameter.label.z80asm"
 				}
 			]
 		}

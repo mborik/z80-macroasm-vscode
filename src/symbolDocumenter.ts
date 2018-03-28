@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-const fileGlobPattern = "**/*.{a80,asm,inc,s,$C}";
-const commentLineRegex = /^;(.*)$/;
+const fileGlobPattern = "**/*.{a80,asm,inc,s}";
+const commentLineRegex = /^;+(.*)$/;
 const endCommentRegex = /^[^;]+;(.*)$/;
 const includeLineRegex = /^include\s+(["'])([^\1]+)\1.*$/i;
-const spacerRegex = /^(.)\1{3,}$/;
+const horizontalRuleRegex = /^(.)\1+$/;
 const labelDefinitionRegex = /^\@?([\w\.]+)[:\s]/;
 const evalExpressionRegex = /^\@?([\w\.]+)\:?\s+(=|equ|eval)\s+(.+)(;.*)?$/i;
-const defineExpressionRegex = /^\@?([\w\.]+)\:?\s+(inc(?:bin|hob|trd)|b?include|insert|binary|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword)\s+(.+)(;.*)?$/i;
+const defineExpressionRegex = /^\@?([\w\.]+)\:?\s+(inc(?:bin|hob|trd)|b?include|insert|binary|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword)\s+([^$;]+)(;.*)?$/i;
 const keywordRegex = /^(equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(?:bin|hob|sna|tap|trd)|emptytrd|inc(?:bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(?:ule)?|define|undefine|export|disp|textarea|map|field|defarray|assert|fatal|error|warning|message|display|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword|if|ifdef|ifndef|ifused|ifnused|else|elseif|endif|adc|add|and|bit|call|ccf|cp|cpdr?|cpir?|cpl|daa|dec|[de]i|djnz|exx?|halt|im|in|inc|indr?|inir?|j[pr]|ld|lddr?|ldir?|neg|nop|or|ot[di]r|out|out[di]|pop|push|res|ret[in]?|rl|rla|rlc|rlca|rld|rr|rra|rrc|rrca|rrd|rst|sbc|scf|set|sli?a|sll|swap|sra|srl|sub|xor)$/i;
 
 
@@ -29,35 +29,33 @@ class FileTable {
 }
 
 export class ASMSymbolDocumenter {
+	private _watcher: vscode.FileSystemWatcher;
+
 	files: { [name: string]: FileTable };
 	constructor() {
 		this.files = {};
 
-		vscode.workspace.findFiles(fileGlobPattern, null, undefined).then((files) => {
-			files.forEach((fileURI) => {
-				vscode.workspace.openTextDocument(fileURI)
-					.then(doc => this._document(doc));
-			});
+		const fileUriHandler = ((uri: vscode.Uri) => {
+			vscode.workspace.openTextDocument(uri).then(doc => this._document(doc));
 		});
+
+		vscode.workspace.findFiles(fileGlobPattern, null, undefined)
+			.then(files => files.forEach(fileUriHandler));
 
 		vscode.workspace.onDidChangeTextDocument(
 			(event: vscode.TextDocumentChangeEvent) => this._document(event.document)
 		);
 
-		const watcher = vscode.workspace.createFileSystemWatcher(fileGlobPattern);
-		watcher.onDidChange((uri) => {
-			vscode.workspace.openTextDocument(uri)
-				.then(doc => this._document(doc));
-		});
-
-		watcher.onDidCreate((uri) => {
-			vscode.workspace.openTextDocument(uri)
-				.then(doc => this._document(doc));
-		});
-
-		watcher.onDidDelete((uri) => {
+		this._watcher = vscode.workspace.createFileSystemWatcher(fileGlobPattern);
+		this._watcher.onDidChange(fileUriHandler);
+		this._watcher.onDidCreate(fileUriHandler);
+		this._watcher.onDidDelete((uri) => {
 			delete this.files[uri.fsPath];
 		});
+	}
+
+	destroy() {
+		this._watcher.dispose();
 	}
 
 	/**
@@ -161,13 +159,15 @@ export class ASMSymbolDocumenter {
 		let commentBuffer: String[] = [];
 		for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
 			const line = document.lineAt(lineNumber);
+			if (line.isEmptyOrWhitespace) {
+				continue;
+			}
 
 			const commentLineMatch = commentLineRegex.exec(line.text);
-
 			if (commentLineMatch) {
 				const baseLine = commentLineMatch[1].trim();
 
-				if (spacerRegex.test(baseLine)) {
+				if (horizontalRuleRegex.test(baseLine)) {
 					continue;
 				}
 
@@ -190,26 +190,26 @@ export class ASMSymbolDocumenter {
 					}
 
 					const location = new vscode.Location(document.uri, line.range.start);
-					let documentation: string | undefined = undefined;
-
 					const defineExpressionMatch = defineExpressionRegex.exec(line.text);
 					const evalExpressionMatch = evalExpressionRegex.exec(line.text);
 					const endCommentMatch = endCommentRegex.exec(line.text);
 
 					if (defineExpressionMatch) {
-						commentBuffer.push(defineExpressionMatch[2] + " `" + defineExpressionMatch[3].trim() + "`\n");
+						let instruction = (defineExpressionMatch[2] + " ".repeat(8)).substr(0, 8);
+						commentBuffer.push("\n```\n" + instruction + defineExpressionMatch[3].trim() + "\n```");
 					}
-					if (evalExpressionMatch) {
-						commentBuffer.push("`" + evalExpressionMatch[3].trim() + "`\n");
-					}
-					if (endCommentMatch) {
-						commentBuffer.push(endCommentMatch[1].trim());
-					}
-					if (commentBuffer.length > 0) {
-						documentation = commentBuffer.join("\n").trim();
+					else if (evalExpressionMatch) {
+						commentBuffer.push("\n`" + evalExpressionMatch[3].trim() + "`");
 					}
 
-					table.symbols[declaration] = new SymbolDescriptor(location, documentation);
+					if (endCommentMatch) {
+						commentBuffer.unshift(endCommentMatch[1].trim());
+					}
+
+					table.symbols[declaration] = new SymbolDescriptor(
+						location,
+						commentBuffer.join("\n").trim() || undefined
+					);
 				}
 
 				commentBuffer = [];

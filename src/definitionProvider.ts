@@ -14,7 +14,7 @@ export class ASMDefinitionProvider implements vscode.DefinitionProvider {
 
 		return new Promise<vscode.Definition>((resolve, reject) => {
 			const symbol = this.symbolDocumenter.symbol(text, document);
-			if (symbol) {
+			if (symbol && !token.isCancellationRequested) {
 				return resolve(symbol.location);
 			}
 			reject();

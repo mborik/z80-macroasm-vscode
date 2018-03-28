@@ -4,15 +4,21 @@ import { ASMSymbolDocumenter } from "./symbolDocumenter";
 import { ASMCompletionProposer } from './completionProposer';
 import { ASMDefinitionProvider } from './definitionProvider';
 
-const languageSelector: vscode.DocumentFilter = { language: "z80-macroasm", scheme: "file" };
-
+let symbolDocumenter: ASMSymbolDocumenter | undefined;
 
 export function activate(ctx: vscode.ExtensionContext) {
-	const symbolDocumenter = new ASMSymbolDocumenter();
+	const languageSelector: vscode.DocumentFilter = { language: "z80-macroasm", scheme: "file" };
+
+	symbolDocumenter = new ASMSymbolDocumenter();
 
 	ctx.subscriptions.push(vscode.languages.registerHoverProvider(languageSelector, new ASMHoverProvider(symbolDocumenter)));
 	ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(languageSelector, new ASMCompletionProposer(symbolDocumenter)));
 	ctx.subscriptions.push(vscode.languages.registerDefinitionProvider(languageSelector, new ASMDefinitionProvider(symbolDocumenter)));
 }
 
-export function deactivate() {}
+export function deactivate() {
+	if (symbolDocumenter) {
+		symbolDocumenter.destroy();
+		symbolDocumenter = undefined;
+	}
+}

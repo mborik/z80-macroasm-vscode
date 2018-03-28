@@ -12,7 +12,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
 
 ### Credits
 
-This extension done by **Martin Bórik** is compilation or derivated work inspired by these another VS Code extensions:
+This extension was done by **Martin Bórik** as a compilation of derived work inspired by these VS Code extensions:
 - [`z80asm-vscode`](https://github.com/Imanolea/z80asm-vscode) by **Imanol Barriuso**
 - [`vscode-pasmo`](https://github.com/BouKiCHi/vscode-pasmo) by **BouKiCHi**
 - [`rgbds-vscode`](https://github.com/DonaldHays/rgbds-vscode) by **Donald Hays**

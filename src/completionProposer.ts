@@ -13,12 +13,6 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 
 		let output: vscode.CompletionItem[] = [];
 
-/* TODO
-		const keywords: string[] = ["macro", "endm"];
-		keywords.forEach((keyword) => {
-			output.push(new vscode.CompletionItem(keyword, vscode.CompletionItemKind.Keyword));
-		});
-*/
 		const symbols = this.symbolDocumenter.symbols(document);
 		for (const name in symbols) {
 			if (symbols.hasOwnProperty(name)) {
