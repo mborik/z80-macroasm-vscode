@@ -40,19 +40,19 @@
 			"patterns": [
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(^|\\s+)(?i:(equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|outradix))\\s"
+					"match": "(?i:(?<=\\s)(?:equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|outradix)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(^|\\s+)(?i:(cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(ule)?|define|undefine|export|disp|textarea|map|field|defarray))\\s"
+					"match": "(?i:(?<=\\s)(?:cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(ule)?|define|undefine|export|disp|textarea|map|field|defarray)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(^|\\s+)(?i:(assert|fatal|error|warning|message|display|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword))\\s"
+					"match": "(?i:(?<=\\s)(?:assert|fatal|error|warning|message|display|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(^|\\s+)(?i:(if|ifdef|ifndef|ifused|ifnused|else|elseif|endif))\\s"
+					"match": "(?i:(?<=\\s)(?:if|ifdef|ifndef|ifused|ifnused|else|elseif|endif)\\b)"
 				}
 			]
 		},
@@ -185,7 +185,7 @@
 		"labels": {
 			"patterns": [
 				{
-					"match": "^\\@?([\\w\\.]+)[:\\s]",
+					"match": "^\\@?((\\$\\$(?!\\.))?[\\w\\.]+)[:\\s]",
 					"captures": {
 						"1": {
 							"name": "entity.name.function.z80asm"

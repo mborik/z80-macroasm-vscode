@@ -4,12 +4,12 @@ import * as path from 'path';
 const fileGlobPattern = "**/*.{a80,asm,inc,s}";
 const commentLineRegex = /^;+(.*)$/;
 const endCommentRegex = /^[^;]+;(.*)$/;
-const includeLineRegex = /^include\s+(["'])([^\1]+)\1.*$/i;
+const includeLineRegex = /\binclude\s+(["'])([^\1]+)\1.*$/i;
 const horizontalRuleRegex = /^(.)\1+$/;
 const labelDefinitionRegex = /^\@?([\w\.]+)[:\s]/;
 const evalExpressionRegex = /^\@?([\w\.]+)\:?\s+(=|equ|eval)\s+(.+)(;.*)?$/i;
 const defineExpressionRegex = /^\@?([\w\.]+)\:?\s+(inc(?:bin|hob|trd)|b?include|insert|binary|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword)\s+([^$;]+)(;.*)?$/i;
-const keywordRegex = /^(equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(?:bin|hob|sna|tap|trd)|emptytrd|inc(?:bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(?:ule)?|define|undefine|export|disp|textarea|map|field|defarray|assert|fatal|error|warning|message|display|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword|if|ifdef|ifndef|ifused|ifnused|else|elseif|endif|adc|add|and|bit|call|ccf|cp|cpdr?|cpir?|cpl|daa|dec|[de]i|djnz|exx?|halt|im|in|inc|indr?|inir?|j[pr]|ld|lddr?|ldir?|neg|nop|or|ot[di]r|out|out[di]|pop|push|res|ret[in]?|rl|rla|rlc|rlca|rld|rr|rra|rrc|rrca|rrd|rst|sbc|scf|set|sli?a|sll|swap|sra|srl|sub|xor)$/i;
+const keywordRegex = /^(equ|eval|org|end?t|align|phase|dephase|unphase|save(?:bin|hob|sna|tap|trd)|emptytrd|inc(?:bin|hob|trd)|b?include|insert|binary|macro|rept|dup|block|endm|endp|edup|exitm|module|endmod(?:ule)?|define|undefine|export|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword|if|ifdef|ifndef|ifused|ifnused|else|elseif|endif)$/i;
 
 
 class SymbolDescriptor {
@@ -39,7 +39,7 @@ export class ASMSymbolDocumenter {
 			vscode.workspace.openTextDocument(uri).then(doc => this._document(doc));
 		});
 
-		vscode.workspace.findFiles(fileGlobPattern, null, undefined)
+		vscode.workspace.findFiles(fileGlobPattern)
 			.then(files => files.forEach(fileUriHandler));
 
 		vscode.workspace.onDidChangeTextDocument(
@@ -59,42 +59,21 @@ export class ASMSymbolDocumenter {
 	}
 
 	/**
-	 * Seeks files that include `fsPath` for symbols.
-	 * @param fsPath The path of the file to seek above.
-	 * @param output The collection of discovered symbols.
-	 * @param searched Paths of files that have already been searched.
-	 */
-	private _seekSymbolsUp(fsPath: string, output: { [name: string]: SymbolDescriptor }, searched: string[]) {
-		for (const filename in this.files) {
-			if (this.files.hasOwnProperty(filename)) {
-				if (searched.indexOf(filename) != -1) {
-					continue;
-				}
-
-				const table = this.files[filename];
-				if (!table) {
-					return;
-				}
-
-				if (table.includedFiles.indexOf(fsPath) != -1) {
-					this._seekSymbols(filename, output, searched, true);
-				}
-			}
-		}
-	}
-
-	/**
 	 * Seeks symbols for use by Intellisense in the file at `fsPath`.
 	 * @param fsPath The path of the file to seek in.
 	 * @param output The collection of discovered symbols.
 	 * @param searched Paths of files that have already been searched.
 	 * @param searchIncludes If true, also searches file includes.
 	 */
-	private _seekSymbols(fsPath: string, output: { [name: string]: SymbolDescriptor }, searched: string[], searchIncludes: boolean) {
-		const table = this.files[fsPath];
+	private async _seekSymbols(fsPath: string, output: { [name: string]: SymbolDescriptor }, searched: string[]) {
+		let table = this.files[fsPath];
 
-		if (table == undefined) {
-			return;
+		if (!table) {
+			// Open missing document and process...
+			const doc = await vscode.workspace.openTextDocument(fsPath);
+
+			this._document(doc);
+			table = this.files[fsPath];
 		}
 
 		searched.push(fsPath);
@@ -108,17 +87,11 @@ export class ASMSymbolDocumenter {
 			}
 		}
 
-		if (searchIncludes) {
-			table.includedFiles.forEach((includeFilename) => {
-				if (searched.indexOf(includeFilename) == -1) {
-					searched.push(includeFilename);
-
-					this._seekSymbols(includeFilename, output, searched, searchIncludes);
-				}
-			});
-
-			this._seekSymbolsUp(fsPath, output, searched);
-		}
+		table.includedFiles.forEach((includeFilename) => {
+			if (searched.indexOf(includeFilename) == -1) {
+				this._seekSymbols(includeFilename, output, searched);
+			}
+		});
 	}
 
 	/**
@@ -127,17 +100,9 @@ export class ASMSymbolDocumenter {
 	 */
 	symbols(context: vscode.TextDocument): { [name: string]: SymbolDescriptor } {
 		const output: { [name: string]: SymbolDescriptor } = {};
+		const searchedIncludes: string[] = [];
 
-		// First, find all exported symbols in the entire workspace
-		for (const filename in this.files) {
-			if (this.files.hasOwnProperty(filename)) {
-				this._seekSymbols(filename, output, [], false);
-			}
-		}
-
-		// Next, grab all symbols for this file and included files
-		const searchedIncludes: string[] = []
-		this._seekSymbols(context.uri.fsPath, output, searchedIncludes, true);
+		this._seekSymbols(context.uri.fsPath, output, searchedIncludes);
 
 		return output;
 	}
@@ -178,7 +143,7 @@ export class ASMSymbolDocumenter {
 				const labelMatch = labelDefinitionRegex.exec(line.text);
 
 				if (includeLineMatch) {
-					const filename = includeLineMatch[1];
+					const filename = includeLineMatch[2];
 					const documentDirname = path.dirname(document.uri.fsPath);
 					const includeName = path.join(documentDirname, filename);
 					table.includedFiles.push(includeName);
