@@ -5,11 +5,13 @@ const fileGlobPattern = "**/*.{a80,asm,inc,s}";
 const commentLineRegex = /^;+(.*)$/;
 const endCommentRegex = /^[^;]+;(.*)$/;
 const includeLineRegex = /\binclude\s+(["'])([^\1]+)\1.*$/i;
+const moduleLineRegex = /\bmodule\s+(\w+)\b/i;
 const horizontalRuleRegex = /^(.)\1+$/;
-const labelDefinitionRegex = /^\@?([\w\.]+)[:\s]/;
+const labelDefinitionRegex = /^\@?((\$\$(?!\.))?[\w\.]+)[:\s]/;
+const parentLabelRegex = /^(((\@|\$\$)(?!\.))?\w[\w\.]*)[:\s]/;
 const evalExpressionRegex = /^\@?([\w\.]+)\:?\s+(=|equ|eval)\s+(.+)(;.*)?$/i;
 const defineExpressionRegex = /^\@?([\w\.]+)\:?\s+(inc(?:bin|hob|trd)|b?include|insert|binary|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword)\s+([^$;]+)(;.*)?$/i;
-const keywordRegex = /^(equ|eval|org|end?t|align|phase|dephase|unphase|save(?:bin|hob|sna|tap|trd)|emptytrd|inc(?:bin|hob|trd)|b?include|insert|binary|macro|rept|dup|block|endm|endp|edup|exitm|module|endmod(?:ule)?|define|undefine|export|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword|if|ifdef|ifndef|ifused|ifnused|else|elseif|endif)$/i;
+const keywordRegex = /^(equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(?:bin|hob|sna|tap|trd)|emptytrd|inc(?:bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(?:ule)?|define|undefine|export|disp|textarea|map|field|defarray|assert|fatal|error|warning|message|display|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword|if|ifdef|ifndef|ifused|ifnused|else|elseif|endif|adc|add|and|bit|call|ccf|cp|cpdr?|cpir?|cpl|daa|dec|[de]i|djnz|exx?|halt|im|in|inc|indr?|inir?|j[pr]|ld|lddr?|ldir?|neg|nop|or|ot[di]r|out|out[di]|pop|push|res|ret[in]?|rl|rla|rlc|rlca|rld|rr|rra|rrc|rrca|rrd|rst|sbc|scf|set|sli?a|sll|swap|sra|srl|sub|xor)$/i;
 
 
 class SymbolDescriptor {
@@ -117,11 +119,84 @@ export class ASMSymbolDocumenter {
 		return this.symbols(searchContext)[name];
 	}
 
+	getFullSymbolAtDocPosition<T> (
+		doc: vscode.TextDocument,
+		position: vscode.Position,
+		token: vscode.CancellationToken,
+		hoverDocumentation: boolean = false): Promise<T> {
+
+		return new Promise<T>((resolve, reject) => {
+			const range = doc.getWordRangeAtPosition(position, /((\$\$(?!\.))?[\w\.]+)/);
+			if (!range || (range && (range.isEmpty || !range.isSingleLine || range.start.character === 0))) {
+				return reject();
+			}
+
+			let lbPart = doc.getText(range);
+			if (keywordRegex.test(lbPart)) {
+				return reject();
+			}
+
+			let lbFull = lbPart;
+			let lbParent: string | undefined = undefined;
+			let lbModule: string | undefined = undefined;
+
+			for (let lineNumber = position.line - 1; lineNumber >= 0; lineNumber--) {
+				let line = doc.lineAt(lineNumber);
+				if (line.isEmptyOrWhitespace) {
+					continue;
+				}
+				if (lbPart[0] === '.' && !lbParent) {
+					const parentLabelMatch = line.text.match(parentLabelRegex);
+					if (parentLabelMatch) {
+						lbParent = parentLabelMatch[1];
+					}
+				}
+				const moduleLineMatch = line.text.match(moduleLineRegex);
+				if (moduleLineMatch) {
+					lbModule = moduleLineMatch[1];
+					break;
+				}
+			}
+
+			lbFull = this._enlargeLabel(this._enlargeLabel(lbFull, lbParent), lbModule);
+
+			const symbol = this.symbol(lbFull, doc) || this.symbol(lbPart, doc);
+			if (symbol && !token.isCancellationRequested) {
+				let result: any;
+				if (hoverDocumentation) {
+					result = new vscode.Hover(new vscode.MarkdownString(symbol.documentation), range);
+				}
+				else {
+					result = symbol.location;
+				}
+
+				return resolve(result);
+			}
+
+			reject();
+		});
+	}
+
+	private _enlargeLabel(base: string, prepend?: string): string {
+		if (prepend && base.indexOf(prepend) < 0) {
+			if (base[0] === '.') {
+				base = prepend + base;
+			}
+			else {
+				base = `${prepend}.${base}`;
+			}
+		}
+		return base;
+	}
+
 	private _document(document: vscode.TextDocument) {
 		const table = new FileTable();
 		this.files[document.uri.fsPath] = table;
 
-		let commentBuffer: String[] = [];
+		let moduleStack: string[] = [];
+		let commentBuffer: string[] = [];
+		let lastFullLabel: string | null = null;
+
 		for (let lineNumber = 0; lineNumber < document.lineCount; lineNumber++) {
 			const line = document.lineAt(lineNumber);
 			if (line.isEmptyOrWhitespace) {
@@ -140,6 +215,7 @@ export class ASMSymbolDocumenter {
 			}
 			else {
 				const includeLineMatch = includeLineRegex.exec(line.text);
+				const moduleLineMatch = moduleLineRegex.exec(line.text);
 				const labelMatch = labelDefinitionRegex.exec(line.text);
 
 				if (includeLineMatch) {
@@ -148,10 +224,25 @@ export class ASMSymbolDocumenter {
 					const includeName = path.join(documentDirname, filename);
 					table.includedFiles.push(includeName);
 				}
+				else if (moduleLineMatch) {
+					moduleStack.unshift(moduleLineMatch[1]);
+				}
+				else if (/\bendmod(ule)?\b/i.test(line.text)) {
+					moduleStack.shift();
+				}
 				else if (labelMatch) {
-					const declaration = labelMatch[1];
-					if (keywordRegex.test(declaration)) {
-						continue;
+					let declaration = labelMatch[1];
+					if (declaration[0] === '.') {
+						if (lastFullLabel) {
+							declaration = lastFullLabel + declaration;
+						}
+					}
+					else if (declaration.indexOf('$$') < 0) {
+						lastFullLabel = declaration;
+					}
+
+					if (moduleStack.length && labelMatch[0][0] !== '@') {
+						declaration = `${moduleStack[0]}.${declaration}`;
 					}
 
 					const location = new vscode.Location(document.uri, line.range.start);
