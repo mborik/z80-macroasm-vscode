@@ -2,7 +2,7 @@
     "name": "z80-macroasm",
     "displayName": "Z80 Macro-Assembler",
     "description": "Support for Z80 macro-assemblers in Visual Studio Code",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "icon": "logo.png",
     "publisher": "mborik",
     "categories": [
