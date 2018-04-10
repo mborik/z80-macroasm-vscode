@@ -12,7 +12,7 @@ export function activate(ctx: vscode.ExtensionContext) {
 	symbolDocumenter = new ASMSymbolDocumenter();
 
 	ctx.subscriptions.push(vscode.languages.registerHoverProvider(languageSelector, new ASMHoverProvider(symbolDocumenter)));
-	ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(languageSelector, new ASMCompletionProposer(symbolDocumenter)));
+	ctx.subscriptions.push(vscode.languages.registerCompletionItemProvider(languageSelector, new ASMCompletionProposer(symbolDocumenter), ','));
 	ctx.subscriptions.push(vscode.languages.registerDefinitionProvider(languageSelector, new ASMDefinitionProvider(symbolDocumenter)));
 }
 
