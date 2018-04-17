@@ -2,26 +2,28 @@ import * as vscode from 'vscode';
 import { ASMSymbolDocumenter } from './symbolDocumenter';
 
 const shouldSuggestInstructionRegex = /^(\@?((\$\$(?!\.))?[\w\.]+)[:\s])?\s*(\w+)?(?!.+)$/;
-const shouldSuggestRegisterRegex = /(\w+)\s+(\w+|\([^\)]+?\))(,\s*?\(?[^\(\n]*)$/;
-const suggestRegisterForRegex = /^(adc|add|bit|ex|ld|out|res|r[lr]c?|set|s[lr]a|s[lr]l|slia|sbc)$/i;
+const shouldSuggest1ArgRegisterRegex = /(?:(pop|push)|(cp|in|s[lr]a|s[lr]l|slia|sub|and|x?or)|(ex|ld|inc|dec|adc|add|sbc))\s+([a-z]\w*|\([^\)]+?\))$/i;
+const shouldSuggest2ArgRegisterRegex = /(adc|add|bit|ex|ld|out|res|r[lr]c?|set|s[lr]a|s[lr]l|slia|sbc)\s+(\w+|\([^\)]+?\))(,\s*?\(?[^\(\n]*)$/i;
 
 const instructionSet = [
-	"adc\t",  "add\t",  "and\t",  "bit\t",  "call\t", "ccf\n",  "cp\t",   "cpd\n",
-	"cpdr\n", "cpi\n",  "cpir\n", "cpl\n",  "daa\n",  "dec\t",  "di\n",   "ei\n",
-	"djnz\t", "ex\t",   "exx\n",  "halt\n", "im\t",   "in\t",   "inc\t",  "ind\n",
-	"indr\n", "ini\n",  "inir\n", "jp\t",   "jr\t",   "ld\t",   "ldd\n",  "lddr\n",
-	"ldi\n",  "ldir\n", "neg\n",  "nop\n",  "or\t",   "otdr\n", "otir\n", "out\t",
-	"outd\n", "outi\n", "pop\t",  "push\t", "res\t",  "ret\t",  "reti\n", "retn\n",
-	"rl\t",   "rla\n",  "rlc\t",  "rlca\n", "rld\n",  "rr\t",   "rra\n",  "rrc\t",
-	"rrca\n", "rrd\n",  "rst\t",  "sbc\t",  "scf\n",  "set\t",  "sla\t",  "slia\t",
-	"sll\t",  "swap\t", "sra\t",  "srl\t",  "sub\t",  "xor\t"
+	'adc\t',  'add\t',  'and\t',  'bit\t',  'call\t', 'ccf\n',  'cp\t',   'cpd\n',
+	'cpdr\n', 'cpi\n',  'cpir\n', 'cpl\n',  'daa\n',  'dec\t',  'di\n',   'ei\n',
+	'djnz\t', 'ex\t',   'exx\n',  'halt\n', 'im\t',   'in\t',   'inc\t',  'ind\n',
+	'indr\n', 'ini\n',  'inir\n', 'jp\t',   'jr\t',   'ld\t',   'ldd\n',  'lddr\n',
+	'ldi\n',  'ldir\n', 'neg\n',  'nop\n',  'or\t',   'otdr\n', 'otir\n', 'out\t',
+	'outd\n', 'outi\n', 'pop\t',  'push\t', 'res\t',  'ret\t',  'reti\n', 'retn\n',
+	'rl\t',   'rla\n',  'rlc\t',  'rlca\n', 'rld\n',  'rr\t',   'rra\n',  'rrc\t',
+	'rrca\n', 'rrd\n',  'rst\t',  'sbc\t',  'scf\n',  'set\t',  'sla\t',  'slia\t',
+	'sll\t',  'swap\t', 'sra\t',  'srl\t',  'sub\t',  'xor\t'
 ];
 
 const registerSet = [
-	"a", "b", "c", "d", "e", "h", "l", "i", "r",
-	"(hl)", "(ix+*)", "(iy+*)",
-	"hl", "de", "bc", "sp", "ix", "iy", "af'",
-	"ixl", "ixu", "iyl", "iyu", "lx", "hx", "xl", "xh", "ly", "hy", "yl", "yh"
+	/*  0 */ 'a', 'b', 'c', 'd', 'e', 'h', 'l', 'i', 'r',
+	/*  9 */ '(hl)', '(de)', '(bc)', '(ix+*)', '(iy+*)',
+	/* 14 */ 'ixl', 'ixu', 'lx', 'hx', 'xl', 'xh',
+	/* 20 */ 'iyl', 'iyu', 'ly', 'hy', 'yl', 'yh',
+	/* 26 */ 'hl', 'de', 'bc', 'af', 'ix', 'iy',
+	/* 32 */ 'sp', '(sp)', '(ix)', '(iy)'
 ];
 
 export class ASMCompletionProposer implements vscode.CompletionItemProvider {
@@ -40,22 +42,56 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 			return instructionSet.map(snippet => {
 				const item = new vscode.CompletionItem(snippet.trim(), vscode.CompletionItemKind.Keyword);
 				item.insertText = new vscode.SnippetString(`${snippet}$0`);
-				item.commitCharacters = ["\t"];
+				item.commitCharacters = ['\t'];
 				return item;
 			});
 		}
 
 		let output: vscode.CompletionItem[] = [];
 
-		const shouldSuggestRegisterMatch = shouldSuggestRegisterRegex.exec(line);
-		if (shouldSuggestRegisterMatch && suggestRegisterForRegex.test(shouldSuggestRegisterMatch[1])) {
-			output = registerSet.map(snippet => {
+		const shouldSuggest1ArgRegisterMatch = shouldSuggest1ArgRegisterRegex.exec(line);
+		const shouldSuggest2ArgRegisterMatch = shouldSuggest2ArgRegisterRegex.exec(line);
+
+		if (shouldSuggest2ArgRegisterMatch) {
+			if (shouldSuggest2ArgRegisterMatch[1].toLowerCase() === 'ex' &&
+				shouldSuggest2ArgRegisterMatch[2].toLowerCase() === 'af') {
+
+				const item = new vscode.CompletionItem("af'", vscode.CompletionItemKind.Value);
+				item.insertText = new vscode.SnippetString(`af'\n$0`);
+				item.commitCharacters = ['\n'];
+
+				return [item];
+			}
+			else {
+				output = registerSet.map((snippet, idx) => {
+					const item = new vscode.CompletionItem(snippet, vscode.CompletionItemKind.Value);
+					item.insertText = new vscode.SnippetString(`${snippet.replace('*', '${1:0}')}\n$0`);
+					item.commitCharacters = ['\n'];
+
+					// put to the top of the list...
+					item.sortText = `!${idx.toString(36)}`;
+					return item;
+				});
+			}
+		}
+		else if (shouldSuggest1ArgRegisterMatch) {
+			let idxStart = 0, idxEnd = undefined;
+
+			if (shouldSuggest1ArgRegisterMatch[1]) {
+				idxStart = 26;
+				idxEnd = 31;
+			}
+			else if (shouldSuggest1ArgRegisterMatch[2]) {
+				idxEnd = 25;
+			}
+
+			output = registerSet.slice(idxStart, idxEnd).map((snippet, idx) => {
 				const item = new vscode.CompletionItem(snippet, vscode.CompletionItemKind.Value);
-				item.insertText = new vscode.SnippetString(`${snippet.replace('*', '${1:index}')}\n$0`);
-				item.commitCharacters = ["\n"];
+				item.insertText = new vscode.SnippetString(`${snippet.replace('*', '${1:0}')}\n$0`);
+				item.commitCharacters = ['\n'];
 
 				// put to the top of the list...
-				item.sortText = `!${snippet.replace(/^\(?(\w+).+$/, '$1')}`;
+				item.sortText = `!${idx.toString(36)}`;
 				return item;
 			});
 		}
