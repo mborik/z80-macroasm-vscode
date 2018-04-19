@@ -1,4 +1,4 @@
-## Support for Z80 macro-assemblers in Visual Studio Code
+# Support for Z80 macro-assemblers in Visual Studio Code
 
 The **Z80 Macro-Assembler** extension for Visual Studio Code provides the following features inside VS Code:
 
@@ -10,14 +10,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
 * label and symbol documenter on hover, defintion provider, completition proposer
 * snippets for macros and source control keywords
 
-### Credits
-
-This extension was done by **Martin Bórik** as a compilation of derived work inspired by these VS Code extensions:
-- [`z80asm-vscode`](https://github.com/Imanolea/z80asm-vscode) by **Imanol Barriuso**
-- [`vscode-pasmo`](https://github.com/BouKiCHi/vscode-pasmo) by **BouKiCHi**
-- [`rgbds-vscode`](https://github.com/DonaldHays/rgbds-vscode) by **Donald Hays**
-
-### Problem matchers
+## Problem matchers
 
 There are some predefined problem matchers to handle reported errors from compilation output:
 - `errmatcher-as` for **Macroassembler AS**
@@ -30,7 +23,33 @@ These values can be used in `.vscode/tasks.json` of your project's build task, f
     ...
 ```
 
-### License
+## IntelliSense showcase
+
+### Definition Provider:
+> ![Definition provider](images/z80-macroasm-definition.png)
+
+> Generated map of every symbol defined considers also modules or temporal labels:
+> ![Peek Definition demo](images/z80-macroasm-definition-peek.gif)
+
+### Completion Proposer
+> ![Completion Proposer](images/z80-macroasm-completion.png)
+
+> Inteligent completion of directives, pseudo-instructions, Z80 instructions, registers, labels or symbols:
+> ![Completion and snippets demo](images/z80-macroasm-completion-demo.gif)
+
+### Hover over symbol:
+> Show symbol's value or specific definiton:
+> ![Hover over symbol](images/z80-macroasm-hover.gif)
+
+
+## Credits
+
+This extension was done by **Martin Bórik** as a compilation of derived work inspired by these VS Code extensions:
+- [`z80asm-vscode`](https://github.com/Imanolea/z80asm-vscode) by **Imanol Barriuso**
+- [`vscode-pasmo`](https://github.com/BouKiCHi/vscode-pasmo) by **BouKiCHi**
+- [`rgbds-vscode`](https://github.com/DonaldHays/rgbds-vscode) by **Donald Hays**
+
+## License
 
 The Z80 Assembly extension is subject to [these license terms](LICENSE).
 

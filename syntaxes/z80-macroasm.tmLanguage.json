@@ -40,7 +40,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:equ|eval|org|end?t|align|phase|dephase|unphase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|outradix)\\b)"
+					"match": "(?i:(?<=\\s)(?:equ|eval|org|end?t|align|phase|(de|un)phase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|outradix)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
@@ -52,7 +52,22 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:if|ifdef|ifndef|ifused|ifnused|else|elseif|endif)\\b)"
+					"match": "(?i:(?<=\\s)(?:if|ifn?def|ifn?used|else|elseif|endif)\\b)"
+				},
+				{
+					"name": "string.other.lua.z80asm",
+					"begin": "(?i:(?<=\\s)(lua)\\b)",
+					"beginCaptures": {
+						"1": {
+							"name": "keyword.control.z80asm"
+						}
+					},
+					"end": "(?i:(?<=\\s)(endlua)\\b)",
+					"endCaptures": {
+						"1": {
+							"name": "keyword.control.z80asm"
+						}
+					}
 				}
 			]
 		},
