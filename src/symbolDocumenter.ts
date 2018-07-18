@@ -119,6 +119,55 @@ export class ASMSymbolDocumenter {
 		return this.symbols(searchContext)[name];
 	}
 
+	/**
+	 * Provide a list of symbols for both 'Go to Symbol in...' functions.
+	 * @param fileFilter (optional) URI of specific file in workspace.
+	 * @param query (optional) Part of string to find in symbol name.
+	 * @param token Cancellation token object.
+	 * @returns Promise of SymbolInformation objects array.
+	 */
+	provideSymbols (
+		fileFilter: string | null,
+		query: string | null,
+		token: vscode.CancellationToken
+	): Promise<vscode.SymbolInformation[]> {
+
+		return new Promise<vscode.SymbolInformation[]>((resolve, reject) => {
+			if (token.isCancellationRequested) {
+				reject();
+			}
+
+			const output: vscode.SymbolInformation[] = [];
+
+			for (const fileName in this.files) {
+				if (this.files.hasOwnProperty(fileName) && (!fileFilter || fileFilter === fileName)) {
+					const table = this.files[fileName];
+
+					for (const name in table.symbols) {
+						if (table.symbols.hasOwnProperty(name) && (!query || ~name.indexOf(query))) {
+							const symbol = table.symbols[name];
+							output.push(new vscode.SymbolInformation(name, vscode.SymbolKind.Variable, symbol.location.range, symbol.location.uri));
+						}
+					}
+				}
+			}
+
+			if (output.length > 0) {
+				resolve(output);
+			}
+
+			reject();
+		});
+	}
+
+	/**
+	 * Provide defined symbol for 'Go to Definition' or symbol hovering.
+	 * @param doc Text document object.
+	 * @param position Cursor position.
+	 * @param token Cancellation token object.
+	 * @param hoverDocumentation Provide a hover object.
+	 * @returns Promise of T.
+	 */
 	getFullSymbolAtDocPosition<T> (
 		doc: vscode.TextDocument,
 		position: vscode.Position,

@@ -5,7 +5,7 @@
     <DisplayName>Z80 Macro-Assembler</DisplayName>
     <Description xml:space="preserve">Support for Z80 macro-assemblers in Visual Studio Code</Description>
     <Tags>assembly,z80,sinclair,zx spectrum,macro</Tags>
-    <Categories>Languages</Categories>
+    <Categories>Programming Languages</Categories>
     <GalleryFlags>Public</GalleryFlags>
     <License>extension/LICENSE</License>
   </Metadata>
