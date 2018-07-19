@@ -25,20 +25,24 @@ These values can be used in `.vscode/tasks.json` of your project's build task, f
 
 ## IntelliSense showcase
 
+### Symbol Provider:
+- provide symbols or labels in current file in "Go to Symbol in File..." [`Ctrl+Shift+O`, `Cmd+Shift+O`]
+- provide symbols or labels also in all includes in "Go to Symbol in Workspace..." [`Ctrl+T`, `Cmd+T`]
+
 ### Definition Provider:
 > ![Definition provider](images/z80-macroasm-definition.png)
 
-> Generated map of every symbol defined considers also modules or temporal labels:
+- Generated map of every symbol defined considers also modules or temporal labels:
 > ![Peek Definition demo](images/z80-macroasm-definition-peek.gif)
 
 ### Completion Proposer
 > ![Completion Proposer](images/z80-macroasm-completion.png)
 
-> Inteligent completion of directives, pseudo-instructions, Z80 instructions, registers, labels or symbols:
+- Inteligent completion of directives, pseudo-instructions, Z80 instructions, registers, labels or symbols:
 > ![Completion and snippets demo](images/z80-macroasm-completion-demo.gif)
 
 ### Hover over symbol:
-> Show symbol's value or specific definiton:
+- Show symbol's value or specific definiton:
 > ![Hover over symbol](images/z80-macroasm-hover.gif)
 
 

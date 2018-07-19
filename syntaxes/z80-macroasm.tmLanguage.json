@@ -40,11 +40,11 @@
 			"patterns": [
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:equ|eval|org|end?t|align|phase|(de|un)phase|shift|save(bin|hob|sna|tap|trd)|emptytrd|inc(bin|hob|trd)|b?include|insert|binary|end|output|fpos|page|slot|size|outradix)\\b)"
+					"match": "(?i:(?<=\\s)(?:equ|eval|org|end?t|align|(de|un)?phase|shift|save(bin|hob|sna|tap|trd)|empty(tap|trd)|inc(bin|hob|trd)|b?include|insert|binary|end|output|tap(out|end)|fpos|page|slot|size|outradix)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(ule)?|define|undefine|export|disp|textarea|map|field|defarray)\\b)"
+					"match": "(?i:(?<=\\s)(?:cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(ule)?|(un)?define|export|disp|textarea|map|field|defarray)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
