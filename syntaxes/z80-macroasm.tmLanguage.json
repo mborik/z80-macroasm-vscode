@@ -55,6 +55,26 @@
 					"match": "(?i:(?<=\\s)(?:if|ifn?def|ifn?used|else|elseif|endif)\\b)"
 				},
 				{
+					"name": "keyword.control.z80asm",
+					"match": "(?i:(?<=\\s)(?:align|bank|bankset|limit|protect|write direct|charset|def[irs]|str|struct)\\b)"
+				},
+				{
+					"name": "keyword.control.z80asm",
+					"match": "(?i:(?<=\\s)(?:incl48|incl49|inclz4|inczx7|incexo|lz48|lz49|lz4|lzw7|lzexo|lzclose)\\b)"
+				},
+				{
+					"name": "keyword.control.z80asm",
+					"match": "(?i:(?<=\\s)(?:print|fail|repeat|rend|until|switch|case|default|break|endswitch|stop|while|wend)\\b)"
+				},
+				{
+					"name": "keyword.control.z80asm",
+					"match": "(?i:(?<=\\s)(?:amsdos|breakpoint|buildcpr|buildsna|run|save|setcpc|setcrtc)\\b)"
+				},
+				{
+					"name": "keyword.control.z80asm",
+					"match": "(?i:(?<=\\s)(?:list|nolist|let)\\b)"
+				},
+				{
 					"name": "string.other.lua.z80asm",
 					"begin": "(?i:(?<=\\s)(lua)\\b)",
 					"beginCaptures": {
