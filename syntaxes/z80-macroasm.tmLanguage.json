@@ -56,7 +56,7 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:align|bank|bankset|limit|protect|write direct|charset|def[irs]|str|struct)\\b)"
+					"match": "(?i:(?<=\\s)(?:align|bank|bankset|limit|protect|write direct|charset|def[irs]|str|struct|endstruct)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
