@@ -210,6 +210,14 @@
             "endstruct"
         ],
         "description": "Structure creation by rasm"
+    },
+    "kill-amstrad": {
+        "prefix": "kill",
+        "body": [
+            "ld hl, 0xc9fb : ld (0x38), hl",
+            "$0"
+        ],
+        "description": "Kill Amstrad CPC OS"
     }
 
 }
