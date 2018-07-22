@@ -184,19 +184,23 @@
             "while ${1:test}",
             "$0",
             "wend"
-        ]
+        ],
+        "description": "WHILE loop by rasm"
     },
     "setcpc": {
         "prefix": "cpc",
         "body" : [
             "setcpc ${1|0,1,2,3,4,5,6|}"
-        ]
+        ],
+        "description": "CPC choice in SNA by rasm.\n0: CPC 464\n1: CPC 664\n2: CPC 6128\n4: 464 Plus\n5: 6128 Plus\n6: GX-4000"
+        
     },
     "protect": {
         "prefix": "prot",
         "body" : [
             "protect ${1:start} ${2:end}"
-        ]
+        ],
+        "description": "PROTECT start end by rasm"
     },
     "struct": {
         "prefix": "struct",
@@ -204,7 +208,8 @@
             "struct ${1:name}",
             "$0",
             "endstruct"
-        ]
+        ],
+        "description": "Structure creation by rasm"
     }
 
 }
