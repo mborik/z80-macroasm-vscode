@@ -189,7 +189,7 @@
     "setcpc": {
         "prefix": "cpc",
         "body" : [
-            "setcpc ${1|0,1,2,3,4,5,6}"
+            "setcpc ${1|0,1,2,3,4,5,6|}"
         ]
     },
     "protect": {
