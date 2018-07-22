@@ -72,6 +72,10 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
+					"match": "(?i:(?<=\\s)(?:{hex}|{hex[248]}|{bin}|{bin8}|{bin16}|{bin32}|{int}|{eval}|{})\\b)"
+				},
+				{
+					"name": "keyword.control.z80asm",
 					"match": "(?i:(?<=\\s)(?:list|nolist|let)\\b)"
 				},
 				{
