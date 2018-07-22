@@ -218,6 +218,14 @@
             "$0"
         ],
         "description": "Kill Amstrad CPC OS"
+    },
+    "vsync-amstrad": {
+        "prefix": "vsync",
+        "body": [
+            "ld b, 0xf5 : in a, (c) : rra : jr nc, $-3",
+            "$0"
+        ],
+        "description": "Wait VSYNC signal on Amstrad CPC"
     }
 
 }
