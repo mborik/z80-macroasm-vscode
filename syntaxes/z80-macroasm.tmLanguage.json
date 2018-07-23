@@ -48,7 +48,7 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:assert|fatal|error|warning|message|display|shellexec|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword)\\b)"
+					"match": "(?i:(?<=\\s)(?:assert|fatal|error|warning|message|display|shellexec|def[bdlmswir]|d[bcdszw]|abyte[cz]?|byte|word|dword)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
@@ -70,7 +70,6 @@
 					"name": "keyword.control.z80asm",
 					"match": "(?i:(?<=\\s)(?:amsdos|breakpoint|buildcpr|buildsna|run|save|setcpc|setcrtc)\\b)"
 				},
-
 				{
 					"name": "keyword.control.z80asm",
 					"match": "(?i:(?<=\\s)(?:list|nolist|let)\\b)"

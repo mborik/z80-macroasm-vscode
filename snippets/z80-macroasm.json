@@ -1,5 +1,5 @@
 {
-    "macro-as": {
+    "macro-as-pasmo": {
         "prefix": "macro",
         "body": [
             "${1:label}:\tmacro",
@@ -8,23 +8,14 @@
         ],
         "description": "AS/Pasmo macro"
     },
-    "macro-sjasm": {
+    "macro-sjasm-rasm": {
         "prefix": "macro",
         "body": [
             "macro ${1:name}",
             "$0",
             "endm"
         ],
-        "description": "SjASM macro"
-    },
-    "macro-rzasm": {
-        "prefix": "macro",
-        "body": [
-            "macro ${1:name}",
-            "$0",
-            "endm"
-        ],
-        "description": "rasm macro"
+        "description": "SjASM/rasm macro"
     },
     "rept": {
         "prefix": "rept",
@@ -38,11 +29,11 @@
     "repeat": {
         "prefix": "repeat",
         "body": [
-            "repeat ${1:n}${3:, ${2:name}}",
+            "repeat ${1:n}${3:,${2:name}}",
             "$0",
             "rend"
         ],
-        "description": "repeat count[, counter] by rasm"
+        "description": "repeat count[,counter] by rasm"
     },
     "dup-sjasm": {
         "prefix": "dup",
@@ -178,6 +169,13 @@
         ],
         "description": "SjASM device definition"
     },
+    "setcpc-rasm": {
+        "prefix": "cpc",
+        "body" : [
+            "setcpc ${1|0,1,2,3,4,5,6|}"
+        ],
+        "description": "CPC choice in SNA by rasm.\n0: CPC 464\n1: CPC 664\n2: CPC 6128\n4: 464 Plus\n5: 6128 Plus\n6: GX-4000"
+    },
     "while-rasm": {
         "prefix": "while",
         "body": [
@@ -187,22 +185,14 @@
         ],
         "description": "WHILE loop by rasm"
     },
-    "setcpc": {
-        "prefix": "cpc",
-        "body" : [
-            "setcpc ${1|0,1,2,3,4,5,6|}"
-        ],
-        "description": "CPC choice in SNA by rasm.\n0: CPC 464\n1: CPC 664\n2: CPC 6128\n4: 464 Plus\n5: 6128 Plus\n6: GX-4000"
-        
-    },
-    "protect": {
+    "protect-rasm": {
         "prefix": "prot",
         "body" : [
             "protect ${1:start} ${2:end}"
         ],
         "description": "PROTECT start end by rasm"
     },
-    "struct": {
+    "struct-rasm": {
         "prefix": "struct",
         "body": [
             "struct ${1:name}",
@@ -211,5 +201,4 @@
         ],
         "description": "Structure creation by rasm"
     }
-
 }

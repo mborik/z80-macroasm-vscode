@@ -4,7 +4,7 @@
     <Identity Language="en-US" Id="z80-macroasm" Version="0.3.3" Publisher="mborik"/>
     <DisplayName>Z80 Macro-Assembler</DisplayName>
     <Description xml:space="preserve">Support for Z80 macro-assemblers in Visual Studio Code</Description>
-    <Tags>assembly,z80,sinclair,zx spectrum,macro,amstrad,cpc</Tags>
+    <Tags>assembly,macro,assembler,Zilog,Z80,Sinclair,ZX-Spectrum,Amstrad,CPC</Tags>
     <Categories>Programming Languages</Categories>
     <GalleryFlags>Public</GalleryFlags>
     <License>extension/LICENSE</License>

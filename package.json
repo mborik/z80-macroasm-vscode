@@ -10,10 +10,12 @@
     ],
     "keywords": [
         "assembly",
-        "z80",
+        "macro",
+        "assembler",
+        "Zilog",
+        "Z80",
         "Sinclair",
         "ZX-Spectrum",
-        "macro",
         "Amstrad",
         "CPC"
     ],
