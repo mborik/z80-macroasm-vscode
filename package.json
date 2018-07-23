@@ -2,7 +2,7 @@
     "name": "z80-macroasm",
     "displayName": "Z80 Macro-Assembler",
     "description": "Support for Z80 macro-assemblers in Visual Studio Code",
-    "version": "0.3.2",
+    "version": "0.3.3",
     "icon": "logo.png",
     "publisher": "mborik",
     "categories": [
@@ -13,7 +13,9 @@
         "z80",
         "Sinclair",
         "ZX-Spectrum",
-        "macro"
+        "macro",
+        "Amstrad",
+        "CPC"
     ],
     "homepage": "https://github.com/mborik/z80-macroasm-vscode",
     "bugs": "https://github.com/mborik/z80-macroasm-vscode/issues",
