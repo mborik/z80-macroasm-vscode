@@ -70,10 +70,7 @@
 					"name": "keyword.control.z80asm",
 					"match": "(?i:(?<=\\s)(?:amsdos|breakpoint|buildcpr|buildsna|run|save|setcpc|setcrtc)\\b)"
 				},
-				{
-					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:{hex}|{hex[248]}|{bin}|{bin8}|{bin16}|{bin32}|{int}|{eval}|{})\\b)"
-				},
+
 				{
 					"name": "keyword.control.z80asm",
 					"match": "(?i:(?<=\\s)(?:list|nolist|let)\\b)"
@@ -186,6 +183,10 @@
 				{
 					"name": "support.type.register.z80asm",
 					"match": "\\b(?i:[abcdefhlir]|ix|iy|af'?|bc|de|hl|pc|sp|ix[lu]|iy[lu]|[lh]x|x[lh]|[lh]y|y[lh])\\b"
+				},
+				{
+					"name": "constant.language.operator.z80asm",
+					"match": "(?i:\\{(?:hex[248]?|bin(?:8|16|32)?|int|eval)?\\})"
 				}
 			]
 		},
