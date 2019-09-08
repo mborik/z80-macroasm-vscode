@@ -30,6 +30,11 @@
 					"end": "\\*/"
 				},
 				{
+					"name": "comment.block.z80asm",
+					"begin": "{",
+					"end": "}"
+				},
+				{
 					"name": "comment.line.z80asm",
 					"begin": ";",
 					"end": "\\n"
@@ -40,19 +45,19 @@
 			"patterns": [
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:equ|eval|org|end?t|align|(de|un)?phase|shift|save(bin|hob|sna|tap|trd)|empty(tap|trd)|inc(bin|hob|trd)|b?include|insert|binary|end|output|tap(out|end)|fpos|page|slot|size|outradix)\\b)"
+					"match": "(?i:(?:equ|eval|f?org|end?t|align|(de|un)?phase|shift|save(bin|hob|sna|tap|trd)|empty(tap|trd)|inc(bin|hob|trd)|b?include|insert|binary|end|output|fname|tap(out|end)|fpos|page|slot|size|outradix)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(ule)?|(un)?define|export|disp|textarea|map|field|defarray)\\b)"
+					"match": "(?i:(?:cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(ule)?|(un)?define|export|disp|textarea|map|field|defarray)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:assert|fatal|error|warning|message|display|shellexec|def[bdlmswir]|d[bcdszw]|abyte[cz]?|byte|word|dword)\\b)"
+					"match": "(?i:(?:assert|fatal|error|warning|message|display|shellexec|def[bdlmswir]|d[bcdszw]|abyte[cz]?|byte|word|dword|r[bw])\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:if|ifn?def|ifn?used|else|elseif|endif)\\b)"
+					"match": "(?i:(?:if|ifn?def|ifexist|ifn?used|else|elseif|endif)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
