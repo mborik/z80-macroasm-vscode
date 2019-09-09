@@ -2,7 +2,7 @@
     "name": "z80-macroasm",
     "displayName": "Z80 Macro-Assembler",
     "description": "Support for Z80 macro-assemblers in Visual Studio Code",
-    "version": "0.4.0",
+    "version": "0.3.3",
     "icon": "logo.png",
     "publisher": "mborik",
     "categories": [
@@ -17,8 +17,7 @@
         "Sinclair",
         "ZX-Spectrum",
         "Amstrad",
-        "CPC",
-        "MSX"
+        "CPC"
     ],
     "homepage": "https://github.com/mborik/z80-macroasm-vscode",
     "bugs": "https://github.com/mborik/z80-macroasm-vscode/issues",
@@ -67,36 +66,6 @@
                         "line": 2,
                         "severity": 3,
                         "message": 4
-                    }
-                ]
-            },
-            {
-                "name": "errmatcher-tniasm",
-                "owner": "z80-macroasm",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceFolder}"
-                ],
-                "pattern": [
-                    {
-                        "regexp": "^(Warning|Error|Syntax Error) in line (\\d+) \\(([^)]+)\\): (.*)$",
-                        "severity": 1,
-                        "line": 2,
-                        "file": 3,
-                        "message": 4
-                    }
-                ]
-            },
-            {
-                "name": "errmatcher-tniasm-preprocessor",
-                "owner": "z80-macroasm",
-                "pattern": [
-                    {
-                        "kind": "file",
-                        "regexp": "^(Warning|Error) .* (\\S+)! .*$",
-                        "message": 0,
-                        "severity": 1,
-                        "file": 2
                     }
                 ]
             }
