@@ -200,21 +200,5 @@
             "endstruct"
         ],
         "description": "Structure creation by rasm"
-    },
-    "msx-cartridge-header": {
-        "prefix": "msx",
-        "body": [
-            "\tdb\t\"AB\"\t; ROM Catridge ID (\"AB\")",
-            "\tdw\tINIT\t; INIT",
-            "\tdw\t\\$0000\t; STATEMENT",
-            "\tdw\t\\$0000\t; DEVICE",
-            "\tdw\t\\$0000\t; TEXT",
-            "\tdw\t\\$0000\t; Reserved",
-            "\tdw\t\\$0000",
-            "\tdw\t\\$0000",
-            "INIT:",
-            "\t$0"
-        ],
-        "description": "MSX ROM cartridge header"
     }
 }
