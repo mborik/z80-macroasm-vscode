@@ -30,6 +30,11 @@
 					"end": "\\*/"
 				},
 				{
+					"name": "comment.block.z80asm",
+					"begin": "{",
+					"end": "}"
+				},
+				{
 					"name": "comment.line.z80asm",
 					"begin": ";",
 					"end": "\\n"
@@ -73,6 +78,10 @@
 				{
 					"name": "keyword.control.z80asm",
 					"match": "(?i:(?<=\\s)(?:list|nolist|let)\\b)"
+				},
+				{
+					"name": "keyword.control.z80asm",
+					"match": "(?i:\\b(d[bcsw]|fname|f?org|incbin|include|(?:de)?phase|r[bw]|if|ifdef|ifexist|else|endif|cpu\\s(?:z80|r800|msx|gbz80))\\b)"
 				},
 				{
 					"name": "string.other.lua.z80asm",
