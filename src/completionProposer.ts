@@ -20,10 +20,10 @@ const instructionSet = [
 const registerSet = [
 	/*  0 */ 'a', 'b', 'c', 'd', 'e', 'h', 'l', 'i', 'r',
 	/*  9 */ '(hl)', '(de)', '(bc)', '(ix+*)', '(iy+*)',
-	/* 14 */ 'ixl', 'ixu', 'lx', 'hx', 'xl', 'xh',
-	/* 20 */ 'iyl', 'iyu', 'ly', 'hy', 'yl', 'yh',
-	/* 26 */ 'hl', 'de', 'bc', 'af', 'ix', 'iy',
-	/* 32 */ 'sp', '(sp)', '(ix)', '(iy)'
+	/* 14 */ 'ixl', 'ixh', 'ixu', 'lx', 'hx', 'xl', 'xh',
+	/* 21 */ 'iyl', 'iyh', 'iyu', 'ly', 'hy', 'yl', 'yh',
+	/* 28 */ 'hl', 'de', 'bc', 'af', 'ix', 'iy',
+	/* 34 */ 'sp', '(sp)', '(ix)', '(iy)'
 ];
 
 export class ASMCompletionProposer implements vscode.CompletionItemProvider {
@@ -78,11 +78,11 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 			let idxStart = 0, idxEnd = undefined;
 
 			if (shouldSuggest1ArgRegisterMatch[1]) {
-				idxStart = 26;
-				idxEnd = 31;
+				idxStart = 28;
+				idxEnd = 33;
 			}
 			else if (shouldSuggest1ArgRegisterMatch[2]) {
-				idxEnd = 25;
+				idxEnd = 27;
 			}
 
 			output = registerSet.slice(idxStart, idxEnd).map((snippet, idx) => {
