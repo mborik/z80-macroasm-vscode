@@ -190,7 +190,7 @@
 				},
 				{
 					"name": "support.type.register.z80asm",
-					"match": "\\b(?i:[abcdefhlir]|ix|iy|af'?|bc|de|hl|pc|sp|i?[xy][lh]|[lh][xy])\\b"
+					"match": "\\b(?i:[abcdefhlir]|ix|iy|af'?|bc|de|hl|pc|sp|ix[lu]|iy[lu]|[lh]x|x[lh]|[lh]y|y[lh])\\b"
 				},
 				{
 					"name": "constant.language.operator.z80asm",
