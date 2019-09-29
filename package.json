@@ -99,6 +99,23 @@
                         "file": 2
                     }
                 ]
+            },
+            {
+                "name": "errmatcher-rasm",
+                "owner": "z80-macroasm",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": [
+                    {
+                        "regexp": "^\\[(.*):(\\d+)\\]\\s+(Warning)?:?(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "severity": 3,
+                        "message": 4
+                    }
+                ]
             }
         ],
         "languages": [
