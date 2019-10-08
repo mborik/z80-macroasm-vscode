@@ -38,6 +38,11 @@
 					"name": "comment.line.z80asm",
 					"begin": ";",
 					"end": "\\n"
+				},
+				{
+					"name": "comment.line.z80asm",
+					"begin": "//",
+					"end": "\\n"
 				}
 			]
 		},
@@ -186,7 +191,7 @@
 				},
 				{
 					"name": "keyword.mnemonic.z80asm",
-					"match": "\\s(?i:adc|add|and|bit|ccf|cp|cpdr?|cpir?|cpl|daa|dec|[de]i|djnz|exx?|halt|im|in|inc|indr?|inir?|ld|lddr?|ldir?|neg|nop|or|ot[di]r|out|out[di]|pop|push|res|ret[in]|rl|rla|rlc|rlca|rld|rr|rra|rrc|rrca|rrd|rst|sbc|scf|set|sli?a|sll|swap|sra|srl|sub|xor)\\s"
+					"match": "\\s(?i:adc|add|and|bit|ccf|cp|cp[di]r?|cpl|daa|dec|[de]i|djnz|exx?|halt|im|in|inc|in[di]r?|ld|ld[di]r?|neg|nop|or|ot[di]r|out|out[di]|pop|push|res|ret[in]|rla?|rlca?|r[lr]d|rra?|rrca?|rst|sbc|scf|set|sli?a|sll|swap|sra|srl|sub|xor)\\s"
 				},
 				{
 					"name": "support.type.register.z80asm",
@@ -233,7 +238,7 @@
 		"labels": {
 			"patterns": [
 				{
-					"match": "^\\@?((\\$\\$(?!\\.))?[\\w\\.]+)[:\\s]",
+					"match": "^\\@?((\\$\\$(?!\\.))?[\\w\\.]+):?(?=\\s)",
 					"captures": {
 						"1": {
 							"name": "entity.name.function.z80asm"
