@@ -26,6 +26,11 @@ const registerSet = [
 	/* 34 */ 'sp', '(sp)', '(ix)', '(iy)'
 ];
 
+const pad = (num: number, width: number = 2) => {
+	let a = num.toString(16);
+	return ('0000000000' + a).substr(-Math.max(width, a.length)).toUpperCase();
+}
+
 export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 	constructor(public symbolDocumenter: ASMSymbolDocumenter) {}
 
@@ -69,7 +74,7 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 					item.commitCharacters = ['\n'];
 
 					// put to the top of the list...
-					item.sortText = `!${idx.toString(36)}`;
+					item.sortText = `!${pad(idx)}`;
 					return item;
 				});
 			}
@@ -91,24 +96,46 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 				item.commitCharacters = ['\n'];
 
 				// put to the top of the list...
-				item.sortText = `!${idx.toString(36)}`;
+				item.sortText = `!${pad(idx)}`;
 				return item;
 			});
 		}
 
 		const symbols = this.symbolDocumenter.symbols(document);
 		for (const name in symbols) {
-			if (symbols.hasOwnProperty(name)) {
-				const symbol = symbols[name];
+			const symbol = symbols[name];
 
-				const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
-				if (symbol.documentation) {
+			const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
+			if (symbol.path.length > 1) {
+				item.documentation = new vscode.MarkdownString(symbol.declaration);
+			}
+			if (symbol.documentation) {
+				if (item.documentation instanceof vscode.MarkdownString) {
+					item.documentation.appendMarkdown("\n\n"+ symbol.documentation);
+				}
+				else {
 					item.documentation = new vscode.MarkdownString(symbol.documentation);
 				}
-
-				item.sortText = name;
-				output.push(item);
 			}
+
+			if (symbol.location.uri.fsPath === document.fileName) {
+				// sort symbols by proximity to current line of current file
+				const delta = Math.abs(symbol.line - position.line);
+				item.sortText = `!z${pad(delta, 10)}`;
+			}
+			else {
+				item.sortText = symbol.declaration;
+			}
+
+			if (name[0] === '.' && line.lastIndexOf('.') > 0) {
+				item.range = new vscode.Range(
+					new vscode.Position(position.line, line.lastIndexOf('.')),
+					new vscode.Position(position.line, position.character)
+				);
+			}
+
+			item.commitCharacters = ['\n'];
+			output.push(item);
 		}
 
 		return output;

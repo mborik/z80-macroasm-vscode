@@ -16,32 +16,33 @@ const keywordRegex = /^(equ|eval|org|end?t|align|(?:de|un)?phase|shift|save(?:bi
 
 class SymbolDescriptor {
 	constructor(
+		public declaration: string,
+		public path: string[],
 		public location: vscode.Location,
+		public line = location.range.start.line,
 		public documentation?: string) {}
 }
 
 class FileTable {
-	includedFiles: string[]
-	symbols: { [name: string]: SymbolDescriptor }
-
-	constructor() {
-		this.includedFiles = [];
-		this.symbols = {};
-	}
+	includedFiles: string[] = [];
+	symbols: SymbolDescriptor[] = [];
 }
+
+export type SymbolMap = { [name: string]: SymbolDescriptor };
 
 export class ASMSymbolDocumenter {
 	private _watcher: vscode.FileSystemWatcher;
 
-	files: { [name: string]: FileTable };
-	constructor() {
-		this.files = {};
+	files: { [name: string]: FileTable } = {};
 
+
+	constructor() {
 		const fileUriHandler = ((uri: vscode.Uri) => {
 			vscode.workspace.openTextDocument(uri).then(doc => this._document(doc));
 		});
 
-		vscode.workspace.findFiles(fileGlobPattern)
+		vscode.workspace
+			.findFiles(fileGlobPattern)
 			.then(files => files.forEach(fileUriHandler));
 
 		vscode.workspace.onDidChangeTextDocument(
@@ -67,7 +68,7 @@ export class ASMSymbolDocumenter {
 	 * @param searched Paths of files that have already been searched.
 	 * @param searchIncludes If true, also searches file includes.
 	 */
-	private async _seekSymbols(fsPath: string, output: { [name: string]: SymbolDescriptor }, searched: string[]) {
+	private async _seekSymbols(fsPath: string, output: SymbolMap, searched: string[] = []) {
 		let table = this.files[fsPath];
 
 		if (!table) {
@@ -80,16 +81,17 @@ export class ASMSymbolDocumenter {
 
 		searched.push(fsPath);
 
-		for (const name in table.symbols) {
-			if (table.symbols.hasOwnProperty(name)) {
-				const symbol = table.symbols[name];
+		table.symbols.forEach(symbol => {
+			for (let i = symbol.path.length - 1; i >= 0; i--) {
+				const name = symbol.path.slice(i).join('.').replace('..', '.');
+
 				if (!(name in output)) {
 					output[name] = symbol;
 				}
 			}
-		}
+		});
 
-		table.includedFiles.forEach((includeFilename) => {
+		table.includedFiles.forEach(async includeFilename => {
 			if (searched.indexOf(includeFilename) == -1) {
 				this._seekSymbols(includeFilename, output, searched);
 			}
@@ -100,23 +102,11 @@ export class ASMSymbolDocumenter {
 	 * Returns a set of symbols possibly within scope of `context`.
 	 * @param context The document to find symbols for.
 	 */
-	symbols(context: vscode.TextDocument): { [name: string]: SymbolDescriptor } {
-		const output: { [name: string]: SymbolDescriptor } = {};
-		const searchedIncludes: string[] = [];
-
-		this._seekSymbols(context.uri.fsPath, output, searchedIncludes);
+	symbols(context: vscode.TextDocument): SymbolMap {
+		const output: SymbolMap = {};
+		this._seekSymbols(context.uri.fsPath, output);
 
 		return output;
-	}
-
-	/**
-	 * Returns a `SymbolDescriptor` for the symbol having `name`, or `undefined`
-	 * if no such symbol exists.
-	 * @param name The name of the symbol.
-	 * @param searchContext The document to find the symbol in.
-	 */
-	symbol(name: string, searchContext: vscode.TextDocument): SymbolDescriptor | undefined {
-		return this.symbols(searchContext)[name];
 	}
 
 	/**
@@ -140,15 +130,17 @@ export class ASMSymbolDocumenter {
 			const output: vscode.SymbolInformation[] = [];
 
 			for (const fileName in this.files) {
-				if (this.files.hasOwnProperty(fileName) && (!fileFilter || fileFilter === fileName)) {
+				if (!fileFilter || fileFilter === fileName) {
 					const table = this.files[fileName];
 
-					for (const name in table.symbols) {
-						if (table.symbols.hasOwnProperty(name) && (!query || ~name.indexOf(query))) {
-							const symbol = table.symbols[name];
-							output.push(new vscode.SymbolInformation(name, vscode.SymbolKind.Variable, symbol.location.range, symbol.location.uri));
+					table.symbols.forEach(symbol => {
+						if (!query || ~symbol.declaration.indexOf(query)) {
+							output.push(new vscode.SymbolInformation(
+								symbol.declaration, vscode.SymbolKind.Variable,
+								symbol.location.range, symbol.location.uri
+							));
 						}
-					}
+					});
 				}
 			}
 
@@ -209,7 +201,8 @@ export class ASMSymbolDocumenter {
 
 			lbFull = this._enlargeLabel(this._enlargeLabel(lbFull, lbParent), lbModule);
 
-			const symbol = this.symbol(lbFull, doc) || this.symbol(lbPart, doc);
+			const symbols = this.symbols(doc);
+			const symbol = symbols[lbFull] || symbols[lbPart];
 			if (symbol && !token.isCancellationRequested) {
 				let result: any;
 				if (hoverDocumentation) {
@@ -280,9 +273,11 @@ export class ASMSymbolDocumenter {
 					moduleStack.shift();
 				}
 				else if (labelMatch) {
+					let path = [ labelMatch[1] ];
 					let declaration = labelMatch[1];
 					if (declaration[0] === '.') {
 						if (lastFullLabel) {
+							path.unshift(lastFullLabel);
 							declaration = lastFullLabel + declaration;
 						}
 					}
@@ -291,6 +286,7 @@ export class ASMSymbolDocumenter {
 					}
 
 					if (moduleStack.length && labelMatch[0][0] !== '@') {
+						path.unshift(moduleStack[0]);
 						declaration = `${moduleStack[0]}.${declaration}`;
 					}
 
@@ -311,10 +307,13 @@ export class ASMSymbolDocumenter {
 						commentBuffer.unshift(endCommentMatch[1].trim());
 					}
 
-					table.symbols[declaration] = new SymbolDescriptor(
+					table.symbols.push(new SymbolDescriptor(
+						declaration,
+						path,
 						location,
+						lineNumber,
 						commentBuffer.join("\n").trim() || undefined
-					);
+					));
 				}
 
 				commentBuffer = [];

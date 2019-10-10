@@ -9,7 +9,7 @@ export class ASMDefinitionProvider implements vscode.DefinitionProvider {
 		position: vscode.Position,
 		token: vscode.CancellationToken
 	): Thenable<vscode.Definition> {
-		return this.symbolDocumenter.getFullSymbolAtDocPosition<vscode.Definition> (
+		return this.symbolDocumenter.getFullSymbolAtDocPosition<vscode.Definition>(
 			document, position, token
 		);
 	}

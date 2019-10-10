@@ -9,7 +9,7 @@ export class ASMHoverProvider implements vscode.HoverProvider {
 		position: vscode.Position,
 		token: vscode.CancellationToken
 	): Thenable<vscode.Hover> {
-		return this.symbolDocumenter.getFullSymbolAtDocPosition<vscode.Hover> (
+		return this.symbolDocumenter.getFullSymbolAtDocPosition<vscode.Hover>(
 			document, position, token, true
 		);
 	}
