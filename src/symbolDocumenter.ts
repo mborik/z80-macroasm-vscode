@@ -1,17 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-
-const fileGlobPattern = "**/*.{a80,asm,inc,s}";
-const commentLineRegex = /^;+(.*)$/;
-const endCommentRegex = /^[^;]+;(.*)$/;
-const includeLineRegex = /\binclude\s+(["'])([^\1]+)\1.*$/i;
-const moduleLineRegex = /\bmodule\s+(\w+)\b/i;
-const horizontalRuleRegex = /^(.)\1+$/;
-const labelDefinitionRegex = /^\@?((\$\$(?!\.))?[\w\.]+)(?::|\s|$)/;
-const parentLabelRegex = /^(((\@|\$\$)(?!\.))?\w[\w\.]*)(?::|\s|$)/;
-const evalExpressionRegex = /^\@?([\w\.]+)\:?\s+(=|equ|eval)\s+(.+)(;.*)?$/i;
-const defineExpressionRegex = /^\@?([\w\.]+)\:?\s+(inc(?:bin|hob|trd)|b?include|insert|binary|def[bdlmsw]|d[bcdszw]|abyte[cz]?|byte|word|dword)\s+([^$;]+)(;.*)?$/i;
-const keywordRegex = /^(equ|eval|org|end?t|align|(?:de|un)?phase|shift|save(?:bin|hob|sna|tap|trd)|empty(?:tap|trd)|inc(?:bin|hob|trd)|b?include|insert|binary|end|output|tap(?:out|end)|fpos|page|slot|size|cpu|device|encoding|charset|proc|macro|local|shared|public|rept|dup|block|endm|endp|edup|exitm|module|endmod(?:ule)?|(?:un)?define|export|disp|textarea|map|field|defarray|assert|fatal|error|warning|message|display|shellexec|amsdos|breakpoint|buildcpr|buildsna|run|save|setcpc|setcrtc|print|fail|repeat|rend|until|switch|case|default|break|endswitch|stop|while|wend|incl48|incl49|inclz4|inczx7|incexo|lz48|lz49|lz4|lzw7|lzexo|lzclose|bank|bankset|limit|protect|write\s+direct|str|(?:end)?struct|def[bdlmswir]|d[bcdszw]|abyte[cz]?|byte|d?word|if|ifn?def|ifn?used|else|elseif|endif|adc|add|and|bit|call|ccf|cp|cp[di]r?|cpl|daa|dec|[de]i|djnz|exx?|halt|im|in|inc|in[di]r?|j[pr]|ld|ld[di]r?|neg|nop|or|ot[di]r|out|out[di]|pop|push|res|ret[in]?|rla?|rlca?|r[lr]d|rra?|rrca?|rst|sbc|scf|set|sli?a|sll|swap|sr[al]|sub|xor)$/i;
+import regex from './defs_regex';
 
 
 class SymbolDescriptor {
@@ -37,6 +26,7 @@ export class ASMSymbolDocumenter {
 
 
 	constructor() {
+		const fileGlobPattern = "**/*.{a80,asm,inc,s}";
 		const fileUriHandler = ((uri: vscode.Uri) => {
 			vscode.workspace.openTextDocument(uri).then(doc => this._document(doc));
 		});
@@ -167,13 +157,13 @@ export class ASMSymbolDocumenter {
 		hoverDocumentation: boolean = false): Promise<T> {
 
 		return new Promise<T>((resolve, reject) => {
-			const range = doc.getWordRangeAtPosition(position, /((\$\$(?!\.))?[\w\.]+)/);
+			const range = doc.getWordRangeAtPosition(position, regex.labelPhraseRule);
 			if (!range || (range && (range.isEmpty || !range.isSingleLine || range.start.character === 0))) {
 				return reject();
 			}
 
 			let lbPart = doc.getText(range);
-			if (keywordRegex.test(lbPart)) {
+			if (regex.keyword.test(lbPart)) {
 				return reject();
 			}
 
@@ -187,12 +177,12 @@ export class ASMSymbolDocumenter {
 					continue;
 				}
 				if (lbPart[0] === '.' && !lbParent) {
-					const parentLabelMatch = line.text.match(parentLabelRegex);
+					const parentLabelMatch = line.text.match(regex.parentLabel);
 					if (parentLabelMatch) {
 						lbParent = parentLabelMatch[1];
 					}
 				}
-				const moduleLineMatch = line.text.match(moduleLineRegex);
+				const moduleLineMatch = line.text.match(regex.moduleLine);
 				if (moduleLineMatch) {
 					lbModule = moduleLineMatch[1];
 					break;
@@ -245,20 +235,20 @@ export class ASMSymbolDocumenter {
 				continue;
 			}
 
-			const commentLineMatch = commentLineRegex.exec(line.text);
+			const commentLineMatch = regex.commentLine.exec(line.text);
 			if (commentLineMatch) {
 				const baseLine = commentLineMatch[1].trim();
 
-				if (horizontalRuleRegex.test(baseLine)) {
+				if (regex.horizontalRule.test(baseLine)) {
 					continue;
 				}
 
 				commentBuffer.push(baseLine);
 			}
 			else {
-				const includeLineMatch = includeLineRegex.exec(line.text);
-				const moduleLineMatch = moduleLineRegex.exec(line.text);
-				const labelMatch = labelDefinitionRegex.exec(line.text);
+				const includeLineMatch = regex.includeLine.exec(line.text);
+				const moduleLineMatch = regex.moduleLine.exec(line.text);
+				const labelMatch = regex.labelDefinition.exec(line.text);
 
 				if (includeLineMatch) {
 					const filename = includeLineMatch[2];
@@ -269,7 +259,7 @@ export class ASMSymbolDocumenter {
 				else if (moduleLineMatch) {
 					moduleStack.unshift(moduleLineMatch[1]);
 				}
-				else if (/\bendmod(ule)?\b/i.test(line.text)) {
+				else if (regex.endmoduleRule.test(line.text)) {
 					moduleStack.shift();
 				}
 				else if (labelMatch) {
@@ -291,9 +281,9 @@ export class ASMSymbolDocumenter {
 					}
 
 					const location = new vscode.Location(document.uri, line.range.start);
-					const defineExpressionMatch = defineExpressionRegex.exec(line.text);
-					const evalExpressionMatch = evalExpressionRegex.exec(line.text);
-					const endCommentMatch = endCommentRegex.exec(line.text);
+					const defineExpressionMatch = regex.defineExpression.exec(line.text);
+					const evalExpressionMatch = regex.evalExpression.exec(line.text);
+					const endCommentMatch = regex.endComment.exec(line.text);
 
 					if (defineExpressionMatch) {
 						let instruction = (defineExpressionMatch[2] + " ".repeat(8)).substr(0, 8);
