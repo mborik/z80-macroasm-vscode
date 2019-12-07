@@ -12,8 +12,17 @@ class SymbolDescriptor {
 		public documentation?: string) {}
 }
 
+class IncludeDescriptor {
+	constructor(
+		public declaration: string,
+		public labelPath: string[],
+		public fullPath: string,
+		public location: vscode.Location,
+		public line = location.range.start.line) {}
+}
+
 class FileTable {
-	includedFiles: string[] = [];
+	includes: IncludeDescriptor[] = [];
 	symbols: SymbolDescriptor[] = [];
 }
 
@@ -58,7 +67,9 @@ export class ASMSymbolDocumenter {
 	 * @param searched Paths of files that have already been searched.
 	 * @param searchIncludes If true, also searches file includes.
 	 */
-	private async _seekSymbols(fsPath: string, output: SymbolMap, searched: string[] = []) {
+	private async _seekSymbols(fsPath: string, output: SymbolMap,
+				prependPath: string[] = [], searched: string[] = []) {
+
 		let table = this.files[fsPath];
 
 		if (!table) {
@@ -72,8 +83,10 @@ export class ASMSymbolDocumenter {
 		searched.push(fsPath);
 
 		table.symbols.forEach(symbol => {
-			for (let i = symbol.path.length - 1; i >= 0; i--) {
-				const name = symbol.path.slice(i).join('.').replace('..', '.');
+			const fullPath = [ ...prependPath, ...symbol.path ];
+
+			for (let i = fullPath.length - 1; i >= 0; i--) {
+				const name = fullPath.slice(i).join('.').replace('..', '.');
 
 				if (!(name in output)) {
 					output[name] = symbol;
@@ -81,11 +94,38 @@ export class ASMSymbolDocumenter {
 			}
 		});
 
-		table.includedFiles.forEach(async includeFilename => {
-			if (searched.indexOf(includeFilename) == -1) {
-				this._seekSymbols(includeFilename, output, searched);
+		table.includes.forEach(async include => {
+			if (searched.indexOf(include.fullPath) == -1) {
+				this._seekSymbols(include.fullPath, output, include.labelPath, searched);
 			}
 		});
+	}
+
+	/**
+	 * Returns an include descriptor within scope of `context` on given `line`.
+	 * @param context The document to find symbols for.
+	 * @param declaration relative path
+	 * @param line
+	 */
+	private _getInclude(context: vscode.TextDocument, declaration: string, line: number) {
+		const fsPath = context.uri.fsPath;
+		const table = this.files[fsPath];
+
+		if (table) {
+			const include = table.includes.find(i => (i.declaration === declaration && i.line === line));
+
+			if (include) {
+				const doc = vscode.Uri.file(include.fullPath);
+				const range = new vscode.Range(0, 0, 0, 0);
+
+				return {
+					...include,
+					destLocation: new vscode.Location(doc, range)
+				};
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -150,13 +190,36 @@ export class ASMSymbolDocumenter {
 	 * @param hoverDocumentation Provide a hover object.
 	 * @returns Promise of T.
 	 */
-	getFullSymbolAtDocPosition<T> (
+	getFullSymbolAtDocPosition<T = vscode.Definition | vscode.Hover> (
 		doc: vscode.TextDocument,
 		position: vscode.Position,
 		token: vscode.CancellationToken,
 		hoverDocumentation: boolean = false): Promise<T> {
 
-		return new Promise<T>((resolve, reject) => {
+		return new Promise<T>((resolve: (arg0: any) => void, reject) => {
+			const lineText = doc.lineAt(position.line).text;
+			const includeLineMatch = regex.includeLine.exec(lineText);
+
+			if (includeLineMatch) {
+				const include = this._getInclude(doc, includeLineMatch[4], position.line);
+
+				if (include) {
+					if (position.character >= include.location.range.start.character &&
+						position.character <= include.location.range.end.character) {
+
+						if (hoverDocumentation) {
+							return resolve(new vscode.Hover(include.fullPath, include.location.range));
+						}
+						else {
+							return resolve(include.destLocation);
+						}
+					}
+				}
+				else {
+					return reject();
+				}
+			}
+
 			const range = doc.getWordRangeAtPosition(position, regex.labelPhraseRule);
 			if (!range || (range && (range.isEmpty || !range.isSingleLine || range.start.character === 0))) {
 				return reject();
@@ -248,26 +311,17 @@ export class ASMSymbolDocumenter {
 			else {
 				const includeLineMatch = regex.includeLine.exec(line.text);
 				const moduleLineMatch = regex.moduleLine.exec(line.text);
+				const macroLineMatch = regex.macroLine.exec(line.text);
 				const labelMatch = regex.labelDefinition.exec(line.text);
+				let labelPath = [];
 
-				if (includeLineMatch) {
-					const filename = includeLineMatch[2];
-					const documentDirname = path.dirname(document.uri.fsPath);
-					const includeName = path.join(documentDirname, filename);
-					table.includedFiles.push(includeName);
-				}
-				else if (moduleLineMatch) {
-					moduleStack.unshift(moduleLineMatch[1]);
-				}
-				else if (regex.endmoduleRule.test(line.text)) {
-					moduleStack.shift();
-				}
-				else if (labelMatch) {
-					let path = [ labelMatch[1] ];
+				if (labelMatch) {
+					labelPath.push(labelMatch[1]);
+
 					let declaration = labelMatch[1];
 					if (declaration[0] === '.') {
 						if (lastFullLabel) {
-							path.unshift(lastFullLabel);
+							labelPath.unshift(lastFullLabel);
 							declaration = lastFullLabel + declaration;
 						}
 					}
@@ -276,7 +330,7 @@ export class ASMSymbolDocumenter {
 					}
 
 					if (moduleStack.length && labelMatch[0][0] !== '@') {
-						path.unshift(moduleStack[0]);
+						labelPath.unshift(moduleStack[0]);
 						declaration = `${moduleStack[0]}.${declaration}`;
 					}
 
@@ -299,11 +353,65 @@ export class ASMSymbolDocumenter {
 
 					table.symbols.push(new SymbolDescriptor(
 						declaration,
-						path,
+						labelPath,
 						location,
 						lineNumber,
 						commentBuffer.join("\n").trim() || undefined
 					));
+				}
+
+				const pathFragment = [  ...moduleStack.slice(0, 1), ...labelPath.slice(-1) ];
+
+				if (includeLineMatch) {
+					const filename = includeLineMatch[4];
+					const documentDirname = path.dirname(document.uri.fsPath);
+					const includeName = path.join(documentDirname, filename);
+
+					let pos = includeLineMatch.index + includeLineMatch[1].length;
+					const linePos1 = new vscode.Position(lineNumber, pos);
+
+					pos += includeLineMatch[2].length;
+					const linePos2 = new vscode.Position(lineNumber, pos);
+
+					const range = new vscode.Range(linePos1, linePos2);
+					const location = new vscode.Location(document.uri, range);
+
+					table.includes.push(new IncludeDescriptor(
+						filename,
+						pathFragment,
+						includeName,
+						location,
+						lineNumber
+					));
+				}
+				else if (macroLineMatch) {
+					const declaration = macroLineMatch[1];
+					const location = new vscode.Location(document.uri, line.range.start);
+					const endCommentMatch = regex.endComment.exec(line.text);
+					if (endCommentMatch) {
+						commentBuffer.unshift(endCommentMatch[1].trim());
+					}
+
+					if (macroLineMatch[2]) {
+						commentBuffer.unshift("\`" + macroLineMatch[2].trim() + "`\n");
+					}
+
+					commentBuffer.unshift(`**macro ${declaration}**`);
+					pathFragment.push(declaration);
+
+					table.symbols.push(new SymbolDescriptor(
+						declaration,
+						pathFragment,
+						location,
+						lineNumber,
+						commentBuffer.join("\n").trim()
+					));
+				}
+				else if (moduleLineMatch) {
+					moduleStack.unshift(moduleLineMatch[1]);
+				}
+				else if (regex.endmoduleRule.test(line.text)) {
+					moduleStack.shift();
 				}
 
 				commentBuffer = [];

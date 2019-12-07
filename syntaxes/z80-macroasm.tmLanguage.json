@@ -18,6 +18,9 @@
 			"include": "#numbers"
 		},
 		{
+			"include": "#includes"
+		},
+		{
 			"include": "#labels"
 		}
 	],
@@ -50,7 +53,7 @@
 			"patterns": [
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:equ|eval|f?org|end?t|align|(?:de|un)?phase|shift|save(?:bin|dev|hob|nex|sna|tap|trd)|empty(?:tap|trd)|inc(?:bin|hob|trd)|b?include|includelua|insert|binary|end|out(?:put|end)|tap(?:out|end)|fpos|fname|page|slot|size|opt|outradix)\\b)"
+					"match": "(?i:(?<=\\s)(?:equ|eval|f?org|end?t|align|(?:de|un)?phase|shift|save(?:bin|dev|hob|nex|sna|tap|trd)|empty(?:tap|trd)|inc(?:bin|hob|trd)|binclude|includelua|insert|binary|end|out(?:put|end)|tap(?:out|end)|fpos|fname|page|slot|size|opt|outradix)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
@@ -236,6 +239,21 @@
 				{
 					"name": "constant.numeric.integer.decimal.z80asm",
 					"match": "\\-?\\d+"
+				}
+			]
+		},
+		"includes": {
+			"patterns": [
+				{
+					"match": "(?i:(?<=\\s)(include)\\s+(([\"'])(?:[^\\3]+)\\3))",
+					"captures": {
+						"1": {
+							"name": "keyword.control.z80asm"
+						},
+						"2": {
+							"name": "string.modifier.import.z80asm"
+						}
+					}
 				}
 			]
 		},

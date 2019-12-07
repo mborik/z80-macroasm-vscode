@@ -2,9 +2,10 @@ const mkRegex = (str: TemplateStringsArray, opts: string = 'i') =>
 	new RegExp(str.raw[0].replace(/\s/gm, ''), opts);
 
 export default {
-	commentLine: /^;+(.*)$/,
-	endComment: /^[^;]+;(.*)$/,
-	includeLine: /\binclude\s+(["'])([^\1]+)\1.*$/i,
+	commentLine: /^(?:;+|\/{2,})\s*(.*)$/,
+	endComment: /(?:;+|\/{2,})\s*(.*)$/,
+	includeLine: /(\binclude\s+)((["'])([^\3]+)\3).*$/i,
+	macroLine: /\bmacro\s+(\w+)(?:\s+([^\/;$]+))/i,
 	moduleLine: /\bmodule\s+(\w+)\b/i,
 	endmoduleRule: /\bendmod(ule)?\b/i,
 	horizontalRule: /^(.)\1+$/,

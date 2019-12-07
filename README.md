@@ -10,6 +10,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
   - [tniASM](http://www.tni.nl/products/tniasm.html) (v0.x series)
 * [problem matchers](#problem-matchers) for **SjASMPlus**, **Macroassembler AS**, **rasm** and **tniASM** compilation output
 * label and symbol documenter on hover, defintion provider, completition proposer
+* macro documenter and argument definition provider
 * snippets for macros and source control keywords
 
 ## Problem matchers
