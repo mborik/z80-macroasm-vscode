@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ASMSymbolDocumenter } from './symbolDocumenter';
+import { ASMSymbolDocumenter, DocumenterResult } from './symbolDocumenter';
 
 export class ASMHoverProvider implements vscode.HoverProvider {
 	constructor(public symbolDocumenter: ASMSymbolDocumenter) {}
@@ -10,7 +10,7 @@ export class ASMHoverProvider implements vscode.HoverProvider {
 		token: vscode.CancellationToken
 	): Thenable<vscode.Hover> {
 		return this.symbolDocumenter.getFullSymbolAtDocPosition<vscode.Hover>(
-			document, position, token, true
+			document, position, token, DocumenterResult.HOVER
 		);
 	}
 }

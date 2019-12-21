@@ -3,7 +3,11 @@ import * as path from 'path';
 import regex from './defs_regex';
 
 
-class SymbolDescriptor {
+export const enum DocumenterResult {
+	DEFINITION, HOVER, SYMBOL,
+};
+
+export class SymbolDescriptor {
 	constructor(
 		public declaration: string,
 		public path: string[],
@@ -25,6 +29,9 @@ class FileTable {
 	includes: IncludeDescriptor[] = [];
 	symbols: SymbolDescriptor[] = [];
 }
+
+type SymbolDocumenterMultitype =
+	vscode.Definition | vscode.Hover | SymbolDescriptor;
 
 export type SymbolMap = { [name: string]: SymbolDescriptor };
 
@@ -190,24 +197,24 @@ export class ASMSymbolDocumenter {
 	 * @param hoverDocumentation Provide a hover object.
 	 * @returns Promise of T.
 	 */
-	getFullSymbolAtDocPosition<T = vscode.Definition | vscode.Hover> (
+	getFullSymbolAtDocPosition<T = SymbolDocumenterMultitype> (
 		doc: vscode.TextDocument,
 		position: vscode.Position,
 		token: vscode.CancellationToken,
-		hoverDocumentation: boolean = false): Promise<T> {
+		resultType: DocumenterResult = DocumenterResult.DEFINITION): Promise<T> {
 
 		return new Promise<T>((resolve: (arg0: any) => void, reject) => {
 			const lineText = doc.lineAt(position.line).text;
 			const includeLineMatch = regex.includeLine.exec(lineText);
 
-			if (includeLineMatch) {
+			if (resultType !== DocumenterResult.SYMBOL && includeLineMatch) {
 				const include = this._getInclude(doc, includeLineMatch[4], position.line);
 
 				if (include) {
 					if (position.character >= include.location.range.start.character &&
 						position.character <= include.location.range.end.character) {
 
-						if (hoverDocumentation) {
+						if (resultType === DocumenterResult.HOVER) {
 							return resolve(new vscode.Hover(include.fullPath, include.location.range));
 						}
 						else {
@@ -257,11 +264,11 @@ export class ASMSymbolDocumenter {
 			const symbols = this.symbols(doc);
 			const symbol = symbols[lbFull] || symbols[lbPart];
 			if (symbol && !token.isCancellationRequested) {
-				let result: any;
-				if (hoverDocumentation) {
+				let result: SymbolDocumenterMultitype = symbol;
+				if (resultType === DocumenterResult.HOVER) {
 					result = new vscode.Hover(new vscode.MarkdownString(symbol.documentation), range);
 				}
-				else {
+				else if (resultType === DocumenterResult.DEFINITION) {
 					result = symbol.location;
 				}
 

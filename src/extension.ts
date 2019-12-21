@@ -3,6 +3,7 @@ import { ASMHoverProvider } from "./hover";
 import { ASMSymbolDocumenter } from "./symbolDocumenter";
 import { ASMCompletionProposer } from './completionProposer';
 import { ASMDefinitionProvider } from './definitionProvider';
+import { ASMRenameProvider } from './renameProvider';
 import { ASMDocumentSymbolProvider, ASMWorkspaceSymbolProvider } from './symbolProvider';
 
 let symbolDocumenter: ASMSymbolDocumenter | undefined;
@@ -17,6 +18,7 @@ export function activate(ctx: vscode.ExtensionContext) {
 		vscode.languages.registerCompletionItemProvider(languageSelector, new ASMCompletionProposer(symbolDocumenter), ',', '.', ' '),
 		vscode.languages.registerDefinitionProvider(languageSelector, new ASMDefinitionProvider(symbolDocumenter)),
 		vscode.languages.registerDocumentSymbolProvider(languageSelector, new ASMDocumentSymbolProvider(symbolDocumenter)),
+		vscode.languages.registerRenameProvider(languageSelector, new ASMRenameProvider(symbolDocumenter)),
 		vscode.languages.registerWorkspaceSymbolProvider(new ASMWorkspaceSymbolProvider(symbolDocumenter)),
 	);
 }
