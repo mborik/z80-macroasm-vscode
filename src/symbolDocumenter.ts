@@ -3,17 +3,30 @@ import * as path from 'path';
 import regex from './defs_regex';
 
 
+export const fileGlobPattern = "**/*.{a80,asm,inc,s}";
 export const enum DocumenterResult {
-	DEFINITION, HOVER, SYMBOL,
+	DEFINITION, HOVER, SYMBOL, SYMBOL_FULL
 };
 
-export class SymbolDescriptor {
+export interface SymbolDescriptorExt {
+	kind: vscode.SymbolKind;
+	declaration: string;
+	path: string[];
+	location: vscode.Location;
+	line: number;
+	documentation?: string;
+	labelPart?: string;
+	docInstance?: vscode.TextDocument;
+}
+
+export class SymbolDescriptor implements SymbolDescriptorExt {
 	constructor(
 		public declaration: string,
 		public path: string[],
 		public location: vscode.Location,
 		public line = location.range.start.line,
-		public documentation?: string) {}
+		public documentation?: string,
+		public kind: vscode.SymbolKind = vscode.SymbolKind.Variable) {}
 }
 
 class IncludeDescriptor {
@@ -31,7 +44,7 @@ class FileTable {
 }
 
 type SymbolDocumenterMultitype =
-	vscode.Definition | vscode.Hover | SymbolDescriptor;
+	vscode.Definition | vscode.Hover | SymbolDescriptorExt;
 
 export type SymbolMap = { [name: string]: SymbolDescriptor };
 
@@ -42,7 +55,6 @@ export class ASMSymbolDocumenter {
 
 
 	constructor() {
-		const fileGlobPattern = "**/*.{a80,asm,inc,s}";
 		const fileUriHandler = ((uri: vscode.Uri) => {
 			vscode.workspace.openTextDocument(uri).then(doc => this._document(doc));
 		});
@@ -89,7 +101,7 @@ export class ASMSymbolDocumenter {
 
 		searched.push(fsPath);
 
-		table.symbols.forEach(symbol => {
+		for (const symbol of table.symbols) {
 			const fullPath = [ ...prependPath, ...symbol.path ];
 
 			for (let i = fullPath.length - 1; i >= 0; i--) {
@@ -99,13 +111,13 @@ export class ASMSymbolDocumenter {
 					output[name] = symbol;
 				}
 			}
-		});
+		}
 
-		table.includes.forEach(async include => {
+		await Promise.all(table.includes.map(async include => {
 			if (searched.indexOf(include.fullPath) == -1) {
-				this._seekSymbols(include.fullPath, output, include.labelPath, searched);
+				await this._seekSymbols(include.fullPath, output, include.labelPath, searched);
 			}
-		});
+		}));
 	}
 
 	/**
@@ -136,12 +148,39 @@ export class ASMSymbolDocumenter {
 	}
 
 	/**
+	 * Get file uri list for given document including all its
+	 * included files recursively.
+	 * @param {vscode.TextDocument} doc
+	 */
+	filesWithIncludes(context: vscode.TextDocument) {
+		const fsPath = context.uri.fsPath;
+		const table = this.files[fsPath];
+
+		const result: { [name: string]: IncludeDescriptor } = {};
+		const putAllToResults = (t: FileTable): any => t?.includes
+			.filter(i => (!result[i.fullPath]) && (result[i.fullPath] = i) && true)
+			.forEach(i => putAllToResults(this.files[i.fullPath]));
+
+		if (table) {
+			result[fsPath] = <any> {
+				declaration: context.fileName,
+				fullPath: fsPath,
+				labelPath: []
+			};
+
+			putAllToResults(table);
+		}
+
+		return result;
+	}
+
+	/**
 	 * Returns a set of symbols possibly within scope of `context`.
 	 * @param context The document to find symbols for.
 	 */
-	symbols(context: vscode.TextDocument): SymbolMap {
+	async symbols(context: vscode.TextDocument): Promise<SymbolMap> {
 		const output: SymbolMap = {};
-		this._seekSymbols(context.uri.fsPath, output);
+		await this._seekSymbols(context.uri.fsPath, output);
 
 		return output;
 	}
@@ -173,7 +212,7 @@ export class ASMSymbolDocumenter {
 					table.symbols.forEach(symbol => {
 						if (!query || ~symbol.declaration.indexOf(query)) {
 							output.push(new vscode.SymbolInformation(
-								symbol.declaration, vscode.SymbolKind.Variable,
+								symbol.declaration, symbol.kind,
 								symbol.location.range, symbol.location.uri
 							));
 						}
@@ -191,50 +230,54 @@ export class ASMSymbolDocumenter {
 
 	/**
 	 * Provide defined symbol for 'Go to Definition' or symbol hovering.
-	 * @param doc Text document object.
+	 * @param context Text document object.
 	 * @param position Cursor position.
 	 * @param token Cancellation token object.
 	 * @param hoverDocumentation Provide a hover object.
 	 * @returns Promise of T.
 	 */
 	getFullSymbolAtDocPosition<T = SymbolDocumenterMultitype> (
-		doc: vscode.TextDocument,
+		context: vscode.TextDocument,
 		position: vscode.Position,
 		token: vscode.CancellationToken,
 		resultType: DocumenterResult = DocumenterResult.DEFINITION): Promise<T> {
 
-		return new Promise<T>((resolve: (arg0: any) => void, reject) => {
-			const lineText = doc.lineAt(position.line).text;
+		return (async () => {
+			const lineText = context.lineAt(position.line).text;
 			const includeLineMatch = regex.includeLine.exec(lineText);
 
 			if (resultType !== DocumenterResult.SYMBOL && includeLineMatch) {
-				const include = this._getInclude(doc, includeLineMatch[4], position.line);
+				const include = this._getInclude(context, includeLineMatch[4], position.line);
 
 				if (include) {
 					if (position.character >= include.location.range.start.character &&
 						position.character <= include.location.range.end.character) {
 
 						if (resultType === DocumenterResult.HOVER) {
-							return resolve(new vscode.Hover(include.fullPath, include.location.range));
+							return new vscode.Hover(include.fullPath, include.location.range);
 						}
 						else {
-							return resolve(include.destLocation);
+							return include.destLocation;
 						}
 					}
 				}
 				else {
-					return reject();
+					return null;
 				}
 			}
 
-			const range = doc.getWordRangeAtPosition(position, regex.labelPhraseRule);
+			const range = context.getWordRangeAtPosition(
+				position,
+				resultType === DocumenterResult.SYMBOL ? undefined : regex.fullLabelRule
+			);
+
 			if (!range || (range && (range.isEmpty || !range.isSingleLine || range.start.character === 0))) {
-				return reject();
+				return null;
 			}
 
-			let lbPart = doc.getText(range);
+			let lbPart = context.getText(range);
 			if (regex.keyword.test(lbPart)) {
-				return reject();
+				return null;
 			}
 
 			let lbFull = lbPart;
@@ -242,7 +285,7 @@ export class ASMSymbolDocumenter {
 			let lbModule: string | undefined = undefined;
 
 			for (let lineNumber = position.line - 1; lineNumber >= 0; lineNumber--) {
-				let line = doc.lineAt(lineNumber);
+				let line = context.lineAt(lineNumber);
 				if (line.isEmptyOrWhitespace) {
 					continue;
 				}
@@ -254,29 +297,34 @@ export class ASMSymbolDocumenter {
 				}
 				const moduleLineMatch = line.text.match(regex.moduleLine);
 				if (moduleLineMatch) {
-					lbModule = moduleLineMatch[1];
+					lbModule = moduleLineMatch[2];
 					break;
 				}
 			}
 
 			lbFull = this._enlargeLabel(this._enlargeLabel(lbFull, lbParent), lbModule);
 
-			const symbols = this.symbols(doc);
-			const symbol = symbols[lbFull] || symbols[lbPart];
-			if (symbol && !token.isCancellationRequested) {
-				let result: SymbolDocumenterMultitype = symbol;
+			const symbols = await this.symbols(context);
+			if (!token.isCancellationRequested) {
+				const symbol: any = symbols[lbFull] || symbols[lbPart];
+				if (!symbol) {
+					return null;
+				}
+
 				if (resultType === DocumenterResult.HOVER) {
-					result = new vscode.Hover(new vscode.MarkdownString(symbol.documentation), range);
+					return new vscode.Hover(new vscode.MarkdownString(symbol.documentation), range);
 				}
 				else if (resultType === DocumenterResult.DEFINITION) {
-					result = symbol.location;
+					return symbol.location;
 				}
+				else if (resultType >= DocumenterResult.SYMBOL) {
+					symbol.docInstance = context;
+					symbol.labelPart = lbFull;
 
-				return resolve(result);
+					return symbol;
+				}
 			}
-
-			reject();
-		});
+		})();
 	}
 
 	private _enlargeLabel(base: string, prepend?: string): string {
@@ -392,15 +440,20 @@ export class ASMSymbolDocumenter {
 					));
 				}
 				else if (macroLineMatch) {
-					const declaration = macroLineMatch[1];
-					const location = new vscode.Location(document.uri, line.range.start);
+					const declaration = macroLineMatch[2];
+					const start = line.firstNonWhitespaceCharacterIndex + macroLineMatch[1].length;
+					const location = new vscode.Location(document.uri, new vscode.Range(
+						line.lineNumber, start,
+						line.lineNumber, start + declaration.length
+					));
+
 					const endCommentMatch = regex.endComment.exec(line.text);
 					if (endCommentMatch) {
 						commentBuffer.unshift(endCommentMatch[1].trim());
 					}
 
-					if (macroLineMatch[2]) {
-						commentBuffer.unshift("\`" + macroLineMatch[2].trim() + "`\n");
+					if (macroLineMatch[3]) {
+						commentBuffer.unshift("\`" + macroLineMatch[3].trim() + "`\n");
 					}
 
 					commentBuffer.unshift(`**macro ${declaration}**`);
@@ -411,11 +464,30 @@ export class ASMSymbolDocumenter {
 						pathFragment,
 						location,
 						lineNumber,
-						commentBuffer.join("\n").trim()
+						commentBuffer.join("\n").trim(),
+						vscode.SymbolKind.Function
 					));
 				}
 				else if (moduleLineMatch) {
-					moduleStack.unshift(moduleLineMatch[1]);
+					const declaration = moduleLineMatch[2];
+					const start = line.firstNonWhitespaceCharacterIndex + moduleLineMatch[1].length;
+					const location = new vscode.Location(document.uri, new vscode.Range(
+						line.lineNumber, start,
+						line.lineNumber, start + declaration.length
+					));
+
+					moduleStack.unshift(declaration);
+					commentBuffer.unshift(`**module ${declaration}**\n`);
+					pathFragment.push(declaration);
+
+					table.symbols.push(new SymbolDescriptor(
+						declaration,
+						pathFragment,
+						location,
+						lineNumber,
+						commentBuffer.join("\n").trim(),
+						vscode.SymbolKind.Module
+					));
 				}
 				else if (regex.endmoduleRule.test(line.text)) {
 					moduleStack.shift();

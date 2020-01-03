@@ -87,72 +87,91 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 	}
 
 //---------------------------------------------------------------------------------------
-	provideCompletionItems(
+	async provideCompletionItems(
 		document: vscode.TextDocument,
 		position: vscode.Position,
 		token: vscode.CancellationToken,
 		context: vscode.CompletionContext
-	): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList> {
+	) {
 
 		const editorOptions = this.getEditorOptions(document);
 		const line: string = document.lineAt(position.line).text;
 		const shouldSuggestInstructionMatch = regex.shouldSuggestInstruction.exec(line);
 
+		let output: vscode.CompletionItem[] = [];
+
 		if (shouldSuggestInstructionMatch) {
 			const uc = isFirstLetterUppercase(shouldSuggestInstructionMatch[4]);
 
-			return [
+			output = [
 				...set.instructions.map(this.instructionMapper.bind(this, editorOptions, uc, false)),
 				...set.nextInstructions.map(this.instructionMapper.bind(this, editorOptions, uc, true))
 			];
 		}
+		else {
+			const shouldSuggest1ArgRegisterMatch = regex.shouldSuggest1ArgRegister.exec(line);
+			const shouldSuggest2ArgRegisterMatch = regex.shouldSuggest2ArgRegister.exec(line);
 
-		let output: vscode.CompletionItem[] = [];
+			if (shouldSuggest2ArgRegisterMatch) {
+				const uc = isFirstLetterUppercase(shouldSuggest2ArgRegisterMatch[1]);
 
-		const shouldSuggest1ArgRegisterMatch = regex.shouldSuggest1ArgRegister.exec(line);
-		const shouldSuggest2ArgRegisterMatch = regex.shouldSuggest2ArgRegister.exec(line);
+				if (shouldSuggest2ArgRegisterMatch[1].toLowerCase() === 'ex' &&
+					shouldSuggest2ArgRegisterMatch[2].toLowerCase() === 'af') {
 
-		if (shouldSuggest2ArgRegisterMatch) {
-			const uc = isFirstLetterUppercase(shouldSuggest2ArgRegisterMatch[1]);
+					const text = uppercaseIfNeeded("af'", uc);
+					const item = new vscode.CompletionItem(text, vscode.CompletionItemKind.Value);
+					item.insertText = new vscode.SnippetString(text)
+						.appendText(editorOptions.eol)
+						.appendTabstop(0);
 
-			if (shouldSuggest2ArgRegisterMatch[1].toLowerCase() === 'ex' &&
-				shouldSuggest2ArgRegisterMatch[2].toLowerCase() === 'af') {
-
-				const text = uppercaseIfNeeded("af'", uc);
-				const item = new vscode.CompletionItem(text, vscode.CompletionItemKind.Value);
-				item.insertText = new vscode.SnippetString(text)
-					.appendText(editorOptions.eol)
-					.appendTabstop(0);
-
-				item.commitCharacters = ['\n'];
-				return [item];
+					item.commitCharacters = ['\n'];
+					return [item];
+				}
+				else {
+					output = set.registers.map(this.registerMapper.bind(this, editorOptions.eol, uc));
+				}
 			}
-			else {
-				output = set.registers.map(this.registerMapper.bind(this, editorOptions.eol, uc));
+			else if (shouldSuggest1ArgRegisterMatch) {
+				const uc = isFirstLetterUppercase(shouldSuggest1ArgRegisterMatch[0]);
+				let idxStart = 0, idxEnd = undefined;
+
+				if (shouldSuggest1ArgRegisterMatch[1]) {
+					idxStart = set.regR16Index;
+					idxEnd = set.regStackIndex;
+				}
+				else if (shouldSuggest1ArgRegisterMatch[2]) {
+					idxEnd = set.regR16Index;
+				}
+
+				output = set.registers.slice(idxStart, idxEnd).map(
+					this.registerMapper.bind(this, editorOptions.eol, uc)
+				);
 			}
 		}
-		else if (shouldSuggest1ArgRegisterMatch) {
-			const uc = isFirstLetterUppercase(shouldSuggest1ArgRegisterMatch[0]);
-			let idxStart = 0, idxEnd = undefined;
 
-			if (shouldSuggest1ArgRegisterMatch[1]) {
-				idxStart = set.regR16Index;
-				idxEnd = set.regStackIndex;
-			}
-			else if (shouldSuggest1ArgRegisterMatch[2]) {
-				idxEnd = set.regR16Index;
-			}
-
-			output = set.registers.slice(idxStart, idxEnd).map(
-				this.registerMapper.bind(this, editorOptions.eol, uc)
-			);
-		}
-
-		const symbols = this.symbolDocumenter.symbols(document);
+		const symbols = await this.symbolDocumenter.symbols(document);
 		for (const name in symbols) {
 			const symbol = symbols[name];
 
-			const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Variable);
+			// mark a suggested item with proper icon
+			let kind = vscode.CompletionItemKind.Variable;
+
+			// suggest also macros in place of instructions
+			if (symbol.kind === vscode.SymbolKind.Module) {
+				kind = vscode.CompletionItemKind.Module;
+
+				if (shouldSuggestInstructionMatch) {
+					continue;
+				}
+			}
+			else if (symbol.kind === vscode.SymbolKind.Function) {
+				kind = vscode.CompletionItemKind.Function;
+			}
+			else if (shouldSuggestInstructionMatch) {
+				continue;
+			}
+
+			const item = new vscode.CompletionItem(name, kind);
 			if (symbol.path.length > 1) {
 				item.documentation = new vscode.MarkdownString(symbol.declaration);
 			}
@@ -176,8 +195,8 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 
 			if (name[0] === '.' && line.lastIndexOf('.') > 0) {
 				item.range = new vscode.Range(
-					new vscode.Position(position.line, line.lastIndexOf('.')),
-					new vscode.Position(position.line, position.character)
+					position.line, line.lastIndexOf('.'),
+					position.line, position.character
 				);
 			}
 

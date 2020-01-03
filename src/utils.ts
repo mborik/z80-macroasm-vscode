@@ -1,6 +1,6 @@
 const utils = {
 	'isFirstLetterUppercase':
-		(input: string) => (input[0] >= 'A' && input[0] <= 'Z'),
+		(input: string) => (!!input && input[0] >= 'A' && input[0] <= 'Z'),
 
 	'uppercaseIfNeeded':
 		(input: string, ucase: boolean) => (ucase ? input.toUpperCase() : input),

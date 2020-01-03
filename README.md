@@ -9,7 +9,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
   - [rasm](http://www.roudoudou.com/rasm/)
   - [tniASM](http://www.tni.nl/products/tniasm.html) (v0.x series)
 * [problem matchers](#problem-matchers) for **SjASMPlus**, **Macroassembler AS**, **rasm** and **tniASM** compilation output
-* label and symbol documenter on hover, defintion provider, completition proposer
+* label and symbol documenter on hover, defintion provider, completition proposer and rename provider
 * macro documenter and argument definition provider
 * snippets for macros and source control keywords
 
@@ -49,6 +49,9 @@ These values can be used in `.vscode/tasks.json` of your project's build task, f
 ### Hover over symbol:
 - Show symbol's value or specific definiton:
 > ![Hover over symbol](images/z80-macroasm-hover.gif)
+
+### Rename Provider
+- Allow to rename labels, temporal labels, module names or macro indetifiers in InteliSense meaning.
 
 
 ## Credits
