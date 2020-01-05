@@ -15,8 +15,10 @@ export interface SymbolDescriptorExt {
 	location: vscode.Location;
 	line: number;
 	documentation?: string;
+	localLabel: boolean;
 	labelPart?: string;
-	docInstance?: vscode.TextDocument;
+	labelFull?: string;
+	context?: vscode.TextDocument;
 }
 
 export class SymbolDescriptor implements SymbolDescriptorExt {
@@ -26,7 +28,8 @@ export class SymbolDescriptor implements SymbolDescriptorExt {
 		public location: vscode.Location,
 		public line = location.range.start.line,
 		public documentation?: string,
-		public kind: vscode.SymbolKind = vscode.SymbolKind.Variable) {}
+		public kind: vscode.SymbolKind = vscode.SymbolKind.Variable,
+		public localLabel: boolean = false) {}
 }
 
 class IncludeDescriptor {
@@ -246,7 +249,7 @@ export class ASMSymbolDocumenter {
 			const lineText = context.lineAt(position.line).text;
 			const includeLineMatch = regex.includeLine.exec(lineText);
 
-			if (resultType !== DocumenterResult.SYMBOL && includeLineMatch) {
+			if (resultType >= DocumenterResult.SYMBOL && includeLineMatch) {
 				const include = this._getInclude(context, includeLineMatch[4], position.line);
 
 				if (include) {
@@ -268,15 +271,22 @@ export class ASMSymbolDocumenter {
 
 			const range = context.getWordRangeAtPosition(
 				position,
-				resultType === DocumenterResult.SYMBOL ? undefined : regex.fullLabelRule
+				resultType !== DocumenterResult.SYMBOL ? regex.fullLabel : undefined
 			);
 
-			if (!range || (range && (range.isEmpty || !range.isSingleLine || range.start.character === 0))) {
+			if (!range || (range && (range.isEmpty || !range.isSingleLine))) {
 				return null;
 			}
 
 			let lbPart = context.getText(range);
-			if (regex.keyword.test(lbPart)) {
+			if (resultType < DocumenterResult.SYMBOL &&
+				(range.start.character === 0 || regex.keyword.test(lbPart))) {
+
+				return null;
+			}
+
+			const symbols = await this.symbols(context);
+			if (token.isCancellationRequested) {
 				return null;
 			}
 
@@ -284,45 +294,69 @@ export class ASMSymbolDocumenter {
 			let lbParent: string | undefined = undefined;
 			let lbModule: string | undefined = undefined;
 
-			for (let lineNumber = position.line - 1; lineNumber >= 0; lineNumber--) {
-				let line = context.lineAt(lineNumber);
-				if (line.isEmptyOrWhitespace) {
-					continue;
-				}
-				if (lbPart[0] === '.' && !lbParent) {
-					const parentLabelMatch = line.text.match(regex.parentLabel);
-					if (parentLabelMatch) {
-						lbParent = parentLabelMatch[1];
+			if (resultType === DocumenterResult.SYMBOL_FULL && lbPart[0] !== '.') {
+				const lbSplitted = lbFull.split('.');
+				if (lbSplitted.length >= 2) {
+					let testLb = symbols[lbSplitted[0]];
+					if (testLb) {
+						if (testLb.kind === vscode.SymbolKind.Module) {
+							lbModule = lbSplitted.shift();
+							if (lbSplitted.length > 1) {
+								lbParent = lbSplitted.shift();
+							}
+
+							lbFull = lbPart = lbSplitted[0];
+						}
+						else {
+							lbParent = lbSplitted.shift();
+							lbFull = lbPart = `.${lbSplitted[0]}`;
+						}
 					}
 				}
-				const moduleLineMatch = line.text.match(regex.moduleLine);
-				if (moduleLineMatch) {
-					lbModule = moduleLineMatch[2];
-					break;
+			}
+
+			if (!lbParent && !lbModule) {
+				for (let lineNumber = position.line - 1; lineNumber >= 0; lineNumber--) {
+					let line = context.lineAt(lineNumber);
+					if (line.isEmptyOrWhitespace) {
+						continue;
+					}
+					if (lbPart[0] === '.' && !lbParent) {
+						const parentLabelMatch = line.text.match(regex.parentLabel);
+						if (parentLabelMatch) {
+							lbParent = parentLabelMatch[1];
+						}
+					}
+					const moduleLineMatch = line.text.match(regex.moduleLine);
+					if (moduleLineMatch) {
+						lbModule = moduleLineMatch[2];
+						break;
+					}
+					else if (regex.endmoduleLine.test(line.text)) {
+						break;
+					}
 				}
 			}
 
 			lbFull = this._enlargeLabel(this._enlargeLabel(lbFull, lbParent), lbModule);
 
-			const symbols = await this.symbols(context);
-			if (!token.isCancellationRequested) {
-				const symbol: any = symbols[lbFull] || symbols[lbPart];
-				if (!symbol) {
-					return null;
-				}
+			const symbol: any = symbols[lbFull] || symbols[lbPart];
+			if (!symbol) {
+				return null;
+			}
 
-				if (resultType === DocumenterResult.HOVER) {
-					return new vscode.Hover(new vscode.MarkdownString(symbol.documentation), range);
-				}
-				else if (resultType === DocumenterResult.DEFINITION) {
-					return symbol.location;
-				}
-				else if (resultType >= DocumenterResult.SYMBOL) {
-					symbol.docInstance = context;
-					symbol.labelPart = lbFull;
+			if (resultType === DocumenterResult.HOVER) {
+				return new vscode.Hover(new vscode.MarkdownString(symbol.documentation), range);
+			}
+			else if (resultType === DocumenterResult.DEFINITION) {
+				return symbol.location;
+			}
+			else if (resultType >= DocumenterResult.SYMBOL) {
+				symbol.context = context;
+				symbol.labelPart = lbPart;
+				symbol.labelFull = lbFull;
 
-					return symbol;
-				}
+				return symbol;
 			}
 		})();
 	}
@@ -373,8 +407,11 @@ export class ASMSymbolDocumenter {
 				if (labelMatch) {
 					labelPath.push(labelMatch[1]);
 
+					let localLabel: boolean = false;
 					let declaration = labelMatch[1];
 					if (declaration[0] === '.') {
+						localLabel = true;
+
 						if (lastFullLabel) {
 							labelPath.unshift(lastFullLabel);
 							declaration = lastFullLabel + declaration;
@@ -411,7 +448,9 @@ export class ASMSymbolDocumenter {
 						labelPath,
 						location,
 						lineNumber,
-						commentBuffer.join("\n").trim() || undefined
+						commentBuffer.join("\n").trim() || undefined,
+						vscode.SymbolKind.Variable,
+						localLabel
 					));
 				}
 
@@ -489,7 +528,7 @@ export class ASMSymbolDocumenter {
 						vscode.SymbolKind.Module
 					));
 				}
-				else if (regex.endmoduleRule.test(line.text)) {
+				else if (regex.endmoduleLine.test(line.text)) {
 					moduleStack.shift();
 				}
 

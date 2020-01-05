@@ -7,12 +7,14 @@ export default {
 	includeLine: /(\binclude\s+)((["'])([^\3]+)\3).*$/i,
 	macroLine: /\b(macro\s+)(\w+)(?:\s+([^\/;$]+))?/i,
 	moduleLine: /\b(module\s+)(\w+)\b/i,
-	endmoduleRule: /\bendmod(ule)?\b/i,
+	endmoduleLine: /\bendmod(ule)?\b/i,
 	horizontalRule: /^(.)\1+$/,
-	fullLabelRule: /((\$\$(?!\.))?[\w\.]+)/,
-	partialLabelRule: /(?:\$\$(?!\.)|\.)?(\w+)/,
-	stringBoundsRule: /(["'])(?:([^\1]+)\1)/,
-	numeralMultiRule: /^((\-?\d+)|((?:(?:\-?0x)|[\$#])[0-9a-f]+)|(\-?[0-9a-f]+h)|(%[01]+)|([01]+b))$/i,
+	fullLabel: /((\$\$(?!\.))?[\w\.]+)/,
+	partialLabel: /(?:\$\$(?!\.)|\.)?(\w+)/,
+	stringBounds: /(["'])(?:([^\1]+)\1)/g,
+	numerals: /^((\-?\d+)|((?:(?:\-?0x)|[\$#])[0-9a-f]+)|(\-?[0-9a-f]+h)|(%[01]+)|([01]+b))$/i,
+	registers: /\b(?:[abcdefhlir]|ix|iy|af'?|bc|de|hl|pc|sp|ix[hlu]|iy[hlu]|[lh]x|x[lh]|[lh]y|y[lh])\b/i,
+	condFlags: /\b(j[pr]|call|ret)(?:\s+([cmpz]|n[cz]|p[eo]))\b/i,
 	labelDefinition: /^\@?((\$\$(?!\.))?[\w\.]+)(?::|\s|$)/,
 	parentLabel: /^(((\@|\$\$)(?!\.))?\w[\w\.]*)(?::|\s|$)/,
 	evalExpression: /^\@?([\w\.]+)\:?\s+(=|equ|eval)\s+(.+)(;.*)?$/i,
@@ -30,7 +32,7 @@ export default {
 			s[lr]a|s[lr]l|slia|sl1|sbc|
 			nextreg|bs[lr]a|bsr[lf]|brlc
 		)
-		\s+(\w+|\([^\)]+?\))(,\s*?\(?[^\(\n]*)$`,
+		\s+(\w+|\([^\)]+?\)),\s*?\(?([^\(\n]*)$`,
 	defineExpression: mkRegex`
 		^\@?([\w\.]+)\:?\s+(
 			inc(?:bin|hob|trd)|b?include|includelua|insert|binary|

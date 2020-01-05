@@ -2,9 +2,9 @@
     "compilerOptions": {
         "module": "commonjs",
         "moduleResolution": "node",
-        "target": "es6",
+        "target": "es2020",
         "outDir": "out",
-        "lib": [ "es6" ],
+        "lib": [ "es2020" ],
         "sourceMap": true,
         "rootDir": ".",
         "strict": true,

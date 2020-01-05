@@ -17,27 +17,47 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 		const lineText = document.lineAt(position.line).text;
 		const includeLineMatch = regex.includeLine.exec(lineText);
 		if (includeLineMatch) {
-			throw 'You cannot rename a include.';
+			throw 'You cannot rename a includes.';
 		}
 
 		const commentLineMatch = regex.endComment.exec(lineText);
 		if (commentLineMatch && position.character >= commentLineMatch.index) {
-			throw 'You cannot rename a comment.';
+			throw 'You cannot rename a comments.';
 		}
 
-		let range = document.getWordRangeAtPosition(position, regex.stringBoundsRule);
+		let range = document.getWordRangeAtPosition(position, regex.stringBounds);
 		if (range && !range.isEmpty) {
-			throw 'You cannot rename a string.';
+			throw 'You cannot rename a strings.';
 		}
 
 		range = document.getWordRangeAtPosition(position);
-		const text = document.getText(range);
-		if (regex.keyword.test(text)) {
-			throw 'You cannot rename a keyword.';
+		if (!range) {
+			throw null;
 		}
 
-		if (regex.numeralMultiRule.test(text)) {
-			throw 'You cannot rename a numeral.';
+		const activeLinePart = lineText.substr(0, range.end.character);
+		const keywordMatch = regex.shouldSuggestInstruction.exec(activeLinePart);
+
+		if (keywordMatch && regex.keyword.test(keywordMatch[4])) {
+			throw 'You cannot rename a keywords.';
+		}
+
+		const arg1RegisterMatch = regex.shouldSuggest1ArgRegister.exec(activeLinePart);
+		const arg2RegisterMatch = regex.shouldSuggest2ArgRegister.exec(activeLinePart);
+		const condFlagsMatch = regex.condFlags.exec(activeLinePart);
+
+		if ((condFlagsMatch && condFlagsMatch[2]) ||
+			(arg2RegisterMatch && arg2RegisterMatch[3] &&
+				regex.registers.test(arg2RegisterMatch[3])) ||
+			(arg1RegisterMatch && arg1RegisterMatch[4] &&
+				regex.registers.test(arg1RegisterMatch[4]))) {
+
+			throw 'You cannot rename a registers or flags.';
+		}
+
+		const text = document.getText(range);
+		if (regex.numerals.test(text)) {
+			throw 'You cannot rename a numerals.';
 		}
 
 		return range;
@@ -70,20 +90,19 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 
 		const wsEdit = new vscode.WorkspaceEdit();
 
-		const range = document.getWordRangeAtPosition(position, regex.partialLabelRule);
+		const range = document.getWordRangeAtPosition(position, regex.partialLabel);
 		if (!range || (range && (range.isEmpty || !range.isSingleLine))) {
 			return wsEdit;
 		}
 
-		const partialLabelMatch = regex.partialLabelRule.exec(document.getText(range));
-		if (!partialLabelMatch ||
-			(partialLabelMatch && regex.keyword.test(partialLabelMatch[1]))) {
-
+		const partialLabelMatch = regex.partialLabel.exec(document.getText(range));
+		if (!partialLabelMatch) {
 			return wsEdit;
 		}
 
 		const oldName = partialLabelMatch[1];
-		const wasLocalLabel = (partialLabelMatch[0][0] === '.');
+
+		let wasLocalLabel = (partialLabelMatch[0][0] === '.');
 		let symbol: SymbolDescriptorExt | null = null;
 
 		if (wasLocalLabel) {
@@ -116,9 +135,10 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 			}
 		}
 
-		if (symbol != null && symbol.labelPart) {
-			const files = this.symbolDocumenter.filesWithIncludes(document);
+		if (symbol != null && symbol.labelFull) {
+			wasLocalLabel = symbol.localLabel;
 
+			const files = this.symbolDocumenter.filesWithIncludes(document);
 			if (token.isCancellationRequested) {
 				throw token;
 			}
@@ -212,50 +232,56 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 						// remove module definition to prevent false match
 						lineText = lineText.replace(moduleLineMatch[0], '');
 					}
-					else if (regex.endmoduleRule.test(lineText)) {
+					else if (regex.endmoduleLine.test(lineText)) {
 						moduleStack.shift();
 						continue;
 					}
 
+					// remove strings to prevent false match
+					lineText = lineText.replace(regex.stringBounds, '');
+
 					let replacementPhrase =
-						wasLocalLabel ? `(\\b\\w+)?\\.` : `()?\\b`;
+						wasLocalLabel ? `(?:(\\b\\w+)\\.|\\.)` : `(?:(\\b\\w+)\\.)?`;
 					replacementPhrase += oldName + '\\b';
 
-					lineText.replace(RegExp(replacementPhrase, 'g'),
-						(match, prefix: string, index: number) => {
-							if (symbol == null) {
-								return match;
-							}
+					const matches = lineText.matchAll(RegExp(replacementPhrase, 'g'));
+					for (const match of matches) {
+						const [ phrase, prefix ] = match;
 
-							const localLabel = (match[0] === '.');
-							if (localLabel && symbol.labelPart &&
-								!symbol.labelPart.endsWith(lastFullLabel + match)) {
+						const localLabel = (phrase[0] === '.');
+						if ((
+								localLabel && symbol.labelFull &&
+								!symbol.labelFull.endsWith(lastFullLabel + phrase)
+							) ||
+							(
+								!localLabel && !prefix &&
+									symbol.labelPart && symbol.path.length > 1 &&
+								!(phrase === symbol.labelPart &&
+									moduleStack[0] == symbol.path[0])
+							)) {
 
-								return match;
-							}
-
-							let start = index;
-							if (prefix) {
-								if (match !== symbol.labelPart && prefix !== symbol.path[0]) {
-									return match;
-								}
-
-								start += prefix.length + 1;
-							}
-							else if (localLabel) {
-								start++;
-							}
-
-							const range = new vscode.Range(
-								lineNumber, start,
-								lineNumber, start + oldName.length
-							);
-
-							wsEdit.replace(doc.uri, range, newName);
-
-							return match;
+							continue;
 						}
-					);
+
+						let start = match.index || 0;
+						if (prefix) {
+							if (phrase !== symbol.labelFull && prefix !== symbol.path[0]) {
+								continue;
+							}
+
+							start += prefix.length + 1;
+						}
+						else if (localLabel) {
+							start++;
+						}
+
+						const range = new vscode.Range(
+							lineNumber, start,
+							lineNumber, start + oldName.length
+						);
+
+						wsEdit.replace(doc.uri, range, newName);
+					}
 				}
 			}
 		}
