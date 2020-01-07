@@ -53,23 +53,27 @@
 			"patterns": [
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:equ|eval|f?org|end?t|align|(?:de|un)?phase|shift|save(?:bin|dev|hob|nex|sna|tap|trd)|empty(?:tap|trd)|inc(?:bin|hob|trd)|binclude|includelua|insert|binary|end|out(?:put|end)|tap(?:out|end)|fpos|fname|page|slot|size|opt|outradix)\\b)"
+					"match": "(?i:(?<=\\s)(?:equ|eval|[fr]?org|end?t|align|(?:de|un)?phase|shift|save(?:bin|dev|hob|nex|sna|tap|trd)|empty(?:tap|trd)|inc(?:bin|hob|trd)|binclude|includelua|insert|binary|end|out(?:put|end)|tap(?:out|end)|fpos|fname|slot|size|opt)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:cpu|device|encoding|charset|proc|macro|local|shared|public|rept|e?dup|block|end[mpr]|exitm|module|endmod(?:ule)?|(?:un)?define|export|disp|textarea|map|mmu|field|defarray)\\b)"
+					"match": "(?i:(?<=\\s)(?:cpu|device|proc|macro|label|local|global|shared|public|forward|rept|e?dup|block|end[mpr]|exitm|module|endmod(?:ule)?|(?:un)?define|export|disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:assert|fatal|error|warning|message|display|print|fail|shellexec|def[bdghlmswir]|d[bcghmswz]|abyte[cz]?|byte|d?word|hex)\\b)"
+					"match": "(?i:(?<=\\s)(?:assert|fatal|error|warning|message|display|print|title|prtit|prtexit|fail|shellexec|def[bdghlmswir]|d[bcghmswz]|abyte[cz]?|byte|d?word|hex)\\b)"
+				},
+				{
+					"name": "keyword.control.i8080asm",
+					"match": "(?i:(?<=\\s)(?:page|newpage|radix|outradix|encoding|charset|codepage|macexp_(?:dft|ovr)|listing|(?:end)?struct|(?:end)?section)|maxnest)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:if|ifn?def|ifn?used|else|elseif|endif)\\b)"
+					"match": "(?i:(?<=\\s)(?:if|ifn?def|ifn?used|ifn?exist|else|elseif|endif)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:bank|bankset|limit|protect|write\\s+direct|str|struct|endstruct)\\b)"
+					"match": "(?i:(?<=\\s)(?:bank|bankset|limit|protect|write\\s+direct|str\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
@@ -77,7 +81,7 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:repeat|rend|until|switch|case|default|break|endswitch|stop|while|wend)\\b)"
+					"match": "(?i:(?<=\\s)(?:repeat|rend|until|switch|(?:else|end)case|default|break|endswitch|stop|while|wend|function)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
@@ -186,11 +190,17 @@
 				},
 				{
 					"name": "support.type.flag.z80asm",
-					"match": "\\b(?i:z80|r800|msx|gbz80|zxspectrum(?:48|128|256|512|1024))\\b"
+					"match": "\\b(?i:z80|r800|msx|gbz80|zxspectrum(?:48|128|256|512|1024)|(?:(?:no)?(?:expand|expif|expmacro|export|intlabel|globalsymbols)))\\b"
 				},
 				{
 					"name": "constant.numeric.operator.z80asm",
-					"match": "\\b(?i:high|low|not|mod|sh[lr])\\b"
+					"match": "\\b(?i:high|low|not|mod|sh[lr])\\b",
+					"comment": "sjasm numeric operators"
+				},
+				{
+					"name": "constant.numeric.function.z80asm",
+					"match": "\\b(?i:sqrt|a?sinh?|a?cosh?|a?tanh?|a?coth?|exp|alog|a?ld|ln|log|int|bitcnt|firstbit|lastbit|bitpos|sgn|abs|toupper|tolower|upstring|lowstring|strlen|substr|charfromstr|strstr|val|exprtype)\\b",
+					"comment": "AS macroassembler functions"
 				},
 				{
 					"name": "keyword.mnemonic.z80asm",
@@ -229,12 +239,28 @@
 					"match": "(\\-?0x[0-9a-fA-F]+)\\b"
 				},
 				{
+					"name": "constant.numeric.integer.octal.z80asm",
+					"match": "@[0-7]+"
+				},
+				{
+					"name": "constant.numeric.integer.octal.z80asm",
+					"match": "\\-?[0-7]+[oO]\\b"
+				},
+				{
+					"name": "constant.numeric.integer.octal.z80asm",
+					"match": "(\\-?0q?[0-7]+)\\b"
+				},
+				{
 					"name": "constant.numeric.integer.binary.z80asm",
 					"match": "%[01]+\\b"
 				},
 				{
 					"name": "constant.numeric.integer.binary.z80asm",
 					"match": "\\b[01]+[bB]\\b"
+				},
+				{
+					"name": "constant.numeric.integer.binary.z80asm",
+					"match": "(\\-?0b[01]+)\\b"
 				},
 				{
 					"name": "constant.numeric.integer.decimal.z80asm",

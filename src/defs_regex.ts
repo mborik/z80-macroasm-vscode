@@ -12,7 +12,7 @@ export default {
 	fullLabel: /((\$\$(?!\.))?[\w\.]+)/,
 	partialLabel: /(?:\$\$(?!\.)|\.)?(\w+)/,
 	stringBounds: /(["'])(?:([^\1]+)\1)/g,
-	numerals: /^((\-?\d+)|((?:(?:\-?0x)|[\$#])[0-9a-f]+)|(\-?[0-9a-f]+h)|(%[01]+)|([01]+b))$/i,
+	numerals: /^((\-?\d+)|((?:(?:\-?0x)|[\$#])[0-9a-f]+)|(\-?[0-9a-f]+h)|((?:(?:\-?0q)|@)[0-7]+)|([0-7]+o)|((?:(?:\-?0b)|%)[01]+)|([01]+b))$/i,
 	registers: /\b(?:[abcdefhlir]|ix|iy|af'?|bc|de|hl|pc|sp|ix[hlu]|iy[hlu]|[lh]x|x[lh]|[lh]y|y[lh])\b/i,
 	condFlags: /\b(j[pr]|call|ret)(?:\s+([cmpz]|n[cz]|p[eo]))\b/i,
 	labelDefinition: /^\@?((\$\$(?!\.))?[\w\.]+)(?::|\s|$)/,
