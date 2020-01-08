@@ -52,6 +52,7 @@ These values can be used in `.vscode/tasks.json` of your project's build task, f
 
 ### Rename Provider
 - Allow to rename labels, temporal labels, module names or macro indetifiers in InteliSense meaning.
+> ![Renaming of symbols](images/z80-macroasm-rename.gif)
 
 
 ## Credits
