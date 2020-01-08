@@ -183,7 +183,15 @@ export class ASMSymbolDocumenter {
 	 */
 	async symbols(context: vscode.TextDocument): Promise<SymbolMap> {
 		const output: SymbolMap = {};
-		await this._seekSymbols(context.uri.fsPath, output);
+		const searched: string[] = [];
+
+		await this._seekSymbols(context.uri.fsPath, output, [], searched);
+
+		for (const filepath in this.files) {
+			if (searched.length && !searched.includes(filepath)) {
+				await this._seekSymbols(filepath, output, [], searched);
+			}
+		}
 
 		return output;
 	}
@@ -249,7 +257,7 @@ export class ASMSymbolDocumenter {
 			const lineText = context.lineAt(position.line).text;
 			const includeLineMatch = regex.includeLine.exec(lineText);
 
-			if (resultType >= DocumenterResult.SYMBOL && includeLineMatch) {
+			if (resultType < DocumenterResult.SYMBOL && includeLineMatch) {
 				const include = this._getInclude(context, includeLineMatch[4], position.line);
 
 				if (include) {
@@ -265,29 +273,59 @@ export class ASMSymbolDocumenter {
 					}
 				}
 				else {
-					return null;
+					return;
 				}
 			}
 
-			const range = context.getWordRangeAtPosition(
-				position,
-				resultType !== DocumenterResult.SYMBOL ? regex.fullLabel : undefined
-			);
+			const commentLineMatch = regex.endComment.exec(lineText);
+			if (commentLineMatch && position.character >= commentLineMatch.index) {
+				return;
+			}
+
+			let range = context.getWordRangeAtPosition(position, regex.stringBounds);
+			if (range && !range.isEmpty) {
+				return;
+			}
+
+			if (resultType === DocumenterResult.SYMBOL) {
+				range = context.getWordRangeAtPosition(position);
+			}
+			else {
+				range = context.getWordRangeAtPosition(position, regex.fullLabel);
+			}
 
 			if (!range || (range && (range.isEmpty || !range.isSingleLine))) {
-				return null;
+				return;
+			}
+
+			if (resultType < DocumenterResult.SYMBOL) {
+				const activeLinePart = lineText.substr(0, range.end.character);
+				const keywordMatch = regex.shouldSuggestInstruction.exec(activeLinePart);
+
+				const arg1RegisterMatch = regex.shouldSuggest1ArgRegister.exec(activeLinePart);
+				const arg2RegisterMatch = regex.shouldSuggest2ArgRegister.exec(activeLinePart);
+				const condFlagsMatch = regex.condFlags.exec(activeLinePart);
+
+				if ((condFlagsMatch && condFlagsMatch[2]) ||
+					(keywordMatch && keywordMatch[4] &&
+						regex.keyword.test(keywordMatch[4])) ||
+					(arg2RegisterMatch && arg2RegisterMatch[3] &&
+						regex.registers.test(arg2RegisterMatch[3])) ||
+					(arg1RegisterMatch && arg1RegisterMatch[4] &&
+						regex.registers.test(arg1RegisterMatch[4]))) {
+
+					return;
+				}
 			}
 
 			let lbPart = context.getText(range);
-			if (resultType < DocumenterResult.SYMBOL &&
-				(range.start.character === 0 || regex.keyword.test(lbPart))) {
-
-				return null;
+			if (regex.numerals.test(lbPart)) {
+				return;
 			}
 
 			const symbols = await this.symbols(context);
 			if (token.isCancellationRequested) {
-				return null;
+				return;
 			}
 
 			let lbFull = lbPart;
@@ -342,7 +380,7 @@ export class ASMSymbolDocumenter {
 
 			const symbol: any = symbols[lbFull] || symbols[lbPart];
 			if (!symbol) {
-				return null;
+				return;
 			}
 
 			if (resultType === DocumenterResult.HOVER) {

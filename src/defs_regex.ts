@@ -12,7 +12,7 @@ export default {
 	fullLabel: /((\$\$(?!\.))?[\w\.]+)/,
 	partialLabel: /(?:\$\$(?!\.)|\.)?(\w+)/,
 	stringBounds: /(["'])(?:([^\1]+)\1)/g,
-	numerals: /^((\-?\d+)|((?:(?:\-?0x)|[\$#])[0-9a-f]+)|(\-?[0-9a-f]+h)|((?:(?:\-?0q)|@)[0-7]+)|([0-7]+o)|((?:(?:\-?0b)|%)[01]+)|([01]+b))$/i,
+	numerals: /^(((?:(?:\-?0x)|[\$#])[0-9a-f]+)|(\-?[0-9a-f]+h)|((?:(?:\-?0q?)|@)[0-7]+)|([0-7]+o)|((?:(?:\-?0b)|%)[01]+)|([01]+b)|(\-?\d+))$/i,
 	registers: /\b(?:[abcdefhlir]|ix|iy|af'?|bc|de|hl|pc|sp|ix[hlu]|iy[hlu]|[lh]x|x[lh]|[lh]y|y[lh])\b/i,
 	condFlags: /\b(j[pr]|call|ret)(?:\s+([cmpz]|n[cz]|p[eo]))\b/i,
 	labelDefinition: /^\@?((\$\$(?!\.))?[\w\.]+)(?::|\s|$)/,
@@ -40,20 +40,21 @@ export default {
 			def[bdghlmswir]|d[bcghmswz]|abyte[cz]?|byte|d?word|hex
 		)\s+([^\$;]+)(;.*)?$`,
 	keyword: mkRegex`^(
-		equ|eval|f?org|end?t|align|(?:de|un)?phase|shift|
+		equ|eval|[fr]?org|end|end?t|align|(?:de|un)?phase|shift|
 		save(?:bin|dev|hob|nex|sna|tap|trd)|empty(?:tap|trd)|
-		inc(?:bin|hob|trd)|b?include|includelua|insert|binary|end|out(?:put|end)|tap(?:out|end)|
-		fpos|fname|page|slot|size|opt|outradix|
-		cpu|device|encoding|charset|proc|local|shared|public|export|
-		dup|edup|block|rept|macro|end[mpr]|exitm|module|endmod(?:ule)?|(?:un)?define|
-		disp|textarea|map|mmu|field|defarray|list|nolist|let|labelslist|
-		assert|fatal|error|warning|message|display|print|fail|
+		inc(?:bin|hob|trd)|b?include|includelua|insert|binary|out(?:put|end)|tap(?:out|end)|
+		fpos|fname|slot|size|opt|page|newpage|radix|outradix|encoding|charset|codepage|
+		macexp_(?:dft|ovr)|listing|(?:end)?struct|(?:end)?section|maxnest|
+		cpu|device|proc|label|local|global|shared|public|forward|export|
+		e?dup|block|rept|macro|end[mpr]|exitm|module|endmod(?:ule)?|(?:un)?define|
+		disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum|
+		list|nolist|let|labelslist|assert|fatal|error|warning|message|display|print|fail|
 		shellexec|amsdos|breakpoint|buildcpr|buildsna|run|save|setcpc|setcrtc|
-		repeat|rend|until|switch|case|default|break|endswitch|stop|while|wend|
+		repeat|rend|until|switch|(?:else|end)case|default|break|endswitch|stop|while|wend|function|
 		inc(?:l4[89]|lz4|zx7|exo)|lz(?:4[89]?|w7|exo|close)|read|
-		bank|bankset|limit|protect|write\s+direct|str|(?:end)?struct|
+		bank|bankset|limit|protect|write\s+direct|str|
 		def[bdlmswir]|d[bcdszw]|abyte[cz]?|byte|d?word|hex|
-		if|ifn?def|ifn?used|else|elseif|endif|
+		if|ifn?def|ifn?used|ifn?exist|else|elseif|endif|
 		ad[cd]|and|bit|call|ccf|cp|cp[di]r?|cpl|daa|dec|[de]i|djnz|exx?|halt|
 		i[mn]|inc|in[di]r?|j[pr]|ld|ld[di]r?|neg|nop|ot[di]r|out|out[di]|
 		pop|push|res|ret[in]?|rla?|rlca?|r[lr]d|rra?|rrca?|rst|sbc|scf|set|

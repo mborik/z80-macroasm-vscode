@@ -150,6 +150,10 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 		}
 
 		const symbols = await this.symbolDocumenter.symbols(document);
+		if (token.isCancellationRequested) {
+			return;
+		}
+
 		for (const name in symbols) {
 			const symbol = symbols[name];
 
