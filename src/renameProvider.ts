@@ -139,15 +139,11 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 			wasLocalLabel = symbol.localLabel;
 
 			const files = this.symbolDocumenter.filesWithIncludes(document);
-			if (token.isCancellationRequested) {
-				throw token;
-			}
-
 			for (const uri in files) {
 				const doc = await vscode.workspace.openTextDocument(uri);
 
 				if (token.isCancellationRequested) {
-					throw token;
+					return wsEdit;
 				}
 
 				let moduleStack: string[] = [];
@@ -161,15 +157,15 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 
 					let lineText = line.text;
 
-					const commentLineMatch = regex.commentLine.exec(lineText);
+					const commentLineMatch = regex.endComment.exec(lineText);
 					const includeLineMatch = regex.includeLine.exec(lineText);
 					const moduleLineMatch = regex.moduleLine.exec(lineText);
 					const macroLineMatch = regex.macroLine.exec(lineText);
 					const labelMatch = regex.labelDefinition.exec(lineText);
 
 					if (commentLineMatch) {
-						// skip comment lines
-						continue;
+						// remove comment from line to prevent false match
+						lineText = lineText.replace(commentLineMatch[0], '');
 					}
 					else if (includeLineMatch) {
 						// remove include from line to prevent false match
@@ -239,6 +235,11 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 
 					// remove strings to prevent false match
 					lineText = lineText.replace(regex.stringBounds, '');
+
+					// nothing left on the line...
+					if (!lineText.trim()) {
+						continue;
+					}
 
 					let replacementPhrase =
 						wasLocalLabel ? `(?:(\\b\\w+)\\.|\\.)` : `(?:(\\b\\w+)\\.)?`;
