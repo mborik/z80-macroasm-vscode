@@ -30,6 +30,11 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 			throw 'You cannot rename a strings.';
 		}
 
+		range = document.getWordRangeAtPosition(position, regex.numerals);
+		if (range && !range.isEmpty) {
+			throw 'You cannot rename a numerals.';
+		}
+
 		range = document.getWordRangeAtPosition(position);
 		if (!range) {
 			throw null;
@@ -53,11 +58,6 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 				regex.registers.test(arg1RegisterMatch[4]))) {
 
 			throw 'You cannot rename a registers or flags.';
-		}
-
-		const text = document.getText(range);
-		if (regex.numerals.test(text)) {
-			throw 'You cannot rename a numerals.';
 		}
 
 		return range;

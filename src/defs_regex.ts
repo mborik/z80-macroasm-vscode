@@ -12,9 +12,18 @@ export default {
 	fullLabel: /((\$\$(?!\.))?[\w\.]+)/,
 	partialLabel: /(?:\$\$(?!\.)|\.)?(\w+)/,
 	stringBounds: /(["'])(?:([^\1]+)\1)/g,
-	numerals: /^(((?:(?:\-?0x)|[\$#])[0-9a-f]+)|(\-?[0-9a-f]+h)|((?:(?:\-?0q?)|@)[0-7]+)|([0-7]+o)|((?:(?:\-?0b)|%)[01]+)|([01]+b)|(\-?\d+))$/i,
+	numerals: mkRegex`
+		(
+			((?:(?:\-|\b)(?:0b)|%)[01]+)|
+			(\b[01]+b\b)|
+			((?:(?:\-|\b)(?:0x)|[\$#])[0-9a-f]+)|
+			((?:\-|\b)[0-9a-f]+h\b)|
+			((?:(?:\-|\b)(?:0q?)|@)[0-7]+)|
+			((?:\-|\b)[0-7]+o\b)|
+			((?:\-|\b)\d+)
+		)(?!\w+)`,
 	registers: /\b(?:[abcdefhlir]|ix|iy|af'?|bc|de|hl|pc|sp|ix[hlu]|iy[hlu]|[lh]x|x[lh]|[lh]y|y[lh])\b/i,
-	condFlags: /\b(j[pr]|call|ret)(?:\s+([cmpz]|n[cz]|p[eo]))\b/i,
+	condFlags: /\b(j[pr]|call|ret)(?:\s+([cmpz]|n[cz]|p[eo]))$/i,
 	labelDefinition: /^\@?((\$\$(?!\.))?[\w\.]+)(?::|\s|$)/,
 	parentLabel: /^(((\@|\$\$)(?!\.))?\w[\w\.]*)(?::|\s|$)/,
 	evalExpression: /^\@?([\w\.]+)\:?\s+(=|equ|eval)\s+(.+)(;.*)?$/i,
@@ -44,7 +53,7 @@ export default {
 		save(?:bin|dev|hob|nex|sna|tap|trd)|empty(?:tap|trd)|
 		inc(?:bin|hob|trd)|b?include|includelua|insert|binary|out(?:put|end)|tap(?:out|end)|
 		fpos|fname|slot|size|opt|page|newpage|radix|outradix|encoding|charset|codepage|
-		macexp_(?:dft|ovr)|listing|(?:end)?struct|(?:end)?section|maxnest|
+		macexp_(?:dft|ovr)|listing|(?:end)?struct|(?:end)?section|(?:end)?lua|maxnest|
 		cpu|device|proc|label|local|global|shared|public|forward|export|
 		e?dup|block|rept|macro|end[mpr]|exitm|module|endmod(?:ule)?|(?:un)?define|
 		disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum|

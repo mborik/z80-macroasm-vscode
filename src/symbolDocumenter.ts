@@ -287,6 +287,11 @@ export class ASMSymbolDocumenter {
 				return;
 			}
 
+			range = context.getWordRangeAtPosition(position, regex.numerals);
+			if (range && !range.isEmpty) {
+				return;
+			}
+
 			if (resultType === DocumenterResult.SYMBOL) {
 				range = context.getWordRangeAtPosition(position);
 			}
@@ -318,16 +323,12 @@ export class ASMSymbolDocumenter {
 				}
 			}
 
-			let lbPart = context.getText(range);
-			if (regex.numerals.test(lbPart)) {
-				return;
-			}
-
 			const symbols = await this.symbols(context);
 			if (token.isCancellationRequested) {
 				return;
 			}
 
+			let lbPart = context.getText(range);
 			let lbFull = lbPart;
 			let lbParent: string | undefined = undefined;
 			let lbModule: string | undefined = undefined;
