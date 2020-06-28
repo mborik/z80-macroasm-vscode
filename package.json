@@ -117,7 +117,7 @@
                 "name": "errmatcher-sjasmplus",
                 "owner": "z80-macroasm",
                 "fileLocation": [
-                    "relative",
+                    "autodetect",
                     "${workspaceFolder}"
                 ],
                 "pattern": [
