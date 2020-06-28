@@ -35,6 +35,66 @@
     ],
     "main": "./out/src/extension",
     "contributes": {
+        "configuration": {
+            "type": "object",
+            "title": "Z80 Macro-Assembler configuration",
+            "properties": {
+                "z80-macroasm.files.include": {
+                    "type": "string",
+                    "default": "**/*.{a80,asm,inc,s}",
+                    "description": "Files to include and work with. If you, or your macro-assembler using a different conventions of source file extensions then change it here."
+                },
+                "z80-macroasm.files.exclude": {
+                    "type": ["string", "null"],
+                    "default": null,
+                    "description": "Choose files or directories to exclude (e.g '**/*.{lst}')."
+                },
+                "z80-macroasm.format.indent": {
+                    "type": "number",
+                    "default": 2,
+                    "description": "Formatter: How many tabstops you prefer before the instructions or keywords (default 2)."
+                },
+                "z80-macroasm.format.whitespaceAfterInstruction": {
+                    "type": "string",
+                    "enum": [ "auto", "tabstop", "tab", "single-space" ],
+                    "default": "auto",
+                    "description": "Formatter: Which type of whitespace you want to put after the instruction (default `auto` will autodetect file's tabstop type and width)."
+                },
+                "z80-macroasm.format.spaceAfterFirstArgument": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Formatter: If you want to put a single space character after comma, first instruction's argument."
+                },
+                "z80-macroasm.format.uppercaseKeywords": {
+                    "type": [ "boolean", "string" ],
+                    "enum": [ "auto", true, false ],
+                    "default": "auto",
+                    "description": "Formatter: Uppercase all keywords, instructions and registers."
+                },
+                "z80-macroasm.format.bracketType": {
+                    "type": "string",
+                    "enum": [ "round", "square" ],
+                    "default": "round",
+                    "description": "Formatter: Define which type of brackets around the instruction's arguments (pointers) you prefer: `(hl)` or `[hl]`."
+                },
+                "z80-macroasm.format.splitInstructionsByColon": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Formatter: Split colon separated instructions to lines."
+                },
+                "z80-macroasm.format.colonAfterLabels": {
+                    "type": [ "boolean", "string" ],
+                    "enum": [ "no-change", true, false ],
+                    "default": "no-change",
+                    "description": "Formatter: Put colon after each label or symbol (by default keep untouched)."
+                },
+                "z80-macroasm.seekSymbolsThroughWorkspace": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "If true, extension will crawl through all workspace files to document all symbols. Otherwise, only includes are taken into account."
+                }
+            }
+        },
         "problemMatchers": [
             {
                 "name": "errmatcher-as",

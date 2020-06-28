@@ -3,7 +3,6 @@ import * as path from 'path';
 import regex from './defs_regex';
 
 
-export const fileGlobPattern = "**/*.{a80,asm,inc,s}";
 export const enum DocumenterResult {
 	DEFINITION, HOVER, SYMBOL, SYMBOL_FULL
 };
@@ -57,20 +56,20 @@ export class ASMSymbolDocumenter {
 	files: { [name: string]: FileTable } = {};
 
 
-	constructor() {
+	constructor(private settings: vscode.WorkspaceConfiguration) {
 		const fileUriHandler = ((uri: vscode.Uri) => {
 			vscode.workspace.openTextDocument(uri).then(doc => this._document(doc));
 		});
 
 		vscode.workspace
-			.findFiles(fileGlobPattern)
+			.findFiles(settings.files.include, settings.files.exclude)
 			.then(files => files.forEach(fileUriHandler));
 
 		vscode.workspace.onDidChangeTextDocument(
 			(event: vscode.TextDocumentChangeEvent) => this._document(event.document)
 		);
 
-		this._watcher = vscode.workspace.createFileSystemWatcher(fileGlobPattern);
+		this._watcher = vscode.workspace.createFileSystemWatcher(settings.files.include);
 		this._watcher.onDidChange(fileUriHandler);
 		this._watcher.onDidCreate(fileUriHandler);
 		this._watcher.onDidDelete((uri) => {
@@ -187,9 +186,11 @@ export class ASMSymbolDocumenter {
 
 		await this._seekSymbols(context.uri.fsPath, output, [], searched);
 
-		for (const filepath in this.files) {
-			if (searched.length && !searched.includes(filepath)) {
-				await this._seekSymbols(filepath, output, [], searched);
+		if (this.settings.seekSymbolsThroughWorkspace) {
+			for (const filepath in this.files) {
+				if (searched.length && !searched.includes(filepath)) {
+					await this._seekSymbols(filepath, output, [], searched);
+				}
 			}
 		}
 
