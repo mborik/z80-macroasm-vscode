@@ -56,7 +56,7 @@ export class ASMSymbolDocumenter {
 	files: { [name: string]: FileTable } = {};
 
 
-	constructor(private settings: vscode.WorkspaceConfiguration) {
+	constructor(public settings: vscode.WorkspaceConfiguration) {
 		const fileUriHandler = ((uri: vscode.Uri) => {
 			vscode.workspace.openTextDocument(uri).then(doc => this._document(doc));
 		});
@@ -140,7 +140,9 @@ export class ASMSymbolDocumenter {
 		const table = this.files[fsPath];
 
 		if (table) {
-			const include = table.includes.find(i => (i.declaration === declaration && i.line === line));
+			const include = table.includes.find(
+				i => (i.declaration === declaration && i.line === line)
+			);
 
 			if (include) {
 				const doc = vscode.Uri.file(include.fullPath);

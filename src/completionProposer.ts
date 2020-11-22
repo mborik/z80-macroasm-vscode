@@ -5,9 +5,13 @@ import regex from './defs_regex';
 import set from './defs_list';
 
 interface EditorOptions {
-	indent_spaces: boolean;
-	indent_size: number;
+	indentSpaces: boolean;
+	indentSize: number;
 	eol: string;
+	whitespaceAfterInstruction: 'auto' | 'tabstop' | 'tab' | 'single-space';
+	spaceAfterFirstArgument: boolean;
+	uppercaseKeywords: 'auto' | boolean;
+	bracketType: 'round' | 'square';
 }
 
 
@@ -18,16 +22,18 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 		const config = vscode.workspace.getConfiguration();
 
 		const result: EditorOptions = {
-			indent_spaces: (config.editor.insertSpaces === 'true'),
-			indent_size: parseInt(config.editor.tabSize as any, 10) || 8,
+			...this.symbolDocumenter.settings?.format,
+
+			indentSpaces: (config.editor.insertSpaces === 'true'),
+			indentSize: parseInt(config.editor.tabSize as any, 10) || 8,
 			eol: (config.files.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n'
 		};
 
 		// if this document is open, use the settings from that window
 		vscode.window.visibleTextEditors.some(editor => {
 			if (editor.document && editor.document.fileName === document.fileName) {
-				result.indent_spaces = (editor.options.insertSpaces === true);
-				result.indent_size = parseInt(editor.options.tabSize as any, 10) || 8;
+				result.indentSpaces = (editor.options.insertSpaces === true);
+				result.indentSize = parseInt(editor.options.tabSize as any, 10) || 8;
 				result.eol = (editor.document.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n';
 				return true;
 			}
@@ -43,12 +49,23 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 
 		const item = new vscode.CompletionItem(snippet, vscode.CompletionItemKind.Keyword);
 		const snip = new vscode.SnippetString(snippet);
-		if (delimiter === '\t' && opt.indent_spaces) {
-			let tabSize = opt.indent_size;
-			while (snippet.length > tabSize)
-				tabSize += opt.indent_size;
+		if (delimiter === '\t') {
+			if (opt.whitespaceAfterInstruction === 'single-space') {
+				snip.appendText(' ');
+			}
+			else if (opt.whitespaceAfterInstruction === 'tab') {
+				snip.appendText('\t');
+			}
+			else if (opt.indentSpaces) {
+				let tabSize = opt.indentSize;
+				while (snippet.length > tabSize)
+					tabSize += opt.indentSize;
 
-			snip.appendText(' '.repeat(tabSize - snippet.length));
+				snip.appendText(' '.repeat(tabSize - snippet.length));
+			}
+			else {
+				snip.appendText('\t');
+			}
 		}
 		else if (delimiter === '\n') {
 			snip.appendText(opt.eol);
@@ -70,13 +87,24 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 		return item;
 	}
 
-	private registerMapper(eol: string, ucase: boolean, snippet: string, idx: number) {
+	private registerMapper(options: EditorOptions & { secondArgument?: boolean },
+			ucase: boolean, snippet: string, idx: number) {
+
 		snippet = uppercaseIfNeeded(snippet, ucase);
 
-		const item = new vscode.CompletionItem(snippet, vscode.CompletionItemKind.Value);
-		const snip = new vscode.SnippetString(snippet.replace('*', '${1:0}'));
+		let prefix = '';
+		if (options.secondArgument && options.spaceAfterFirstArgument) {
+			prefix = ' ';
+		}
 
-		snip.appendText(eol)
+		if (options.bracketType === 'square' && snippet.indexOf('(') === 0) {
+			snippet = snippet.replace('(', '[').replace(')', ']');
+		}
+
+		const item = new vscode.CompletionItem(snippet, vscode.CompletionItemKind.Value);
+		const snip = new vscode.SnippetString(prefix + snippet.replace('*', '${1:0}'));
+
+		snip.appendText(options.eol)
 		snip.appendTabstop(0);
 
 		// put on the top of the list...
@@ -98,10 +126,14 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 		const line: string = document.lineAt(position.line).text;
 		const shouldSuggestInstructionMatch = regex.shouldSuggestInstruction.exec(line);
 
+		const shouldKeywordUppercase = (part: string) =>
+			editorOptions.uppercaseKeywords === 'auto' ? isFirstLetterUppercase(part) :
+			editorOptions.uppercaseKeywords as boolean;
+
 		let output: vscode.CompletionItem[] = [];
 
 		if (shouldSuggestInstructionMatch) {
-			const uc = isFirstLetterUppercase(shouldSuggestInstructionMatch[4]);
+			const uc = shouldKeywordUppercase(shouldSuggestInstructionMatch[4]);
 
 			output = [
 				...set.instructions.map(this.instructionMapper.bind(this, editorOptions, uc, false)),
@@ -113,7 +145,7 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 			const shouldSuggest2ArgRegisterMatch = regex.shouldSuggest2ArgRegister.exec(line);
 
 			if (shouldSuggest2ArgRegisterMatch) {
-				const uc = isFirstLetterUppercase(shouldSuggest2ArgRegisterMatch[1]);
+				const uc = shouldKeywordUppercase(shouldSuggest2ArgRegisterMatch[1]);
 
 				if (shouldSuggest2ArgRegisterMatch[1].toLowerCase() === 'ex' &&
 					shouldSuggest2ArgRegisterMatch[2].toLowerCase() === 'af') {
@@ -128,11 +160,14 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 					return [item];
 				}
 				else {
-					output = set.registers.map(this.registerMapper.bind(this, editorOptions.eol, uc));
+					output = set.registers.map(this.registerMapper.bind(this, {
+						...editorOptions,
+						secondArgument: true
+					}, uc));
 				}
 			}
 			else if (shouldSuggest1ArgRegisterMatch) {
-				const uc = isFirstLetterUppercase(shouldSuggest1ArgRegisterMatch[0]);
+				const uc = shouldKeywordUppercase(shouldSuggest1ArgRegisterMatch[0]);
 				let idxStart = 0, idxEnd = undefined;
 
 				if (shouldSuggest1ArgRegisterMatch[1]) {
@@ -144,7 +179,7 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 				}
 
 				output = set.registers.slice(idxStart, idxEnd).map(
-					this.registerMapper.bind(this, editorOptions.eol, uc)
+					this.registerMapper.bind(this, editorOptions, uc)
 				);
 			}
 		}

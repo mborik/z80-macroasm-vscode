@@ -34,14 +34,14 @@ export default {
 			(cp|in|s[lr]a|s[lr]l|slia|sl1|sub|and|te?st|x?or|mul)|
 			(ex|ld|inc|dec|adc|add|sbc)
 		)
-		\s+\(?([a-z]\w*)?$`,
+		\s+[[(]?([a-z]\w*)?$`,
 	shouldSuggest2ArgRegister: mkRegex`
 		(
 			adc|add|bit|ex|ld|out|res|r[lr]c?|set|
 			s[lr]a|s[lr]l|slia|sl1|sbc|
 			nextreg|bs[lr]a|bsr[lf]|brlc
 		)
-		\s+(\w+|\([^\)]+?\)),\s*?\(?([^\(\n]*)$`,
+		\s+(\w+|\([^\)]+?\)|\[[^\]]+?\]),\s*?[[(]?([^[(\n]*)$`,
 	defineExpression: mkRegex`
 		^\@?([\w\.]+)\:?\s+(
 			inc(?:bin|hob|trd)|b?include|includelua|insert|binary|
