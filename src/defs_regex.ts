@@ -2,7 +2,7 @@ const mkRegex = (str: TemplateStringsArray, opts: string = 'i') =>
 	new RegExp(str.raw[0].replace(/\s/gm, ''), opts);
 
 export default {
-	commentLine: /^(?:;+|\/{2,})\s*(.*)$/,
+	commentLine: /^(?:\s*;+|\/{2,})\s*(.*)$/,
 	endComment: /(?:;+|\/{2,})\s*(.*)$/,
 	includeLine: /(\binclude\s+)((["'])([^\3]+)\3).*$/i,
 	macroLine: /\b(macro\s+)(\w+)(?:\s+([^\/;$]+))?/i,

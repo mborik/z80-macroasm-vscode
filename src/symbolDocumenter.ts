@@ -85,8 +85,8 @@ export class ASMSymbolDocumenter {
 	 * Seeks symbols for use by Intellisense in the file at `fsPath`.
 	 * @param fsPath The path of the file to seek in.
 	 * @param output The collection of discovered symbols.
+	 * @param prependPath Path fragments which should be prepended.
 	 * @param searched Paths of files that have already been searched.
-	 * @param searchIncludes If true, also searches file includes.
 	 */
 	private async _seekSymbols(fsPath: string, output: SymbolMap,
 				prependPath: string[] = [], searched: string[] = []) {
@@ -94,11 +94,18 @@ export class ASMSymbolDocumenter {
 		let table = this.files[fsPath];
 
 		if (!table) {
-			// Open missing document and process...
-			const doc = await vscode.workspace.openTextDocument(fsPath);
+			try {
+				// Open missing document and process...
+				const doc = await vscode.workspace.openTextDocument(fsPath);
 
-			this._document(doc);
-			table = this.files[fsPath];
+				this._document(doc);
+				table = this.files[fsPath];
+
+			} catch(e) {
+				// file not found, probably non-existent include
+				searched.push(fsPath);
+				return;
+			}
 		}
 
 		searched.push(fsPath);
@@ -125,8 +132,8 @@ export class ASMSymbolDocumenter {
 	/**
 	 * Returns an include descriptor within scope of `context` on given `line`.
 	 * @param context The document to find symbols for.
-	 * @param declaration relative path
-	 * @param line
+	 * @param declaration Include relative path
+	 * @param line Line number of including in file
 	 */
 	private _getInclude(context: vscode.TextDocument, declaration: string, line: number) {
 		const fsPath = context.uri.fsPath;
