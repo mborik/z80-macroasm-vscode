@@ -18,6 +18,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
 There are some predefined problem matchers to handle reported errors from compilation output:
 - `errmatcher-as` for **Macroassembler AS**
 - `errmatcher-sjasmplus` for **SjASMPlus**
+- `errmatcher-sjasm` for **SjASM**
 - `errmatcher-rasm` for **rasm**
 - `errmatcher-tniasm` and `errmatcher-tniasm-preprocessor` for **tniASM**
 

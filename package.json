@@ -131,6 +131,19 @@
                 ]
             },
             {
+                "name": "errmatcher-sjasm",
+                "owner": "z80-macroasm",
+                "fileLocation": [ "absolute" ],
+                "pattern": [
+                    {
+                        "regexp": "^([^\\(]+)(?:\\()(\\d+)(?:\\)\\s*\\:\\s+)(.+)$",
+                        "file": 1,
+                        "line": 2,
+                        "message": 3
+                    }
+                ]
+            },
+            {
                 "name": "errmatcher-tniasm",
                 "owner": "z80-macroasm",
                 "fileLocation": [
