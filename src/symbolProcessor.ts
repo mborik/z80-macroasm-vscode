@@ -3,7 +3,7 @@ import * as path from 'path';
 import regex from './defs_regex';
 
 
-export const enum DocumenterResult {
+export const enum ProcessorResult {
 	DEFINITION, HOVER, SYMBOL, SYMBOL_FULL
 };
 
@@ -45,12 +45,12 @@ class FileTable {
 	symbols: SymbolDescriptor[] = [];
 }
 
-type SymbolDocumenterMultitype =
+type SymbolProcessorMultitype =
 	vscode.Definition | vscode.Hover | SymbolDescriptorExt;
 
 export type SymbolMap = { [name: string]: SymbolDescriptor };
 
-export class ASMSymbolDocumenter {
+export class SymbolProcessor {
 	private _watcher: vscode.FileSystemWatcher;
 
 	files: { [name: string]: FileTable } = {};
@@ -257,24 +257,24 @@ export class ASMSymbolDocumenter {
 	 * @param hoverDocumentation Provide a hover object.
 	 * @returns Promise of T.
 	 */
-	getFullSymbolAtDocPosition<T = SymbolDocumenterMultitype> (
+	getFullSymbolAtDocPosition<T = SymbolProcessorMultitype> (
 		context: vscode.TextDocument,
 		position: vscode.Position,
 		token: vscode.CancellationToken,
-		resultType: DocumenterResult = DocumenterResult.DEFINITION): Promise<T> {
+		resultType: ProcessorResult = ProcessorResult.DEFINITION): Promise<T> {
 
 		return (async () => {
 			const lineText = context.lineAt(position.line).text;
 			const includeLineMatch = regex.includeLine.exec(lineText);
 
-			if (resultType < DocumenterResult.SYMBOL && includeLineMatch) {
+			if (resultType < ProcessorResult.SYMBOL && includeLineMatch) {
 				const include = this._getInclude(context, includeLineMatch[4], position.line);
 
 				if (include) {
 					if (position.character >= include.location.range.start.character &&
 						position.character <= include.location.range.end.character) {
 
-						if (resultType === DocumenterResult.HOVER) {
+						if (resultType === ProcessorResult.HOVER) {
 							return new vscode.Hover(include.fullPath, include.location.range);
 						}
 						else {
@@ -302,7 +302,7 @@ export class ASMSymbolDocumenter {
 				return;
 			}
 
-			if (resultType === DocumenterResult.SYMBOL) {
+			if (resultType === ProcessorResult.SYMBOL) {
 				range = context.getWordRangeAtPosition(position);
 			}
 			else {
@@ -313,7 +313,7 @@ export class ASMSymbolDocumenter {
 				return;
 			}
 
-			if (resultType < DocumenterResult.SYMBOL) {
+			if (resultType < ProcessorResult.SYMBOL) {
 				const activeLinePart = lineText.substr(0, range.end.character);
 				const keywordMatch = regex.shouldSuggestInstruction.exec(activeLinePart);
 
@@ -343,7 +343,7 @@ export class ASMSymbolDocumenter {
 			let lbParent: string | undefined = undefined;
 			let lbModule: string | undefined = undefined;
 
-			if (resultType === DocumenterResult.SYMBOL_FULL && lbPart[0] !== '.') {
+			if (resultType === ProcessorResult.SYMBOL_FULL && lbPart[0] !== '.') {
 				const lbSplitted = lbFull.split('.');
 				if (lbSplitted.length >= 2) {
 					let testLb = symbols[lbSplitted[0]];
@@ -394,13 +394,13 @@ export class ASMSymbolDocumenter {
 				return;
 			}
 
-			if (resultType === DocumenterResult.HOVER) {
+			if (resultType === ProcessorResult.HOVER) {
 				return new vscode.Hover(new vscode.MarkdownString(symbol.documentation), range);
 			}
-			else if (resultType === DocumenterResult.DEFINITION) {
+			else if (resultType === ProcessorResult.DEFINITION) {
 				return symbol.location;
 			}
-			else if (resultType >= DocumenterResult.SYMBOL) {
+			else if (resultType >= ProcessorResult.SYMBOL) {
 				symbol.context = context;
 				symbol.labelPart = lbPart;
 				symbol.labelFull = lbFull;

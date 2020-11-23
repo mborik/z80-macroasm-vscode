@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { ASMSymbolDocumenter } from './symbolDocumenter';
+import { SymbolProcessor } from './symbolProcessor';
 import { isFirstLetterUppercase, uppercaseIfNeeded, pad } from './utils';
 import regex from './defs_regex';
 import set from './defs_list';
@@ -8,21 +8,21 @@ interface EditorOptions {
 	indentSpaces: boolean;
 	indentSize: number;
 	eol: string;
-	whitespaceAfterInstruction: 'auto' | 'tabstop' | 'tab' | 'single-space';
+	whitespaceAfterInstruction: 'auto' |  'tab' | 'single-space';
 	spaceAfterFirstArgument: boolean;
 	uppercaseKeywords: 'auto' | boolean;
 	bracketType: 'round' | 'square';
 }
 
 
-export class ASMCompletionProposer implements vscode.CompletionItemProvider {
-	constructor(public symbolDocumenter: ASMSymbolDocumenter) {}
+export class Z80CompletionProposer implements vscode.CompletionItemProvider {
+	constructor(public symbolProcessor: SymbolProcessor) {}
 
 	private getEditorOptions(document: vscode.TextDocument) {
 		const config = vscode.workspace.getConfiguration();
 
 		const result: EditorOptions = {
-			...this.symbolDocumenter.settings?.format,
+			...this.symbolProcessor.settings?.format,
 
 			indentSpaces: (config.editor.insertSpaces === 'true'),
 			indentSize: parseInt(config.editor.tabSize as any, 10) || 8,
@@ -184,7 +184,7 @@ export class ASMCompletionProposer implements vscode.CompletionItemProvider {
 			}
 		}
 
-		const symbols = await this.symbolDocumenter.symbols(document);
+		const symbols = await this.symbolProcessor.symbols(document);
 		if (token.isCancellationRequested) {
 			return;
 		}

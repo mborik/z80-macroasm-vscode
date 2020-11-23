@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
-import { ASMSymbolDocumenter } from './symbolDocumenter';
+import { SymbolProcessor } from './symbolProcessor';
 
-export class ASMDefinitionProvider implements vscode.DefinitionProvider {
-	constructor(public symbolDocumenter: ASMSymbolDocumenter) {}
+export class Z80DefinitionProvider implements vscode.DefinitionProvider {
+	constructor(public symbolProcessor: SymbolProcessor) {}
 
 	provideDefinition(
 		document: vscode.TextDocument,
 		position: vscode.Position,
 		token: vscode.CancellationToken
 	): Thenable<vscode.Definition> {
-		return this.symbolDocumenter.getFullSymbolAtDocPosition<vscode.Definition>(
+		return this.symbolProcessor.getFullSymbolAtDocPosition<vscode.Definition>(
 			document, position, token
 		);
 	}

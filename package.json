@@ -49,14 +49,19 @@
                     "default": null,
                     "description": "Choose files or directories to exclude (e.g '**/*.{lst}')."
                 },
-                "z80-macroasm.format.indent": {
+                "z80-macroasm.format.baseIndent": {
                     "type": "number",
                     "default": 2,
                     "description": "Formatter: How many tabstops you prefer before the instructions or keywords (default 2)."
                 },
+                "z80-macroasm.format.controlIndent": {
+                    "type": "number",
+                    "default": 1,
+                    "description": "Formatter: How many tabstops you prefer before the control structure keywords, selections, modules, or blocks (default 1)."
+                },
                 "z80-macroasm.format.whitespaceAfterInstruction": {
                     "type": "string",
-                    "enum": [ "auto", "tabstop", "tab", "single-space" ],
+                    "enum": [ "auto", "tab", "single-space" ],
                     "default": "auto",
                     "description": "Formatter: Which type of whitespace you want to put after the instruction (default `auto` will autodetect file's tabstop type and width)."
                 },

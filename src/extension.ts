@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
-import { ASMHoverProvider } from "./hover";
-import { ASMSymbolDocumenter } from "./symbolDocumenter";
-import { ASMCompletionProposer } from './completionProposer';
-import { ASMDefinitionProvider } from './definitionProvider';
-import { ASMRenameProvider } from './renameProvider';
-import { ASMDocumentSymbolProvider, ASMWorkspaceSymbolProvider } from './symbolProvider';
+import { SymbolProcessor } from "./symbolProcessor";
+import { Z80CompletionProposer } from './completionProposer';
+import { Z80DefinitionProvider } from './definitionProvider';
+import { Z80HoverProvider } from "./hover";
+import { Z80RenameProvider } from './renameProvider';
+import { Z80DocumentSymbolProvider, Z80WorkspaceSymbolProvider } from './symbolProvider';
 
 
 let changeConfigSubscription: vscode.Disposable | undefined;
-let symbolDocumenter: ASMSymbolDocumenter | undefined;
+let symbolProcessor: SymbolProcessor | undefined;
 
 export function activate(ctx: vscode.ExtensionContext) {
 	configure(ctx);
@@ -20,9 +20,9 @@ export function activate(ctx: vscode.ExtensionContext) {
 }
 
 export function deactivate() {
-	if (symbolDocumenter) {
-		symbolDocumenter.destroy();
-		symbolDocumenter = undefined;
+	if (symbolProcessor) {
+		symbolProcessor.destroy();
+		symbolProcessor = undefined;
 	}
 	if (changeConfigSubscription) {
 		changeConfigSubscription.dispose();
@@ -36,7 +36,11 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 	const languageSelector: vscode.DocumentFilter = { language, scheme: "file" };
 
 	// test if changing specific configuration
-	if (event && !event.affectsConfiguration(language)) {
+	if (event && symbolProcessor) {
+		if (event.affectsConfiguration(language)) {
+			symbolProcessor.settings = settings;
+		}
+
 		return;
 	}
 
@@ -46,18 +50,19 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 		provider.dispose();
 	}
 
-	// dispose previously created symbol documenter
-	if (symbolDocumenter) {
-		symbolDocumenter.destroy();
+	// dispose previously created symbol processor
+	if (symbolProcessor) {
+		symbolProcessor.destroy();
 	}
-	symbolDocumenter = new ASMSymbolDocumenter(settings);
+	symbolProcessor = new SymbolProcessor(settings);
 
+	// create subscriptions for all providers
 	ctx.subscriptions.push(
-		vscode.languages.registerHoverProvider(languageSelector, new ASMHoverProvider(symbolDocumenter)),
-		vscode.languages.registerCompletionItemProvider(languageSelector, new ASMCompletionProposer(symbolDocumenter), ',', '.', ' '),
-		vscode.languages.registerDefinitionProvider(languageSelector, new ASMDefinitionProvider(symbolDocumenter)),
-		vscode.languages.registerDocumentSymbolProvider(languageSelector, new ASMDocumentSymbolProvider(symbolDocumenter)),
-		vscode.languages.registerRenameProvider(languageSelector, new ASMRenameProvider(symbolDocumenter)),
-		vscode.languages.registerWorkspaceSymbolProvider(new ASMWorkspaceSymbolProvider(symbolDocumenter)),
+		vscode.languages.registerCompletionItemProvider(languageSelector, new Z80CompletionProposer(symbolProcessor), ',', '.', ' '),
+		vscode.languages.registerDefinitionProvider(languageSelector, new Z80DefinitionProvider(symbolProcessor)),
+		vscode.languages.registerDocumentSymbolProvider(languageSelector, new Z80DocumentSymbolProvider(symbolProcessor)),
+		vscode.languages.registerHoverProvider(languageSelector, new Z80HoverProvider(symbolProcessor)),
+		vscode.languages.registerRenameProvider(languageSelector, new Z80RenameProvider(symbolProcessor)),
+		vscode.languages.registerWorkspaceSymbolProvider(new Z80WorkspaceSymbolProvider(symbolProcessor)),
 	);
 }

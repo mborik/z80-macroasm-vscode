@@ -1,26 +1,26 @@
 import * as vscode from 'vscode';
-import { ASMSymbolDocumenter } from './symbolDocumenter';
+import { SymbolProcessor } from './symbolProcessor';
 
-export class ASMDocumentSymbolProvider implements vscode.DocumentSymbolProvider {
-	constructor(public symbolDocumenter: ASMSymbolDocumenter) {}
+export class Z80DocumentSymbolProvider implements vscode.DocumentSymbolProvider {
+	constructor(public symbolProcessor: SymbolProcessor) {}
 
 	provideDocumentSymbols(
 		document: vscode.TextDocument,
 		token: vscode.CancellationToken
 	): Thenable<vscode.SymbolInformation[]> {
 
-		return this.symbolDocumenter.provideSymbols(document.fileName, null, token);
+		return this.symbolProcessor.provideSymbols(document.fileName, null, token);
 	}
 }
 
-export class ASMWorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
-	constructor(public symbolDocumenter: ASMSymbolDocumenter) {}
+export class Z80WorkspaceSymbolProvider implements vscode.WorkspaceSymbolProvider {
+	constructor(public symbolProcessor: SymbolProcessor) {}
 
 	provideWorkspaceSymbols(
 		query: string,
 		token: vscode.CancellationToken
 	): vscode.ProviderResult<vscode.SymbolInformation[]> {
 
-		return this.symbolDocumenter.provideSymbols(null, query, token);
+		return this.symbolProcessor.provideSymbols(null, query, token);
 	}
 }

@@ -1,13 +1,13 @@
 import * as vscode from 'vscode';
 import regex from './defs_regex';
 import {
-	ASMSymbolDocumenter,
-	DocumenterResult,
+	ProcessorResult,
+	SymbolProcessor,
 	SymbolDescriptorExt
-} from './symbolDocumenter';
+} from './symbolProcessor';
 
-export class ASMRenameProvider implements vscode.RenameProvider {
-	constructor(public symbolDocumenter: ASMSymbolDocumenter) {}
+export class Z80RenameProvider implements vscode.RenameProvider {
+	constructor(public symbolProcessor: SymbolProcessor) {}
 
 	prepareRename(
 		document: vscode.TextDocument,
@@ -106,8 +106,8 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 		let symbol: SymbolDescriptorExt | null = null;
 
 		if (wasLocalLabel) {
-			symbol = await this.symbolDocumenter.getFullSymbolAtDocPosition<SymbolDescriptorExt>(
-				document, position, token, DocumenterResult.SYMBOL_FULL
+			symbol = await this.symbolProcessor.getFullSymbolAtDocPosition<SymbolDescriptorExt>(
+				document, position, token, ProcessorResult.SYMBOL_FULL
 			);
 
 			if (token.isCancellationRequested) {
@@ -116,8 +116,8 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 		}
 
 		if (symbol == null) {
-			symbol = await this.symbolDocumenter.getFullSymbolAtDocPosition<SymbolDescriptorExt>(
-				document, position, token, DocumenterResult.SYMBOL
+			symbol = await this.symbolProcessor.getFullSymbolAtDocPosition<SymbolDescriptorExt>(
+				document, position, token, ProcessorResult.SYMBOL
 			);
 
 			if (token.isCancellationRequested) {
@@ -126,8 +126,8 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 		}
 
 		if (symbol == null && !wasLocalLabel) {
-			symbol = await this.symbolDocumenter.getFullSymbolAtDocPosition<SymbolDescriptorExt>(
-				document, position, token, DocumenterResult.SYMBOL_FULL
+			symbol = await this.symbolProcessor.getFullSymbolAtDocPosition<SymbolDescriptorExt>(
+				document, position, token, ProcessorResult.SYMBOL_FULL
 			);
 
 			if (token.isCancellationRequested) {
@@ -138,7 +138,7 @@ export class ASMRenameProvider implements vscode.RenameProvider {
 		if (symbol != null && symbol.labelFull) {
 			wasLocalLabel = symbol.localLabel;
 
-			const files = this.symbolDocumenter.filesWithIncludes(document);
+			const files = this.symbolProcessor.filesWithIncludes(document);
 			for (const uri in files) {
 				const doc = await vscode.workspace.openTextDocument(uri);
 
