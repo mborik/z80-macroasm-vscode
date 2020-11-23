@@ -1,49 +1,17 @@
 import * as vscode from 'vscode';
+import { ConfigProps, ConfigPropsProvider } from './configProperties';
 import { SymbolProcessor } from './symbolProcessor';
 import { isFirstLetterUppercase, uppercaseIfNeeded, pad } from './utils';
 import regex from './defs_regex';
 import set from './defs_list';
 
-interface EditorOptions {
-	indentSpaces: boolean;
-	indentSize: number;
-	eol: string;
-	whitespaceAfterInstruction: 'auto' |  'tab' | 'single-space';
-	spaceAfterFirstArgument: boolean;
-	uppercaseKeywords: 'auto' | boolean;
-	bracketType: 'round' | 'square';
-}
 
-
-export class Z80CompletionProposer implements vscode.CompletionItemProvider {
-	constructor(public symbolProcessor: SymbolProcessor) {}
-
-	private getEditorOptions(document: vscode.TextDocument) {
-		const config = vscode.workspace.getConfiguration();
-
-		const result: EditorOptions = {
-			...this.symbolProcessor.settings?.format,
-
-			indentSpaces: (config.editor.insertSpaces === 'true'),
-			indentSize: parseInt(config.editor.tabSize as any, 10) || 8,
-			eol: (config.files.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n'
-		};
-
-		// if this document is open, use the settings from that window
-		vscode.window.visibleTextEditors.some(editor => {
-			if (editor.document && editor.document.fileName === document.fileName) {
-				result.indentSpaces = (editor.options.insertSpaces === true);
-				result.indentSize = parseInt(editor.options.tabSize as any, 10) || 8;
-				result.eol = (editor.document.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n';
-				return true;
-			}
-			return false;
-		});
-
-		return result;
+export class Z80CompletionProposer extends ConfigPropsProvider implements vscode.CompletionItemProvider {
+	constructor(public symbolProcessor: SymbolProcessor) {
+		super(symbolProcessor.settings);
 	}
 
-	private instructionMapper(opt: EditorOptions, ucase: boolean, z80n: boolean, snippet: string) {
+	private instructionMapper(opt: ConfigProps, ucase: boolean, z80n: boolean, snippet: string) {
 		const delimiter = snippet.substr(-1);
 		snippet = uppercaseIfNeeded(snippet, ucase).trim();
 
@@ -87,7 +55,7 @@ export class Z80CompletionProposer implements vscode.CompletionItemProvider {
 		return item;
 	}
 
-	private registerMapper(options: EditorOptions & { secondArgument?: boolean },
+	private registerMapper(options: ConfigProps & { secondArgument?: boolean },
 			ucase: boolean, snippet: string, idx: number) {
 
 		snippet = uppercaseIfNeeded(snippet, ucase);
@@ -122,13 +90,14 @@ export class Z80CompletionProposer implements vscode.CompletionItemProvider {
 		context: vscode.CompletionContext
 	) {
 
-		const editorOptions = this.getEditorOptions(document);
+		const configProps = this.getConfigProps(document);
 		const line: string = document.lineAt(position.line).text;
 		const shouldSuggestInstructionMatch = regex.shouldSuggestInstruction.exec(line);
 
 		const shouldKeywordUppercase = (part: string) =>
-			editorOptions.uppercaseKeywords === 'auto' ? isFirstLetterUppercase(part) :
-			editorOptions.uppercaseKeywords as boolean;
+			configProps.uppercaseKeywords === 'auto' ? isFirstLetterUppercase(part) :
+			configProps.uppercaseKeywords as boolean;
+
 
 		let output: vscode.CompletionItem[] = [];
 
@@ -136,8 +105,8 @@ export class Z80CompletionProposer implements vscode.CompletionItemProvider {
 			const uc = shouldKeywordUppercase(shouldSuggestInstructionMatch[4]);
 
 			output = [
-				...set.instructions.map(this.instructionMapper.bind(this, editorOptions, uc, false)),
-				...set.nextInstructions.map(this.instructionMapper.bind(this, editorOptions, uc, true))
+				...set.instructions.map(this.instructionMapper.bind(this, configProps, uc, false)),
+				...set.nextInstructions.map(this.instructionMapper.bind(this, configProps, uc, true))
 			];
 		}
 		else {
@@ -153,7 +122,7 @@ export class Z80CompletionProposer implements vscode.CompletionItemProvider {
 					const text = uppercaseIfNeeded("af'", uc);
 					const item = new vscode.CompletionItem(text, vscode.CompletionItemKind.Value);
 					item.insertText = new vscode.SnippetString(text)
-						.appendText(editorOptions.eol)
+						.appendText(configProps.eol)
 						.appendTabstop(0);
 
 					item.commitCharacters = ['\n'];
@@ -161,7 +130,7 @@ export class Z80CompletionProposer implements vscode.CompletionItemProvider {
 				}
 				else {
 					output = set.registers.map(this.registerMapper.bind(this, {
-						...editorOptions,
+						...configProps,
 						secondArgument: true
 					}, uc));
 				}
@@ -179,7 +148,7 @@ export class Z80CompletionProposer implements vscode.CompletionItemProvider {
 				}
 
 				output = set.registers.slice(idxStart, idxEnd).map(
-					this.registerMapper.bind(this, editorOptions, uc)
+					this.registerMapper.bind(this, configProps, uc)
 				);
 			}
 		}

@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import { FormatProcessor,
+	Z80DocumentFormatter, Z80DocumentRangeFormatter, Z80TypingFormatter } from './formatProcessor';
 import { SymbolProcessor } from "./symbolProcessor";
 import { Z80CompletionProposer } from './completionProposer';
 import { Z80DefinitionProvider } from './definitionProvider';
@@ -9,6 +11,7 @@ import { Z80DocumentSymbolProvider, Z80WorkspaceSymbolProvider } from './symbolP
 
 let changeConfigSubscription: vscode.Disposable | undefined;
 let symbolProcessor: SymbolProcessor | undefined;
+let formatProcessor: FormatProcessor | undefined;
 
 export function activate(ctx: vscode.ExtensionContext) {
 	configure(ctx);
@@ -36,9 +39,10 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 	const languageSelector: vscode.DocumentFilter = { language, scheme: "file" };
 
 	// test if changing specific configuration
-	if (event && symbolProcessor) {
+	if (event && symbolProcessor && formatProcessor) {
 		if (event.affectsConfiguration(language)) {
 			symbolProcessor.settings = settings;
+			formatProcessor.settings = settings;
 		}
 
 		return;
@@ -56,8 +60,17 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 	}
 	symbolProcessor = new SymbolProcessor(settings);
 
+	// dispose previously created format processor
+	if (!formatProcessor) {
+		formatProcessor = new FormatProcessor(settings);
+	}
+
 	// create subscriptions for all providers
 	ctx.subscriptions.push(
+		vscode.languages.registerDocumentFormattingEditProvider(languageSelector, new Z80DocumentFormatter(formatProcessor)),
+		vscode.languages.registerDocumentRangeFormattingEditProvider(languageSelector, new Z80DocumentRangeFormatter(formatProcessor)),
+		vscode.languages.registerOnTypeFormattingEditProvider(languageSelector, new Z80TypingFormatter(formatProcessor), ' ', ',', ';', ':'),
+
 		vscode.languages.registerCompletionItemProvider(languageSelector, new Z80CompletionProposer(symbolProcessor), ',', '.', ' '),
 		vscode.languages.registerDefinitionProvider(languageSelector, new Z80DefinitionProvider(symbolProcessor)),
 		vscode.languages.registerDocumentSymbolProvider(languageSelector, new Z80DocumentSymbolProvider(symbolProcessor)),
