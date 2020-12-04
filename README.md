@@ -22,12 +22,9 @@ There are some predefined problem matchers to handle reported errors from compil
 - `errmatcher-rasm` for **rasm**
 - `errmatcher-tniasm` and `errmatcher-tniasm-preprocessor` for **tniASM**
 
-These values can be used in `.vscode/tasks.json` of your project's build task, for example:
-```json
-    ...
-    "problemMatcher": "$errmatcher-sjasmplus"
-    ...
-```
+These values can be used in `.vscode/tasks.json` of your project's build task.
+[See example &raquo;&raquo;](https://github.com/mborik/z80-macroasm-vscode/wiki/Home/tasks.json)
+
 
 ## IntelliSense showcase
 
@@ -58,7 +55,7 @@ These values can be used in `.vscode/tasks.json` of your project's build task, f
 
 ## Credits
 
-This extension was done by **Martin Bórik** as a compilation of derived work inspired by these VS Code extensions:
+This extension was done by **Martin Bórik** with some inspirations from these VS Code extensions:
 - [`z80asm-vscode`](https://github.com/Imanolea/z80asm-vscode) by **Imanol Barriuso**
 - [`vscode-pasmo`](https://github.com/BouKiCHi/vscode-pasmo) by **BouKiCHi**
 - [`rgbds-vscode`](https://github.com/DonaldHays/rgbds-vscode) by **Donald Hays**
