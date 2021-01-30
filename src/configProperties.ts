@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 export interface ConfigProps {
 	indentSpaces: boolean;
 	indentSize: number;
+	indentDetector: RegExp;
 	eol: string;
 	whitespaceAfterInstruction: 'auto' |  'tab' | 'single-space';
 	spaceAfterFirstArgument: boolean;
@@ -27,6 +28,12 @@ export abstract class ConfigPropsProvider {
 			indentSize: parseInt(config.editor.tabSize as any, 10) || 8,
 			eol: (config.files.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n'
 		};
+
+		result.indentDetector = RegExp('^' +
+			`(\t|${' '.repeat(result.indentSize)})?`.repeat(
+				Math.ceil(80 / result.indentSize)
+			)
+		);
 
 		// if this document is open, use the settings from that window
 		vscode.window.visibleTextEditors.some(editor => {
