@@ -8,6 +8,10 @@ export interface ConfigProps {
 	spaceAfterFirstArgument: boolean;
 	uppercaseKeywords: 'auto' | boolean;
 	bracketType: 'round' | 'square';
+	baseIndent: number;
+	controlIndent: number;
+	colonAfterLabels: "no-change" | boolean;
+	splitInstructionsByColon: boolean;
 }
 
 export abstract class ConfigPropsProvider {
