@@ -11,7 +11,7 @@ export default {
 	controlKeywordLine: mkRegex`
 		\b(
 			rept|e?dup|end[mprw]|exitm|endmod(ule)?|(?:de|un)?phase|
-			(end)?(struct|section|switch)|while|repeat|[rw]end|
+			(end)?(struct|section|switch|lua|maxnest)|while|repeat|[rw]end|
 			if|ifn?def|ifn?used|ifn?exist|else(if)?|endif|
 			until|(else|end)?case|default|break
 		)\b`,
@@ -60,17 +60,18 @@ export default {
 		save(?:bin|dev|hob|nex|sna|tap|trd)|empty(?:tap|trd)|
 		inc(?:bin|hob|trd)|b?include|includelua|insert|binary|out(?:put|end)|tap(?:out|end)|
 		fpos|fname|slot|size|opt|page|newpage|radix|outradix|encoding|charset|codepage|
-		macexp_(?:dft|ovr)|listing|(?:end)?struct|(?:end)?section|(?:end)?lua|maxnest|
+		macexp_(?:dft|ovr)|listing|(?:end)?(?:struct|section|switch|lua|maxnest)|
 		cpu|device|proc|label|local|global|shared|public|forward|export|
-		e?dup|block|rept|macro|end[mpr]|exitm|module|endmod(?:ule)?|(?:un)?define|
+		e?dup|block|rept|macro|end[mprw]|exitm|module|endmod(?:ule)?|(?:de|un)?define|
 		disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum|
-		list|nolist|let|labelslist|assert|fatal|error|warning|message|display|print|fail|
+		list|nolist|let|labelslist|bplist|setbp|setbreakpoint|cspectmap|
+		assert|fatal|error|warning|message|display|print|fail|
 		shellexec|amsdos|breakpoint|buildcpr|buildsna|run|save|setcpc|setcrtc|
-		repeat|rend|until|switch|(?:else|end)case|default|break|endswitch|stop|while|wend|function|
+		repeat|until|(?:else|end)?case|default|break|stop|while|[rw]end|function|
 		inc(?:l4[89]|lz4|zx7|exo)|lz(?:4[89]?|w7|exo|close)|read|
 		bank|bankset|limit|protect|write\s+direct|str|
 		def[bdlmswir]|d[bcdszw]|abyte[cz]?|byte|d?word|hex|
-		if|ifn?def|ifn?used|ifn?exist|else|elseif|endif|
+		if|ifn?def|ifn?used|ifn?exist|else(?:if)?|endif|
 		ad[cd]|and|bit|call|ccf|cp|cp[di]r?|cpl|daa|dec|[de]i|djnz|exx?|halt|
 		i[mn]|inc|in[di]r?|j[pr]|ld|ld[di]r?|neg|nop|ot[di]r|out|out[di]|
 		pop|push|res|ret[in]?|rla?|rlca?|r[lr]d|rra?|rrca?|rst|sbc|scf|set|
