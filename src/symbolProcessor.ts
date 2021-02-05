@@ -460,7 +460,7 @@ export class SymbolProcessor {
 				const labelMatch = regex.labelDefinition.exec(line.text);
 				let labelPath = [];
 
-				if (labelMatch) {
+				if (labelMatch && !parseInt(labelMatch[1])) {
 					labelPath.push(labelMatch[1]);
 
 					let localLabel: boolean = false;
