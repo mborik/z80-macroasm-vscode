@@ -57,14 +57,14 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:cpu|device|proc|macro|label|local|global|shared|public|forward|rept|e?dup|block|end[mpr]|exitm|module|endmod(?:ule)?|(?:un)?define|export|disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum)\\b)"
+					"match": "(?i:(?<=\\s)(?:cpu|device|proc|macro|label|local|global|shared|public|forward|rept|e?dup|block|end[mprw]|exitm|module|endmod(?:ule)?|(?:un)?define|export|disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
 					"match": "(?i:(?<=\\s)(?:assert|fatal|error|warning|message|display|print|title|prtit|prtexit|fail|shellexec|def[bdghlmswir]|d[bcghmswz]|abyte[cz]?|byte|d?word|hex)\\b)"
 				},
 				{
-					"name": "keyword.control.i8080asm",
+					"name": "keyword.control.z80asm",
 					"match": "(?i:(?<=\\s)(?:page|newpage|radix|outradix|encoding|charset|codepage|macexp_(?:dft|ovr)|listing|(?:end)?struct|(?:end)?section|maxnest)\\b)"
 				},
 				{
@@ -81,7 +81,7 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:repeat|rend|until|switch|(?:else|end)case|default|break|endswitch|stop|while|wend|function)\\b)"
+					"match": "(?i:(?<=\\s)(?:repeat|while|[rw]end|until|(?:end)?switch|(?:else|end)?case|default|break|stop|function)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
@@ -89,7 +89,7 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:list|nolist|let|labelslist)\\b)"
+					"match": "(?i:(?<=\\s)(?:list|nolist|let|labelslist|bplist|setbp|setbreakpoint|cspectmap)\\b)"
 				},
 				{
 					"name": "string.other.lua.z80asm",
