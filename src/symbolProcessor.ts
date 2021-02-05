@@ -213,40 +213,47 @@ export class SymbolProcessor {
 	 * @param token Cancellation token object.
 	 * @returns Promise of SymbolInformation objects array.
 	 */
-	provideSymbols (
+	async provideSymbols (
 		fileFilter: string | null,
 		query: string | null,
 		token: vscode.CancellationToken
 	): Promise<vscode.SymbolInformation[]> {
 
-		return new Promise<vscode.SymbolInformation[]>((resolve, reject) => {
-			if (token.isCancellationRequested) {
-				reject();
-			}
+		const symbols: SymbolMap = {};
+		const searched: string[] = [];
+		const output: vscode.SymbolInformation[] = [];
 
-			const output: vscode.SymbolInformation[] = [];
+		if (fileFilter) {
+			await this._seekSymbols(fileFilter, symbols, [], searched);
+		}
+		else {
+			for (const filepath in this.files) {
+				if (searched.length && !searched.includes(filepath) &&
+					!token.isCancellationRequested) {
 
-			for (const fileName in this.files) {
-				if (!fileFilter || fileFilter === fileName) {
-					const table = this.files[fileName];
-
-					table.symbols.forEach(symbol => {
-						if (!query || ~symbol.declaration.indexOf(query)) {
-							output.push(new vscode.SymbolInformation(
-								symbol.declaration, symbol.kind,
-								symbol.location.range, symbol.location.uri
-							));
-						}
-					});
+					await this._seekSymbols(filepath, symbols, [], searched);
 				}
 			}
+		}
 
-			if (output.length > 0) {
-				resolve(output);
+		if (token.isCancellationRequested) {
+			return [];
+		}
+
+		const alreadyProcessedDeclarations: string[] = [];
+		Object.values(symbols).reverse().forEach(symbol => {
+			if (!alreadyProcessedDeclarations.includes(symbol.declaration) &&
+				(!query || symbol.declaration.includes(query))) {
+
+				output.push(new vscode.SymbolInformation(
+					symbol.declaration, symbol.kind, '', symbol.location
+				));
+
+				alreadyProcessedDeclarations.push(symbol.declaration);
 			}
-
-			reject();
 		});
+
+		return output;
 	}
 
 	/**
