@@ -8,6 +8,13 @@ export default {
 	macroLine: /\b(macro\s+)(\w+)(?:\s+([^\/;$]+))?/i,
 	moduleLine: /\b(module\s+)(\w+)\b/i,
 	endmoduleLine: /\bendmod(ule)?\b/i,
+	controlKeywordLine: mkRegex`
+		\b(
+			rept|e?dup|end[mprw]|exitm|endmod(ule)?|(?:de|un)?phase|
+			(end)?(struct|section|switch)|while|repeat|[rw]end|
+			if|ifn?def|ifn?used|ifn?exist|else(if)?|endif|
+			until|(else|end)?case|default|break
+		)\b`,
 	horizontalRule: /^(.)\1+$/,
 	fullLabel: /((\$\$(?!\.))?[\w\.]+)/,
 	partialLabel: /(?:\$\$(?!\.)|\.)?(\w+)/,

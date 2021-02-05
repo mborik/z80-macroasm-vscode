@@ -5,14 +5,14 @@ export interface ConfigProps {
 	indentSize: number;
 	indentDetector: RegExp;
 	eol: string;
+	baseIndent: number;
+	controlIndent: number;
 	whitespaceAfterInstruction: 'auto' |  'tab' | 'single-space';
 	spaceAfterFirstArgument: boolean;
 	uppercaseKeywords: 'auto' | boolean;
 	bracketType: 'round' | 'square';
-	baseIndent: number;
-	controlIndent: number;
-	colonAfterLabels: "no-change" | boolean;
 	splitInstructionsByColon: boolean;
+	colonAfterLabels: "no-change" | boolean;
 }
 
 export abstract class ConfigPropsProvider {

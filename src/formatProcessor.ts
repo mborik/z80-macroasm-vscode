@@ -15,33 +15,41 @@ interface LineParts extends LinePartFrag {
 }
 
 type FormatProcessorOutput = vscode.ProviderResult<vscode.TextEdit[]>;
+type EvalSpecificRegExpExecArray = RegExpExecArray & { notIndented?: boolean } | null;
 
 export class FormatProcessor extends ConfigPropsProvider {
 	format(document: vscode.TextDocument, range: vscode.Range): FormatProcessorOutput {
 		const configProps = this.getConfigProps(document);
 		const startLineNumber = document.lineAt(range.start).lineNumber;
 		const endLineNumber = document.lineAt(range.end).lineNumber;
+		const commaAfterArgument = ',' + (configProps.spaceAfterFirstArgument ? ' ' : '');
 
 		const generateIndent = (count: number, snippet?: string, keepAligned?: boolean) => {
 			const tabsSize = configProps.indentSize * count;
 
 			let prepend = '';
-			let fillSpacesBySnippet = tabsSize;
+			let fillSpacesAfterSnippet = tabsSize;
 			if (snippet) {
 				prepend += snippet;
-				if (snippet.length >= tabsSize && keepAligned) {
+				if (keepAligned && snippet.length >= tabsSize) {
 					prepend += configProps.eol;
 				}
 				else {
-					fillSpacesBySnippet -= snippet.length;
+					while (snippet.length >= fillSpacesAfterSnippet) {
+						fillSpacesAfterSnippet += configProps.indentSize;
+					}
+
+					fillSpacesAfterSnippet -= snippet.length;
 				}
 			}
 
 			if (configProps.indentSpaces) {
-				return prepend + ' '.repeat(fillSpacesBySnippet);
+				return prepend + ' '.repeat(fillSpacesAfterSnippet);
 			}
 			else {
-				return prepend + '\t'.repeat(Math.ceil(fillSpacesBySnippet / configProps.indentSize));
+				return prepend + '\t'.repeat(
+					Math.ceil(fillSpacesAfterSnippet / configProps.indentSize)
+				);
 			}
 		}
 
@@ -50,8 +58,6 @@ export class FormatProcessor extends ConfigPropsProvider {
 			const args = rest?.split(/\s*,\s*/) || [];
 			return { keyword, args };
 		}
-
-		const commaAfterArgument = ',' + (configProps.spaceAfterFirstArgument ? ' ' : '');
 
 		let output: vscode.TextEdit[] = [];
 
@@ -66,7 +72,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				continue;
 			}
 
-			const range = new vscode.Range(line.range.start, line.range.end);
+			let range = new vscode.Range(line.range.start, line.range.end);
 
 			let text = line.text;
 			let indentLevel = -1;
@@ -84,16 +90,17 @@ export class FormatProcessor extends ConfigPropsProvider {
 					idx--;
 				}
 
-				range.end.translate(0, idx - text.length);
+				range = new vscode.Range(range.start, range.end.translate(0, idx - text.length));
 				text = text.substr(0, idx);
 			}
 
-			const evalMatch = regex.evalExpression.exec(text);
+			const evalMatch: EvalSpecificRegExpExecArray = regex.evalExpression.exec(text);
 			if (evalMatch) {
-				const [ fullMatch, label, keyword, firstParam ] = evalMatch;
+				const [ fullMatch, label, keyword, argument ] = evalMatch;
 
-				indentLevel = configProps.baseIndent;
-				lineParts.label = label;
+				indentLevel = configProps.controlIndent;
+				lineParts.label = `${fullMatch[0] === '@' ? '@' : ''}${label}`;
+				lineParts.args = [ argument ];
 				if (keyword[0] === ':') {
 					lineParts.colonAfterLabel = true;
 					lineParts.keyword = keyword.slice(1).trim();
@@ -101,17 +108,20 @@ export class FormatProcessor extends ConfigPropsProvider {
 				else {
 					lineParts.keyword = keyword.trim();
 				}
-				lineParts.args = [ firstParam ];
+
+				if (lineParts.keyword === '=') {
+					evalMatch.notIndented = !/(\t| {2,})=/.test(fullMatch);
+				}
 
 				text = text.replace(fullMatch, '').trim();
 			}
 
 			const labelMatch = regex.labelDefinition.exec(text);
 			if (labelMatch) {
-				const [ fullMatch, label, prefix, colon ] = labelMatch;
+				const [ fullMatch, label,, colon ] = labelMatch;
 
 				indentLevel = configProps.baseIndent;
-				lineParts.label = `${prefix || ''}${label}`;
+				lineParts.label = `${fullMatch[0] === '@' ? '@' : ''}${label}`;
 				lineParts.colonAfterLabel = (colon === ':')
 
 				text = text.replace(fullMatch, '').trim();
@@ -119,27 +129,29 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 			const moduleLineMatch = regex.moduleLine.exec(text);
 			const macroLineMatch = regex.macroLine.exec(text);
-			const includeLineMatch = regex.includeLine.exec(text);
+			const controlKeywordMatch = regex.controlKeywordLine.exec(text);
 
 			if (moduleLineMatch) {
 				const [ fullMatch, keyword ] = moduleLineMatch;
 
 				indentLevel = configProps.controlIndent;
-				lineParts.keyword = keyword;
+				lineParts.keyword = keyword.trim();
 				lineParts.args = [ text.replace(fullMatch, '').trim() ];
 
 				text = ''
 			}
-
-			if (macroLineMatch) {
+			else if (macroLineMatch) {
 				const [, keyword, firstParam, rest ] = macroLineMatch;
 
 				indentLevel = configProps.controlIndent;
-				lineParts.keyword = keyword;
+				lineParts.keyword = keyword.trim();
 				lineParts.firstParam = firstParam;
 				lineParts.args = rest ? rest.split(/\s*,\s*/) : [];
 
 				text = ''
+			}
+			else if (controlKeywordMatch) {
+				indentLevel = configProps.controlIndent;
 			}
 
 			if (text.trim()) {
@@ -163,7 +175,13 @@ export class FormatProcessor extends ConfigPropsProvider {
 				const label = `${lineParts.label}${(
 					(configProps.colonAfterLabels === 'no-change' && lineParts.colonAfterLabel) ||
 						configProps.colonAfterLabels === true) ? ':' : ''}`;
-				newText.push(generateIndent(indentLevel, label, true))
+
+				if (evalMatch?.notIndented) {
+					newText.push(`${label} `);
+				}
+				else {
+					newText.push(generateIndent(indentLevel, label, true));
+				}
 			}
 			else {
 				if (indentLevel < 0) {
@@ -171,16 +189,21 @@ export class FormatProcessor extends ConfigPropsProvider {
 						.exec(line.text)?.filter(Boolean).slice(1).length || 0;
 				}
 
-				newText.push(generateIndent(indentLevel))
+				newText.push(generateIndent(indentLevel));
 			}
 
 			(lineParts.fragments || [{ ...lineParts }]).forEach(
 				({ keyword, firstParam, args = [] }, index) => {
 					if (index) {
-						newText.push(configProps.eol + generateIndent(indentLevel))
+						newText.push(
+							configProps.splitInstructionsByColon ? ': ' :
+							(configProps.eol + generateIndent(indentLevel))
+						);
 					}
 
-					if (configProps.whitespaceAfterInstruction === 'single-space') {
+					if (configProps.whitespaceAfterInstruction === 'single-space' ||
+						evalMatch?.notIndented) {
+
 						newText.push(`${keyword} `);
 					}
 					else if (configProps.whitespaceAfterInstruction === 'tab') {
@@ -208,10 +231,8 @@ export class FormatProcessor extends ConfigPropsProvider {
 				}
 			);
 
-			const result = newText.join('');
-			if (document.getText(range) !== result) {
-				output.push(new vscode.TextEdit(range, result))
-			}
+			const result = newText.join('').trimEnd();
+			output.push(new vscode.TextEdit(range, result))
 		}
 
 		return output;
