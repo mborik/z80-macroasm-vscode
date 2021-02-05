@@ -27,7 +27,6 @@ export default {
 	labelDefinition: /^\@?((\$\$(?!\.))?[\w\.]+)(:|\s|$)/,
 	parentLabel: /^(((\@|\$\$)(?!\.))?\w[\w\.]*)(?::|\s|$)/,
 	evalExpression: /^\@?([\w\.]+)((?:\:?\s*)=\s*|(?:\:\s*|\s+)(?:(?:equ|eval)\s+))(.+)(;.*)?$/i,
-	fullMeaningExpression: /^(\w+)\s+([[(]?\w+[)\]]?(?:\s*,\s*|(?!$)\s+))?(.*)$/,
 	shouldSuggestInstruction: /^(\@?((\$\$(?!\.))?[\w\.]+)[:\s])?\s*(\w+)?(?!.+)$/,
 	shouldSuggest1ArgRegister: mkRegex`
 		(?:

@@ -26,43 +26,32 @@ export class FormatProcessor extends ConfigPropsProvider {
 			const tabsSize = configProps.indentSize * count;
 
 			let prepend = '';
-			let fillSpacesBySnippet = 0;
+			let fillSpacesBySnippet = tabsSize;
 			if (snippet) {
 				prepend += snippet;
 				if (snippet.length >= tabsSize && keepAligned) {
 					prepend += configProps.eol;
 				}
 				else {
-					fillSpacesBySnippet = tabsSize - snippet.length;
+					fillSpacesBySnippet -= snippet.length;
 				}
 			}
 
 			if (configProps.indentSpaces) {
-				return prepend + ' '.repeat(tabsSize - fillSpacesBySnippet);
+				return prepend + ' '.repeat(fillSpacesBySnippet);
 			}
 			else {
-				return prepend + '\t'.repeat(
-					Math.ceil(
-						(tabsSize - fillSpacesBySnippet) / configProps.indentSize
-					)
-				);
+				return prepend + '\t'.repeat(Math.ceil(fillSpacesBySnippet / configProps.indentSize));
 			}
 		}
 
 		const processFragment = (frag: string): LinePartFrag => {
-			const fullMeaningMatch = regex.fullMeaningExpression.exec(frag);
-			if (!fullMeaningMatch) {
-				const [ keyword, rest ] = frag.split(/\s+/, 2);
-				const [ firstParam, ...args ] = rest?.split(/\s*,\s*/) || [ rest ];
-
-				return { keyword, firstParam, args };
-			}
-
-			const [, keyword, firstParam, optionalParams ] = fullMeaningMatch;
-			const args = optionalParams ? optionalParams.split(/\s*,\s*/) : [];
-
-			return { keyword, firstParam, args };
+			const [, keyword = frag, rest ] = frag.match(/^(\S+)\s+(.*)$/) || [];
+			const args = rest?.split(/\s*,\s*/) || [];
+			return { keyword, args };
 		}
+
+		const commaAfterArgument = ',' + (configProps.spaceAfterFirstArgument ? ' ' : '');
 
 		let output: vscode.TextEdit[] = [];
 
@@ -112,7 +101,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				else {
 					lineParts.keyword = keyword.trim();
 				}
-				lineParts.firstParam = firstParam;
+				lineParts.args = [ firstParam ];
 
 				text = text.replace(fullMatch, '').trim();
 			}
@@ -137,7 +126,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 				indentLevel = configProps.controlIndent;
 				lineParts.keyword = keyword;
-				lineParts.firstParam = text.replace(fullMatch, '').trim();
+				lineParts.args = [ text.replace(fullMatch, '').trim() ];
 
 				text = ''
 			}
@@ -153,13 +142,14 @@ export class FormatProcessor extends ConfigPropsProvider {
 				text = ''
 			}
 
-			if (text) {
+			if (text.trim()) {
 				if (indentLevel < 0) {
 					indentLevel = configProps.baseIndent;
 				}
 
-				if (configProps.splitInstructionsByColon) {
-					lineParts.fragments = text.split(/\s*\:\s*/).map(frag => processFragment(frag));
+				const splitLine = text.split(/\s*\:\s*/);
+				if (configProps.splitInstructionsByColon && splitLine.length > 1) {
+					lineParts.fragments = splitLine.map(frag => processFragment(frag.trim()));
 				}
 				else {
 					const { keyword, args } = processFragment(text.trim());
@@ -172,7 +162,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 			if (lineParts.label) {
 				const label = `${lineParts.label}${(
 					(configProps.colonAfterLabels === 'no-change' && lineParts.colonAfterLabel) ||
-						configProps.colonAfterLabels) ? ':' : ''}`;
+						configProps.colonAfterLabels === true) ? ':' : ''}`;
 				newText.push(generateIndent(indentLevel, label, true))
 			}
 			else {
@@ -185,45 +175,43 @@ export class FormatProcessor extends ConfigPropsProvider {
 			}
 
 			(lineParts.fragments || [{ ...lineParts }]).forEach(
-				({ keyword, firstParam, args }, index) => {
+				({ keyword, firstParam, args = [] }, index) => {
 					if (index) {
 						newText.push(configProps.eol + generateIndent(indentLevel))
 					}
 
-					[ keyword, firstParam ].map((value, level) => {
-						if (value) {
-							if (configProps.whitespaceAfterInstruction === 'single-space') {
-								newText.push(`${value} `);
-							}
-							else if (configProps.whitespaceAfterInstruction === 'tab') {
-								newText.push(`${value}\t`);
-							}
-							else {
-								newText.push(generateIndent(level || indentLevel, value))
-							}
-						}
-					});
+					if (configProps.whitespaceAfterInstruction === 'single-space') {
+						newText.push(`${keyword} `);
+					}
+					else if (configProps.whitespaceAfterInstruction === 'tab') {
+						newText.push(`${keyword}\t`);
+					}
+					else {
+						newText.push(generateIndent(1, keyword))
+					}
 
-					args?.forEach((argument, idx, { length: argsLength }) => {
-						if (!idx) {
-							const matchBrackets = /^[[(]([^\]\)]+)[\]\)]$/.exec(argument);
-							if (matchBrackets) {
-								argument = `${
-									configProps.bracketType === 'round' ? '(' : '['}${
-										matchBrackets[1]}${
-									configProps.bracketType === 'round' ? ')' : ']'}`;
-							}
-						}
-						if (idx < argsLength - 1) {
-							argument += `,${configProps.spaceAfterFirstArgument ? ' ' : ''}`;
+					if (firstParam) {
+						newText.push(`${firstParam} `);
+					}
+
+					args.forEach((value, idx) => {
+						const matchBrackets = /^[[(]([^\]\)]+)[\]\)]$/.exec(value);
+						if (matchBrackets) {
+							value = `${
+								configProps.bracketType === 'round' ? '(' : '['}${
+									matchBrackets[1]}${
+								configProps.bracketType === 'round' ? ')' : ']'}`;
 						}
 
-						newText.push(argument);
+						newText.push((idx ? commaAfterArgument : '') + value);
 					})
 				}
 			);
 
-			output.push(new vscode.TextEdit(range, newText.join('')))
+			const result = newText.join('');
+			if (document.getText(range) !== result) {
+				output.push(new vscode.TextEdit(range, result))
+			}
 		}
 
 		return output;
