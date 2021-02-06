@@ -114,9 +114,10 @@ export class FormatProcessor extends ConfigPropsProvider {
 			if (evalMatch) {
 				const [ fullMatch, label, keyword, argument ] = evalMatch;
 
-				indentLevel = configProps.controlIndent;
-				lineParts.label = `${fullMatch[0] === '@' ? '@' : ''}${label}`;
+				indentLevel = configProps.baseIndent;
 				lineParts.args = [ argument ];
+				lineParts.label = `${fullMatch[0] === '@' ? '@' : ''}${label}`;
+
 				if (keyword[0] === ':') {
 					lineParts.colonAfterLabel = true;
 					lineParts.keyword = keyword.slice(1).trim();
