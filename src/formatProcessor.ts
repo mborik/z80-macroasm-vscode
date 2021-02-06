@@ -22,7 +22,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 		const configProps = this.getConfigProps(document);
 		const startLineNumber = document.lineAt(range.start).lineNumber;
 		const endLineNumber = document.lineAt(range.end).lineNumber;
-		const commaAfterArgument = ',' + (configProps.spaceAfterFirstArgument ? ' ' : '');
+		const commaAfterArgument = ',' + (configProps.spaceAfterArgument ? ' ' : '');
 
 		const generateIndent = (count: number, snippet?: string, keepAligned?: boolean) => {
 			const tabsSize = configProps.indentSize * count;

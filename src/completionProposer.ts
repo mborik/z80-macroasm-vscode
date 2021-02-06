@@ -61,7 +61,7 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		snippet = uppercaseIfNeeded(snippet, ucase);
 
 		let prefix = '';
-		if (options.secondArgument && options.spaceAfterFirstArgument) {
+		if (options.secondArgument && options.spaceAfterArgument) {
 			prefix = ' ';
 		}
 

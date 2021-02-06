@@ -33,7 +33,7 @@ These few options allows you to configure extension's behavior but primarily you
   > default: `1`
 - `z80-macroasm.format.whitespaceAfterInstruction` - Which type of whitespace you want to put after the instruction - `"tab"`, `"single-space"` or `"auto"` which autodetect file's tabstop type and width.
   > default: `"auto"`
-- `z80-macroasm.format.spaceAfterFirstArgument` - If you want to put a single space character after comma (instruction's argument).
+- `z80-macroasm.format.spaceAfterArgument` - If you want to put a single space character after comma (instruction's argument).
   > default: `false`
 - `z80-macroasm.format.uppercaseKeywords` - If true, uppercase all keywords, instructions and registers. False means all lowercased and `"auto"` tries to auto-detect your code-style while typing.
   > default: `"auto"`

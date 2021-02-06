@@ -8,7 +8,7 @@ export interface ConfigProps {
 	baseIndent: number;
 	controlIndent: number;
 	whitespaceAfterInstruction: 'auto' |  'tab' | 'single-space';
-	spaceAfterFirstArgument: boolean;
+	spaceAfterArgument: boolean;
 	uppercaseKeywords: 'auto' | boolean;
 	bracketType: 'round' | 'square';
 	splitInstructionsByColon: boolean;

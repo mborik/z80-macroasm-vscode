@@ -65,10 +65,10 @@
                     "default": "auto",
                     "description": "Formatter: Which type of whitespace you want to put after the instruction (default `auto` will autodetect file's tabstop type and width)."
                 },
-                "z80-macroasm.format.spaceAfterFirstArgument": {
+                "z80-macroasm.format.spaceAfterArgument": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Formatter: If you want to put a single space character after comma, first instruction's argument."
+                    "description": "Formatter: If you want to put a single space character after comma (instruction's argument)."
                 },
                 "z80-macroasm.format.uppercaseKeywords": {
                     "type": [ "boolean", "string" ],
