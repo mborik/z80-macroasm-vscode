@@ -45,7 +45,7 @@ These few options allows you to configure extension's behavior but primarily you
   > default: `true`
 
 These keys/values can be used in your workspace or global `settings.json`.
-[See example &raquo;&raquo;](https://github.com/mborik/z80-macroasm-vscode/wiki/Home/settings.json)
+[See example &raquo;&raquo;](https://github.com/mborik/z80-macroasm-vscode/wiki/settings.json)
 
 
 ## 🚨 Problem matchers
@@ -59,7 +59,7 @@ There are some predefined problem matchers to handle reported errors from compil
 - `errmatcher-tniasm` and `errmatcher-tniasm-preprocessor` for **tniASM**
 
 These values can be used in `.vscode/tasks.json` of your project's build task.
-[See example &raquo;&raquo;](https://github.com/mborik/z80-macroasm-vscode/wiki/Home/tasks.json)
+[See example &raquo;&raquo;](https://github.com/mborik/z80-macroasm-vscode/wiki/tasks.json)
 
 
 ## 💡 IntelliSense showcase
