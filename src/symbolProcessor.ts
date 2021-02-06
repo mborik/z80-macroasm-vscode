@@ -243,7 +243,8 @@ export class SymbolProcessor {
 		const alreadyProcessedDeclarations: string[] = [];
 		Object.values(symbols).reverse().forEach(symbol => {
 			if (!alreadyProcessedDeclarations.includes(symbol.declaration) &&
-				(!query || symbol.declaration.includes(query))) {
+				(!query || symbol.declaration.includes(query)) &&
+				(!fileFilter || symbol.location.uri.fsPath.endsWith(fileFilter))) {
 
 				output.push(new vscode.SymbolInformation(
 					symbol.declaration, symbol.kind, '', symbol.location
