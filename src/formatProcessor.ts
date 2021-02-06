@@ -3,7 +3,7 @@ import { ConfigPropsProvider } from './configProperties';
 import regex from './defs_regex';
 
 interface LinePartFrag {
-	keyword?: string;
+	keyword: string;
 	firstParam?: string;
 	args?: string[];
 }
@@ -59,6 +59,22 @@ export class FormatProcessor extends ConfigPropsProvider {
 			return { keyword, args };
 		}
 
+		const adjustKeywordCase = (keyword: string, checkRegsOrConds: boolean = false): string => {
+			if (configProps.uppercaseKeywords !== 'auto' && (
+				regex.keyword.test(keyword) ||
+				(checkRegsOrConds && regex.regsOrConds.test(keyword))
+			)) {
+				if (configProps.uppercaseKeywords) {
+					return keyword.toUpperCase();
+				}
+				else {
+					return keyword.toLowerCase();
+				}
+			}
+
+			return keyword;
+		}
+
 		let output: vscode.TextEdit[] = [];
 
 		for (let lineNumber = startLineNumber; lineNumber <= endLineNumber; ++lineNumber) {
@@ -76,7 +92,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 			let text = line.text;
 			let indentLevel = -1;
-			let lineParts: LineParts = {};
+			let lineParts: LineParts = {} as any;
 
 			const commentLineMatch = regex.commentLine.exec(text);
 			if (commentLineMatch) {
@@ -196,21 +212,21 @@ export class FormatProcessor extends ConfigPropsProvider {
 				({ keyword, firstParam, args = [] }, index) => {
 					if (index) {
 						newText.push(
-							configProps.splitInstructionsByColon ? ': ' :
-							(configProps.eol + generateIndent(indentLevel))
+							configProps.splitInstructionsByColon ?
+							(configProps.eol + generateIndent(indentLevel)) : ': '
 						);
 					}
 
 					if (configProps.whitespaceAfterInstruction === 'single-space' ||
 						evalMatch?.notIndented) {
 
-						newText.push(`${keyword} `);
+						newText.push(`${adjustKeywordCase(keyword)} `);
 					}
 					else if (configProps.whitespaceAfterInstruction === 'tab') {
-						newText.push(`${keyword}\t`);
+						newText.push(`${adjustKeywordCase(keyword)}\t`);
 					}
 					else {
-						newText.push(generateIndent(1, keyword))
+						newText.push(generateIndent(1, adjustKeywordCase(keyword)))
 					}
 
 					if (firstParam) {
@@ -222,8 +238,11 @@ export class FormatProcessor extends ConfigPropsProvider {
 						if (matchBrackets) {
 							value = `${
 								configProps.bracketType === 'round' ? '(' : '['}${
-									matchBrackets[1]}${
+									adjustKeywordCase(matchBrackets[1], true)}${
 								configProps.bracketType === 'round' ? ')' : ']'}`;
+						}
+						else {
+							value = adjustKeywordCase(value, true);
 						}
 
 						newText.push((idx ? commaAfterArgument : '') + value);
