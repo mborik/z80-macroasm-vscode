@@ -8,7 +8,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
   - [Pasmo](http://pasmo.speccy.org/)
   - [rasm](http://www.roudoudou.com/rasm/)
   - [tniASM](http://www.tni.nl/products/tniasm.html) (v0.x series)
-* [problem matchers](#-problem-matchers) for **SjASMPlus**, **Macroassembler AS**, **rasm** and **tniASM** compilation output
+* [problem matchers](#problem-matchers) for **SjASMPlus**, **Macroassembler AS**, **Pasmo**, **rasm** and **tniASM** compilation output
 * label or symbol [defintion documentation](#definitions), suggestions on hover or typing
 * macro documentation and argument definition suggestions
 * semi-automatic [completition](#completion) with formatting
@@ -54,6 +54,7 @@ There are some predefined problem matchers to handle reported errors from compil
 - `errmatcher-as` for **Macroassembler AS**
 - `errmatcher-sjasmplus` for **SjASMPlus**
 - `errmatcher-sjasm` for **SjASM**
+- `errmatcher-pasmo` for **Pasmo**
 - `errmatcher-rasm` for **rasm**
 - `errmatcher-tniasm` and `errmatcher-tniasm-preprocessor` for **tniASM**
 

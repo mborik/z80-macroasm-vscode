@@ -194,6 +194,22 @@
                         "message": 4
                     }
                 ]
+            },
+            {
+                "name": "errmatcher-pasmo",
+                "owner": "z80-macroasm",
+                "fileLocation": [
+                    "relative",
+                    "${workspaceFolder}"
+                ],
+                "pattern": [
+                    {
+                        "regexp": "^([^:]+):([0-9]+)\\s+(.*)$",
+                        "file": 1,
+                        "line": 2,
+                        "message": 3
+                    }
+                ]
             }
         ],
         "languages": [
