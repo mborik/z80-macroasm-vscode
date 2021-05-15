@@ -41,7 +41,7 @@
             "properties": {
                 "z80-macroasm.files.include": {
                     "type": "string",
-                    "default": "**/*.{a80,asm,inc,s}",
+                    "default": "**/*.{a80,asm,inc,lib,mac,s}",
                     "description": "Files to include and work with. If you, or your macro-assembler using a different conventions of source file extensions then change it here."
                 },
                 "z80-macroasm.files.exclude": {
@@ -223,6 +223,8 @@
                     ".a80",
                     ".asm",
                     ".inc",
+                    ".lib",
+                    ".mac",
                     ".s"
                 ],
                 "configuration": "./language.configuration.json"
