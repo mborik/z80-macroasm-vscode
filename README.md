@@ -13,7 +13,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
 * macro documentation and argument definition suggestions
 * semi-automatic [completition](#completion) with formatting
 * [renaming](#renaming) of labels or symbols
-* [formatting](#formatter) of block or whole document
+* [formatting](#formatter) of block or whole document (experimental feature)
 * snippets for macros and source control keywords
 
 ## ⚙️ Settings
@@ -27,6 +27,8 @@ These few options allows you to configure extension's behavior but primarily you
   > default: `false`
 
 ### Formatter:
+- `z80-macroasm.format.enabled` - Turn on the experimental feature of format on-type or on-save.
+  > default: `false`
 - `z80-macroasm.format.baseIndent` - How many tabstops you prefer before the instructions or keywords.
   > default: `2`
 - `z80-macroasm.format.controlIndent` - How many tabstops you prefer before the control structure keywords, selections, modules, or blocks.

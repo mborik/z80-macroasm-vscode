@@ -1,257 +1,289 @@
 {
-    "name": "z80-macroasm",
-    "displayName": "Z80 Macro-Assembler",
-    "description": "Support for Z80 macro-assemblers in Visual Studio Code",
-    "version": "0.7.1",
-    "icon": "logo.png",
-    "publisher": "mborik",
-    "categories": [
-        "Programming Languages"
-    ],
-    "keywords": [
-        "assembly",
-        "macro",
-        "assembler",
-        "Zilog",
-        "Z80",
-        "Sinclair",
-        "ZX-Spectrum",
-        "Amstrad",
-        "CPC",
-        "MSX"
-    ],
-    "homepage": "https://github.com/mborik/z80-macroasm-vscode",
-    "bugs": "https://github.com/mborik/z80-macroasm-vscode/issues",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/mborik/z80-macroasm-vscode.git"
-    },
-    "license": "MIT",
-    "engines": {
-        "vscode": "^1.22.0"
-    },
-    "activationEvents": [
-        "onLanguage:z80-macroasm"
-    ],
-    "main": "./out/src/extension",
-    "contributes": {
-        "configuration": {
-            "type": "object",
-            "title": "Z80 Macro-Assembler configuration",
-            "properties": {
-                "z80-macroasm.files.include": {
-                    "type": "string",
-                    "default": "**/*.{a80,asm,inc,s}",
-                    "description": "Files to include and work with. If you, or your macro-assembler using a different conventions of source file extensions then change it here."
-                },
-                "z80-macroasm.files.exclude": {
-                    "type": ["string", "null"],
-                    "default": null,
-                    "description": "Choose files or directories to exclude (e.g '**/*.{lst}')."
-                },
-                "z80-macroasm.format.baseIndent": {
-                    "type": "number",
-                    "default": 2,
-                    "description": "Formatter: How many tabstops you prefer before the instructions or keywords (default 2)."
-                },
-                "z80-macroasm.format.controlIndent": {
-                    "type": "number",
-                    "default": 1,
-                    "description": "Formatter: How many tabstops you prefer before the control structure keywords, selections, modules, or blocks (default 1)."
-                },
-                "z80-macroasm.format.whitespaceAfterInstruction": {
-                    "type": "string",
-                    "enum": [ "auto", "tab", "single-space" ],
-                    "default": "auto",
-                    "description": "Formatter: Which type of whitespace you want to put after the instruction (default `auto` will autodetect file's tabstop type and width)."
-                },
-                "z80-macroasm.format.spaceAfterArgument": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Formatter: If you want to put a single space character after comma (instruction's argument)."
-                },
-                "z80-macroasm.format.uppercaseKeywords": {
-                    "type": [ "boolean", "string" ],
-                    "enum": [ "auto", true, false ],
-                    "default": "auto",
-                    "description": "Formatter: Uppercase all keywords, instructions and registers."
-                },
-                "z80-macroasm.format.bracketType": {
-                    "type": "string",
-                    "enum": [ "round", "square" ],
-                    "default": "round",
-                    "description": "Formatter: Define which type of brackets around the instruction's arguments (pointers) you prefer: `(hl)` or `[hl]`."
-                },
-                "z80-macroasm.format.splitInstructionsByColon": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Formatter: Split colon separated instructions to lines."
-                },
-                "z80-macroasm.format.colonAfterLabels": {
-                    "type": [ "boolean", "string" ],
-                    "enum": [ "no-change", true, false ],
-                    "default": "no-change",
-                    "description": "Formatter: Put colon after each label or symbol (by default keep untouched)."
-                },
-                "z80-macroasm.seekSymbolsThroughWorkspace": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "If true, extension will crawl through all workspace files to document all symbols. Otherwise, only includes are taken into account."
-                }
-            }
+  "name": "z80-macroasm",
+  "displayName": "Z80 Macro-Assembler",
+  "description": "Support for Z80 macro-assemblers in Visual Studio Code",
+  "version": "0.7.1",
+  "icon": "logo.png",
+  "publisher": "mborik",
+  "categories": [
+    "Programming Languages"
+  ],
+  "keywords": [
+    "assembly",
+    "macro",
+    "assembler",
+    "Zilog",
+    "Z80",
+    "Sinclair",
+    "ZX-Spectrum",
+    "Amstrad",
+    "CPC",
+    "MSX"
+  ],
+  "homepage": "https://github.com/mborik/z80-macroasm-vscode",
+  "bugs": "https://github.com/mborik/z80-macroasm-vscode/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mborik/z80-macroasm-vscode.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.0.0",
+    "node": "^16.2.0"
+  },
+  "activationEvents": [
+    "onLanguage:z80-macroasm"
+  ],
+  "main": "./out/src/extension",
+  "contributes": {
+    "configuration": {
+      "type": "object",
+      "title": "Z80 Macro-Assembler configuration",
+      "properties": {
+        "z80-macroasm.files.include": {
+          "type": "string",
+          "default": "**/*.{a80,asm,inc,s}",
+          "description": "Files to include and work with. If you, or your macro-assembler using a different conventions of source file extensions then change it here."
         },
-        "problemMatchers": [
-            {
-                "name": "errmatcher-as",
-                "owner": "z80-macroasm",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceFolder}"
-                ],
-                "pattern": [
-                    {
-                        "regexp": "^> > >(.*)\\(([0-9]+)\\): (error|warning):\\s+(.*)(\\x1B\\[K)?$",
-                        "file": 1,
-                        "line": 2,
-                        "severity": 3,
-                        "message": 4
-                    }
-                ]
-            },
-            {
-                "name": "errmatcher-sjasmplus",
-                "owner": "z80-macroasm",
-                "fileLocation": [
-                    "autodetect",
-                    "${workspaceFolder}"
-                ],
-                "pattern": [
-                    {
-                        "regexp": "^(.*)\\(([0-9]+)\\): (error|warning):\\s+(.*)$",
-                        "file": 1,
-                        "line": 2,
-                        "severity": 3,
-                        "message": 4
-                    }
-                ]
-            },
-            {
-                "name": "errmatcher-sjasm",
-                "owner": "z80-macroasm",
-                "fileLocation": [ "absolute" ],
-                "pattern": [
-                    {
-                        "regexp": "^([^\\(]+)(?:\\()(\\d+)(?:\\)\\s*\\:\\s+)(.+)$",
-                        "file": 1,
-                        "line": 2,
-                        "message": 3
-                    }
-                ]
-            },
-            {
-                "name": "errmatcher-tniasm",
-                "owner": "z80-macroasm",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceFolder}"
-                ],
-                "pattern": [
-                    {
-                        "regexp": "^(Warning|Error|Syntax Error) in line (\\d+) \\(([^)]+)\\): (.*)$",
-                        "severity": 1,
-                        "line": 2,
-                        "file": 3,
-                        "message": 4
-                    }
-                ]
-            },
-            {
-                "name": "errmatcher-tniasm-preprocessor",
-                "owner": "z80-macroasm",
-                "pattern": [
-                    {
-                        "kind": "file",
-                        "regexp": "^(Warning|Error) .* (\\S+)! .*$",
-                        "message": 0,
-                        "severity": 1,
-                        "file": 2
-                    }
-                ]
-            },
-            {
-                "name": "errmatcher-rasm",
-                "owner": "z80-macroasm",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceFolder}"
-                ],
-                "pattern": [
-                    {
-                        "regexp": "^\\[(.*):(\\d+)\\]\\s+(Warning)?:?(.*)$",
-                        "file": 1,
-                        "line": 2,
-                        "severity": 3,
-                        "message": 4
-                    }
-                ]
-            },
-            {
-                "name": "errmatcher-pasmo",
-                "owner": "z80-macroasm",
-                "fileLocation": [
-                    "relative",
-                    "${workspaceFolder}"
-                ],
-                "pattern": [
-                    {
-                        "regexp": "^([^:]+):([0-9]+)\\s+(.*)$",
-                        "file": 1,
-                        "line": 2,
-                        "message": 3
-                    }
-                ]
-            }
+        "z80-macroasm.files.exclude": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "default": null,
+          "description": "Choose files or directories to exclude (e.g '**/*.{lst}')."
+        },
+        "z80-macroasm.format.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Formatter: Turn on the experimental feature of format on-type or on-save."
+        },
+        "z80-macroasm.format.baseIndent": {
+          "type": "number",
+          "default": 2,
+          "description": "Formatter: How many tabstops you prefer before the instructions or keywords (default 2)."
+        },
+        "z80-macroasm.format.controlIndent": {
+          "type": "number",
+          "default": 1,
+          "description": "Formatter: How many tabstops you prefer before the control structure keywords, selections, modules, or blocks (default 1)."
+        },
+        "z80-macroasm.format.whitespaceAfterInstruction": {
+          "type": "string",
+          "enum": [
+            "auto",
+            "tab",
+            "single-space"
+          ],
+          "default": "auto",
+          "description": "Formatter: Which type of whitespace you want to put after the instruction (default `auto` will autodetect file's tabstop type and width)."
+        },
+        "z80-macroasm.format.spaceAfterArgument": {
+          "type": "boolean",
+          "default": false,
+          "description": "Formatter: If you want to put a single space character after comma (instruction's argument)."
+        },
+        "z80-macroasm.format.uppercaseKeywords": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            "auto",
+            true,
+            false
+          ],
+          "default": "auto",
+          "description": "Formatter: Uppercase all keywords, instructions and registers."
+        },
+        "z80-macroasm.format.bracketType": {
+          "type": "string",
+          "enum": [
+            "round",
+            "square"
+          ],
+          "default": "round",
+          "description": "Formatter: Define which type of brackets around the instruction's arguments (pointers) you prefer: `(hl)` or `[hl]`."
+        },
+        "z80-macroasm.format.splitInstructionsByColon": {
+          "type": "boolean",
+          "default": true,
+          "description": "Formatter: Split colon separated instructions to lines."
+        },
+        "z80-macroasm.format.colonAfterLabels": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            "no-change",
+            true,
+            false
+          ],
+          "default": "no-change",
+          "description": "Formatter: Put colon after each label or symbol (by default keep untouched)."
+        },
+        "z80-macroasm.seekSymbolsThroughWorkspace": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, extension will crawl through all workspace files to document all symbols. Otherwise, only includes are taken into account."
+        }
+      }
+    },
+    "problemMatchers": [
+      {
+        "name": "errmatcher-as",
+        "owner": "z80-macroasm",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
         ],
-        "languages": [
-            {
-                "id": "z80-macroasm",
-                "aliases": [
-                    "Z80 Macro-Assembler",
-                    "z80-asm"
-                ],
-                "extensions": [
-                    ".a80",
-                    ".asm",
-                    ".inc",
-                    ".s"
-                ],
-                "configuration": "./language.configuration.json"
-            }
-        ],
-        "snippets": [
-            {
-                "language": "z80-macroasm",
-                "path": "./snippets/z80-macroasm.json"
-            }
-        ],
-        "grammars": [
-            {
-                "language": "z80-macroasm",
-                "scopeName": "source.z80asm",
-                "path": "./syntaxes/z80-macroasm.tmLanguage.json"
-            }
+        "pattern": [
+          {
+            "regexp": "^> > >(.*)\\(([0-9]+)\\): (error|warning):\\s+(.*)(\\x1B\\[K)?$",
+            "file": 1,
+            "line": 2,
+            "severity": 3,
+            "message": 4
+          }
         ]
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "npm run compile"
-    },
-    "devDependencies": {
-        "@types/node": "^12.12.14",
-        "typescript": "^3.7.3",
-        "vscode": "^1.1.36"
-    }
+      },
+      {
+        "name": "errmatcher-sjasmplus",
+        "owner": "z80-macroasm",
+        "fileLocation": [
+          "autodetect",
+          "${workspaceFolder}"
+        ],
+        "pattern": [
+          {
+            "regexp": "^(.*)\\(([0-9]+)\\): (error|warning):\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "severity": 3,
+            "message": 4
+          }
+        ]
+      },
+      {
+        "name": "errmatcher-sjasm",
+        "owner": "z80-macroasm",
+        "fileLocation": [
+          "absolute"
+        ],
+        "pattern": [
+          {
+            "regexp": "^([^\\(]+)(?:\\()(\\d+)(?:\\)\\s*\\:\\s+)(.+)$",
+            "file": 1,
+            "line": 2,
+            "message": 3
+          }
+        ]
+      },
+      {
+        "name": "errmatcher-tniasm",
+        "owner": "z80-macroasm",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": [
+          {
+            "regexp": "^(Warning|Error|Syntax Error) in line (\\d+) \\(([^)]+)\\): (.*)$",
+            "severity": 1,
+            "line": 2,
+            "file": 3,
+            "message": 4
+          }
+        ]
+      },
+      {
+        "name": "errmatcher-tniasm-preprocessor",
+        "owner": "z80-macroasm",
+        "pattern": [
+          {
+            "kind": "file",
+            "regexp": "^(Warning|Error) .* (\\S+)! .*$",
+            "message": 0,
+            "severity": 1,
+            "file": 2
+          }
+        ]
+      },
+      {
+        "name": "errmatcher-rasm",
+        "owner": "z80-macroasm",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": [
+          {
+            "regexp": "^\\[(.*):(\\d+)\\]\\s+(Warning)?:?(.*)$",
+            "file": 1,
+            "line": 2,
+            "severity": 3,
+            "message": 4
+          }
+        ]
+      },
+      {
+        "name": "errmatcher-pasmo",
+        "owner": "z80-macroasm",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": [
+          {
+            "regexp": "^([^:]+):([0-9]+)\\s+(.*)$",
+            "file": 1,
+            "line": 2,
+            "message": 3
+          }
+        ]
+      }
+    ],
+    "languages": [
+      {
+        "id": "z80-macroasm",
+        "aliases": [
+          "Z80 Macro-Assembler",
+          "z80-asm"
+        ],
+        "extensions": [
+          ".a80",
+          ".asm",
+          ".inc",
+          ".s"
+        ],
+        "configuration": "./language.configuration.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "z80-macroasm",
+        "path": "./snippets/z80-macroasm.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "z80-macroasm",
+        "scopeName": "source.z80asm",
+        "path": "./syntaxes/z80-macroasm.tmLanguage.json"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^15.6.1",
+    "@types/vscode": "^1.52.0",
+    "typescript": "^4.1.3"
+  }
 }
