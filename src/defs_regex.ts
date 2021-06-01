@@ -10,7 +10,7 @@ export default {
 	endmoduleLine: /\bendmod(ule)?\b/i,
 	controlKeywordLine: mkRegex`
 		\b(
-			rept|e?dup|end[mprw]|exitm|endmod(ule)?|(?:de|un)?phase|
+			rept|e?dup|end[mprsw]|exitm|endmod(ule)?|(?:de|un)?phase|
 			(end)?(struct|section|switch|lua|maxnest)|while|repeat|[rw]end|
 			if|ifn?def|ifn?used|ifn?exist|else(if)?|endif|
 			until|(else|end)?case|default|break
@@ -63,7 +63,7 @@ export default {
 		fpos|fname|slot|size|opt|page|newpage|radix|outradix|encoding|charset|codepage|
 		macexp_(?:dft|ovr)|listing|(?:end)?(?:struct|section|switch|lua|maxnest)|
 		cpu|device|proc|label|local|global|shared|public|forward|export|
-		e?dup|block|rept|macro|end[mprw]|exitm|module|endmod(?:ule)?|(?:de|un)?define|
+		e?dup|block|rept|macro|end[mprsw]|exitm|module|endmod(?:ule)?|(?:de|un)?define|
 		disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum|
 		list|nolist|let|labelslist|bplist|setbp|setbreakpoint|cspectmap|
 		assert|fatal|error|warning|message|display|print|fail|

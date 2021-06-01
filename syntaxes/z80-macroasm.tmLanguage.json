@@ -57,7 +57,7 @@
 				},
 				{
 					"name": "keyword.control.z80asm",
-					"match": "(?i:(?<=\\s)(?:cpu|device|proc|macro|label|local|global|shared|public|forward|rept|e?dup|block|end[mprw]|exitm|module|endmod(?:ule)?|(?:un)?define|export|disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum)\\b)"
+					"match": "(?i:(?<=\\s)(?:cpu|device|proc|macro|label|local|global|shared|public|forward|rept|e?dup|block|end[mprsw]|exitm|module|endmod(?:ule)?|(?:un)?define|export|disp|textarea|map|mmu|field|defarray|segment|restore|pushv|popv|enum|enumconf|nextenum)\\b)"
 				},
 				{
 					"name": "keyword.control.z80asm",
