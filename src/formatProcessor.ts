@@ -55,7 +55,18 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 		const processFragment = (frag: string): LinePartFrag => {
 			const [, keyword = frag, rest ] = frag.match(/^(\S+)\s+(.*)$/) || [];
-			const args = rest?.split(/\s*,\s*/) || [];
+			const args: string[] = [];
+			if (typeof rest === 'string') {
+				if (rest.includes(',')) {
+					rest.split(/:(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/).forEach((arg, idx) => {
+						const ret = arg.trimEnd();
+						args.push(idx ? ret.trimStart() : ret);
+					});
+				}
+				else {
+					args.push(rest)
+				}
+			}
 			return { keyword, args };
 		}
 
@@ -163,7 +174,18 @@ export class FormatProcessor extends ConfigPropsProvider {
 				indentLevel = configProps.controlIndent;
 				lineParts.keyword = keyword.trim();
 				lineParts.firstParam = firstParam;
-				lineParts.args = rest ? rest.split(/\s*,\s*/) : [];
+				lineParts.args = [];
+				if (typeof rest === 'string') {
+					if (rest.includes(',')) {
+						rest.split(/:(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/).forEach((arg, idx) => {
+							const ret = arg.trimEnd();
+							lineParts.args?.push(idx ? ret.trimStart() : ret);
+						});
+					}
+					else {
+						lineParts.args.push(rest)
+					}
+				}
 
 				text = ''
 			}
@@ -176,11 +198,14 @@ export class FormatProcessor extends ConfigPropsProvider {
 					indentLevel = configProps.baseIndent;
 				}
 
-				const splitLine = text.split(/\s*\:\s*/);
-				if (configProps.splitInstructionsByColon && splitLine.length > 1) {
-					lineParts.fragments = splitLine.map(frag => processFragment(frag.trim()));
+				if (configProps.splitInstructionsByColon && text.includes(':')) {
+					const splitLine = text.split(/:(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/);
+					if (splitLine.length > 1) {
+						lineParts.fragments = splitLine.map(frag => processFragment(frag.trim()));
+					}
 				}
-				else {
+
+				if (!lineParts.fragments) {
 					const { keyword, args } = processFragment(text.trim());
 					lineParts.keyword = keyword;
 					lineParts.args = args;
