@@ -16,6 +16,8 @@ export default {
 			until|(else|end)?case|default|break
 		)\b`,
 	horizontalRule: /^(.)\1+$/,
+	splitByColon: /:(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/,
+	splitByComma: /,(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/,
 	fullLabel: /((\$\$(?!\.))?[\w\.]+)/,
 	partialLabel: /(?:\$\$(?!\.)|\.)?(\w+)/,
 	stringBounds: /(["'])(?:([^\1]+)\1)/g,

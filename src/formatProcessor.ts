@@ -58,7 +58,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 			const args: string[] = [];
 			if (typeof rest === 'string') {
 				if (rest.includes(',')) {
-					rest.split(/:(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/).forEach((arg, idx) => {
+					rest.split(regex.splitByComma).forEach((arg, idx) => {
 						const ret = arg.trimEnd();
 						args.push(idx ? ret.trimStart() : ret);
 					});
@@ -155,11 +155,12 @@ export class FormatProcessor extends ConfigPropsProvider {
 				text = text.replace(fullMatch, '').trim();
 			}
 
-			const moduleLineMatch = regex.moduleLine.exec(text);
-			const macroLineMatch = regex.macroLine.exec(text);
-			const controlKeywordMatch = regex.controlKeywordLine.exec(text);
+			const trimmedText = text.trim()
+			const moduleLineMatch = regex.moduleLine.exec(trimmedText);
+			const macroLineMatch = regex.macroLine.exec(trimmedText);
+			const controlKeywordMatch = regex.controlKeywordLine.exec(trimmedText);
 
-			if (moduleLineMatch) {
+			if (moduleLineMatch?.index === 0) {
 				const [ fullMatch, keyword ] = moduleLineMatch;
 
 				indentLevel = configProps.controlIndent;
@@ -168,7 +169,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 				text = ''
 			}
-			else if (macroLineMatch) {
+			else if (macroLineMatch?.index === 0) {
 				const [, keyword, firstParam, rest ] = macroLineMatch;
 
 				indentLevel = configProps.controlIndent;
@@ -177,7 +178,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				lineParts.args = [];
 				if (typeof rest === 'string') {
 					if (rest.includes(',')) {
-						rest.split(/:(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/).forEach((arg, idx) => {
+						rest.split(regex.splitByComma).forEach((arg, idx) => {
 							const ret = arg.trimEnd();
 							lineParts.args?.push(idx ? ret.trimStart() : ret);
 						});
@@ -189,7 +190,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 				text = ''
 			}
-			else if (controlKeywordMatch) {
+			else if (controlKeywordMatch?.index === 0) {
 				indentLevel = configProps.controlIndent;
 			}
 
@@ -199,7 +200,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				}
 
 				if (configProps.splitInstructionsByColon && text.includes(':')) {
-					const splitLine = text.split(/:(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/);
+					const splitLine = text.split(regex.splitByColon);
 					if (splitLine.length > 1) {
 						lineParts.fragments = splitLine.map(frag => processFragment(frag.trim()));
 					}
