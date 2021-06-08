@@ -24,6 +24,21 @@ export class FormatProcessor extends ConfigPropsProvider {
 		const endLineNumber = document.lineAt(range.end).lineNumber;
 		const commaAfterArgument = ',' + (configProps.spaceAfterArgument ? ' ' : '');
 
+		const safeSplitStringByChar = (input: string, splitter: string) => {
+			const stringsMatches: string[] = [];
+			return input
+				.replaceAll(regex.stringBounds, (match) => {
+					const i = stringsMatches.push(match);
+					return `【${i.toString().padStart(3, '0')}】`;
+				})
+				.split(splitter)
+				.map((fragment) =>
+					fragment.replaceAll(/【(\d+)】/g, (_, counter) => {
+						return stringsMatches[parseInt(counter) - 1]
+					})
+				)
+		}
+
 		const generateIndent = (count: number, snippet?: string, keepAligned?: boolean) => {
 			const tabsSize = configProps.indentSize * count;
 
@@ -58,7 +73,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 			const args: string[] = [];
 			if (typeof rest === 'string') {
 				if (rest.includes(',')) {
-					rest.split(regex.splitByComma).forEach((arg, idx) => {
+					safeSplitStringByChar(rest, ',').forEach((arg, idx) => {
 						const ret = arg.trimEnd();
 						args.push(idx ? ret.trimStart() : ret);
 					});
@@ -178,7 +193,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				lineParts.args = [];
 				if (typeof rest === 'string') {
 					if (rest.includes(',')) {
-						rest.split(regex.splitByComma).forEach((arg, idx) => {
+						safeSplitStringByChar(rest, ',').forEach((arg, idx) => {
 							const ret = arg.trimEnd();
 							lineParts.args?.push(idx ? ret.trimStart() : ret);
 						});
@@ -200,7 +215,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				}
 
 				if (configProps.splitInstructionsByColon && text.includes(':')) {
-					const splitLine = text.split(regex.splitByColon);
+					const splitLine = safeSplitStringByChar(text, ':');
 					if (splitLine.length > 1) {
 						lineParts.fragments = splitLine.map(frag => processFragment(frag.trim()));
 					}

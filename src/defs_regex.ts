@@ -16,11 +16,9 @@ export default {
 			until|(else|end)?case|default|break
 		)\b`,
 	horizontalRule: /^(.)\1+$/,
-	splitByColon: /:(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/,
-	splitByComma: /,(?=(?:[^'"]*['"][^'"]*['"])*[^'"]*$)/,
 	fullLabel: /((\$\$(?!\.))?[\w\.]+)/,
 	partialLabel: /(?:\$\$(?!\.)|\.)?(\w+)/,
-	stringBounds: /(["'])(?:([^\1]+)\1)/g,
+	stringBounds: /(["'])(?:(?=(\\?))\2.)*?\1/g,
 	numerals: mkRegex`
 		(
 			((?:(?:\-|\b)(?:0b)|%)[01]+)|
