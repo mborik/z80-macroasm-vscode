@@ -176,11 +176,11 @@ export class FormatProcessor extends ConfigPropsProvider {
 			const controlKeywordMatch = regex.controlKeywordLine.exec(trimmedText);
 
 			if (moduleLineMatch?.index === 0) {
-				const [ fullMatch, keyword ] = moduleLineMatch;
+				const [, keyword ] = moduleLineMatch;
 
 				indentLevel = configProps.controlIndent;
 				lineParts.keyword = keyword.trim();
-				lineParts.args = [ text.replace(fullMatch, '').trim() ];
+				lineParts.args = [ text.replace(keyword, '').trim() ];
 
 				text = ''
 			}
