@@ -252,6 +252,10 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 			(lineParts.fragments || [{ ...lineParts }]).forEach(
 				({ keyword, firstParam, args = [] }, index) => {
+					if (!keyword) {
+						return;
+					}
+
 					if (index) {
 						newText.push(
 							configProps.splitInstructionsByColon ?
