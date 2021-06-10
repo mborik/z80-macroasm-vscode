@@ -19,6 +19,7 @@ export default {
 	fullLabel: /((\$\$(?!\.))?[\w\.]+)/,
 	partialLabel: /(?:\$\$(?!\.)|\.)?(\w+)/,
 	stringBounds: /(["'])(?:(?=(\\?))\2.)*?\1/g,
+	bracketsBounds: /^\[([^\]\n]*?)]|\(([^\)\n]*?)\)$/,
 	numerals: mkRegex`
 		(
 			((?:(?:\-|\b)(?:0b)|%)[01]+)|

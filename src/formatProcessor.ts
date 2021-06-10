@@ -280,11 +280,12 @@ export class FormatProcessor extends ConfigPropsProvider {
 					}
 
 					args.forEach((value, idx) => {
-						const matchBrackets = /^[[(]([^\]\)]+)[\]\)]$/.exec(value);
+						const matchBrackets = regex.bracketsBounds.exec(value);
 						if (matchBrackets) {
+							const content = matchBrackets[2] || matchBrackets[1] || ''
 							value = `${
 								configProps.bracketType === 'round' ? '(' : '['}${
-									adjustKeywordCase(matchBrackets[1], true)}${
+									adjustKeywordCase(content, true)}${
 								configProps.bracketType === 'round' ? ')' : ']'}`;
 						}
 						else {
