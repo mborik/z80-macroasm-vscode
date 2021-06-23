@@ -1,20 +1,19 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "target": "esnext",
-        "outDir": "out",
-        "lib": [ "esnext" ],
-        "sourceMap": true,
-        "rootDir": ".",
-        "strict": true,
-        "noUnusedLocals": true,
-        "noImplicitReturns": true,
-        "noFallthroughCasesInSwitch": true,
-        "noUnusedParameters": false
-    },
-    "exclude": [
-        "node_modules",
-        ".vscode-test"
-    ]
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "esnext",
+    "outDir": "out",
+    "lib": [ "esnext" ],
+    "sourceMap": true,
+    "rootDir": ".",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedParameters": false
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }
