@@ -34,10 +34,10 @@ export class FormatProcessor extends ConfigPropsProvider {
 				.split(splitter)
 				.map((fragment) =>
 					fragment.replaceAll(/【(\d+)】/g, (_, counter) => {
-						return stringsMatches[parseInt(counter) - 1]
+						return stringsMatches[parseInt(counter) - 1];
 					})
-				)
-		}
+				);
+		};
 
 		const generateIndent = (count: number, snippet?: string, keepAligned?: boolean) => {
 			const tabsSize = configProps.indentSize * count;
@@ -66,7 +66,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 					Math.ceil(fillSpacesAfterSnippet / configProps.indentSize)
 				);
 			}
-		}
+		};
 
 		const processFragment = (frag: string): LinePartFrag => {
 			const [, keyword = frag, rest ] = frag.match(/^(\S+)\s+(.*)$/) || [];
@@ -79,11 +79,11 @@ export class FormatProcessor extends ConfigPropsProvider {
 					});
 				}
 				else {
-					args.push(rest)
+					args.push(rest);
 				}
 			}
 			return { keyword, args };
-		}
+		};
 
 		const adjustKeywordCase = (keyword: string, checkRegsOrConds: boolean = false): string => {
 			if (configProps.uppercaseKeywords !== 'auto' && (
@@ -99,16 +99,17 @@ export class FormatProcessor extends ConfigPropsProvider {
 			}
 
 			return keyword;
-		}
+		};
 
-		let output: vscode.TextEdit[] = [];
+		const output: vscode.TextEdit[] = [];
 
 		for (let lineNumber = startLineNumber; lineNumber <= endLineNumber; ++lineNumber) {
-			let line = document.lineAt(lineNumber);
+			const line = document.lineAt(lineNumber);
 
 			if (line.range.isEmpty) {
 				continue;
-			} else if (line.isEmptyOrWhitespace) {
+			}
+			else if (line.isEmptyOrWhitespace) {
 				// trim whitespace-filled lines
 				output.push(new vscode.TextEdit(line.range, ''));
 				continue;
@@ -118,7 +119,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 			let text = line.text;
 			let indentLevel = -1;
-			let lineParts: LineParts = {} as any;
+			const lineParts: LineParts = {} as any;
 
 			const commentLineMatch = regex.commentLine.exec(text);
 			if (commentLineMatch) {
@@ -165,12 +166,12 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 				indentLevel = configProps.baseIndent;
 				lineParts.label = `${fullMatch[0] === '@' ? '@' : ''}${label}`;
-				lineParts.colonAfterLabel = (colon === ':')
+				lineParts.colonAfterLabel = (colon === ':');
 
 				text = text.replace(fullMatch, '').trim();
 			}
 
-			const trimmedText = text.trim()
+			const trimmedText = text.trim();
 			const moduleLineMatch = regex.moduleLine.exec(trimmedText);
 			const macroLineMatch = regex.macroLine.exec(trimmedText);
 			const controlKeywordMatch = regex.controlKeywordLine.exec(trimmedText);
@@ -182,7 +183,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				lineParts.keyword = keyword.trim();
 				lineParts.args = [ text.replace(keyword, '').trim() ];
 
-				text = ''
+				text = '';
 			}
 			else if (macroLineMatch?.index === 0) {
 				const [, keyword, firstParam, rest ] = macroLineMatch;
@@ -199,11 +200,11 @@ export class FormatProcessor extends ConfigPropsProvider {
 						});
 					}
 					else {
-						lineParts.args.push(rest)
+						lineParts.args.push(rest);
 					}
 				}
 
-				text = ''
+				text = '';
 			}
 			else if (controlKeywordMatch?.index === 0) {
 				indentLevel = configProps.controlIndent;
@@ -259,7 +260,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 					if (index) {
 						newText.push(
 							configProps.splitInstructionsByColon ?
-							(configProps.eol + generateIndent(indentLevel)) : ': '
+								(configProps.eol + generateIndent(indentLevel)) : ': '
 						);
 					}
 
@@ -272,7 +273,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 						newText.push(`${adjustKeywordCase(keyword)}\t`);
 					}
 					else {
-						newText.push(generateIndent(1, adjustKeywordCase(keyword)))
+						newText.push(generateIndent(1, adjustKeywordCase(keyword)));
 					}
 
 					if (firstParam) {
@@ -282,10 +283,10 @@ export class FormatProcessor extends ConfigPropsProvider {
 					args.forEach((value, idx) => {
 						const matchBrackets = regex.bracketsBounds.exec(value);
 						if (matchBrackets) {
-							const content = matchBrackets[2] || matchBrackets[1] || ''
+							const content = matchBrackets[2] || matchBrackets[1] || '';
 							value = `${
 								configProps.bracketType === 'round' ? '(' : '['}${
-									adjustKeywordCase(content, true)}${
+								adjustKeywordCase(content, true)}${
 								configProps.bracketType === 'round' ? ')' : ']'}`;
 						}
 						else {
@@ -293,12 +294,12 @@ export class FormatProcessor extends ConfigPropsProvider {
 						}
 
 						newText.push((idx ? commaAfterArgument : '') + value);
-					})
+					});
 				}
 			);
 
 			const result = newText.join('').trimEnd();
-			output.push(new vscode.TextEdit(range, result))
+			output.push(new vscode.TextEdit(range, result));
 		}
 
 		return output;

@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { FormatProcessor,
 	Z80DocumentFormatter, Z80DocumentRangeFormatter, Z80TypingFormatter } from './formatProcessor';
-import { SymbolProcessor } from "./symbolProcessor";
+import { SymbolProcessor } from './symbolProcessor';
 import { Z80CompletionProposer } from './completionProposer';
 import { Z80DefinitionProvider } from './definitionProvider';
-import { Z80HoverProvider } from "./hover";
+import { Z80HoverProvider } from './hover';
 import { Z80RenameProvider } from './renameProvider';
 import { Z80DocumentSymbolProvider, Z80WorkspaceSymbolProvider } from './symbolProvider';
 
@@ -36,7 +36,7 @@ export function deactivate() {
 function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationChangeEvent) {
 	const language = 'z80-macroasm';
 	const settings = vscode.workspace.getConfiguration(language);
-	const languageSelector: vscode.DocumentFilter = { language, scheme: "file" };
+	const languageSelector: vscode.DocumentFilter = { language, scheme: 'file' };
 
 	// test if changing specific configuration
 	if (event && event.affectsConfiguration(language)) {
@@ -72,7 +72,7 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 			vscode.languages.registerDocumentFormattingEditProvider(languageSelector, new Z80DocumentFormatter(formatProcessor)),
 			vscode.languages.registerDocumentRangeFormattingEditProvider(languageSelector, new Z80DocumentRangeFormatter(formatProcessor)),
 			vscode.languages.registerOnTypeFormattingEditProvider(languageSelector, new Z80TypingFormatter(formatProcessor), ' ', ',', ';', ':'),
-		)
+		);
 	}
 
 	// create subscriptions for all providers

@@ -7,7 +7,7 @@ const utils = {
 
 	'pad':
 		(num: number, width: number = 2) => {
-			let a = num.toString(16);
+			const a = num.toString(16);
 			return ('0000000000' + a).substr(-Math.max(width, a.length)).toUpperCase();
 		}
 };

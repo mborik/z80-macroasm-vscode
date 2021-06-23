@@ -26,8 +26,9 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 			}
 			else if (opt.indentSpaces) {
 				let tabSize = opt.indentSize;
-				while (snippet.length > tabSize)
+				while (snippet.length > tabSize) {
 					tabSize += opt.indentSize;
+				}
 
 				snip.appendText(' '.repeat(tabSize - snippet.length));
 			}
@@ -56,7 +57,7 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 	}
 
 	private registerMapper(options: ConfigProps & { secondArgument?: boolean },
-			ucase: boolean, snippet: string, idx: number) {
+		ucase: boolean, snippet: string, idx: number) {
 
 		snippet = uppercaseIfNeeded(snippet, ucase);
 
@@ -72,7 +73,7 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		const item = new vscode.CompletionItem(snippet, vscode.CompletionItemKind.Value);
 		const snip = new vscode.SnippetString(prefix + snippet.replace('*', '${1:0}'));
 
-		snip.appendText(options.eol)
+		snip.appendText(options.eol);
 		snip.appendTabstop(0);
 
 		// put on the top of the list...
@@ -86,8 +87,7 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 	async provideCompletionItems(
 		document: vscode.TextDocument,
 		position: vscode.Position,
-		token: vscode.CancellationToken,
-		context: vscode.CompletionContext
+		token: vscode.CancellationToken
 	) {
 
 		const configProps = this.getConfigProps(document);
@@ -185,7 +185,7 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 			}
 			if (symbol.documentation) {
 				if (item.documentation instanceof vscode.MarkdownString) {
-					item.documentation.appendMarkdown("\n\n"+ symbol.documentation);
+					item.documentation.appendMarkdown('\n\n' + symbol.documentation);
 				}
 				else {
 					item.documentation = new vscode.MarkdownString(symbol.documentation);

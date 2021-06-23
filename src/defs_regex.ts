@@ -82,4 +82,4 @@ export default {
 		mul|mirror|nextreg|pixel(ad|dn)|setae|te?st|
 		bs[lr]a|bsr[lf]|brlc
 	)$`,
-}
+};

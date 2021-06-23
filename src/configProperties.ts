@@ -7,12 +7,12 @@ export interface ConfigProps {
 	eol: string;
 	baseIndent: number;
 	controlIndent: number;
-	whitespaceAfterInstruction: 'auto' |  'tab' | 'single-space';
+	whitespaceAfterInstruction: 'auto' | 'tab' | 'single-space';
 	spaceAfterArgument: boolean;
 	uppercaseKeywords: 'auto' | boolean;
 	bracketType: 'round' | 'square';
 	splitInstructionsByColon: boolean;
-	colonAfterLabels: "no-change" | boolean;
+	colonAfterLabels: 'no-change' | boolean;
 }
 
 export abstract class ConfigPropsProvider {

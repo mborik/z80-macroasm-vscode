@@ -82,7 +82,7 @@ export class Z80RenameProvider implements vscode.RenameProvider {
 	 * @param token Cancellation token object.
 	 * @returns Promise.
 	 */
-	private async processSymbolAtDocPosition (
+	private async processSymbolAtDocPosition(
 		document: vscode.TextDocument,
 		position: vscode.Position,
 		newName: string,
@@ -146,7 +146,7 @@ export class Z80RenameProvider implements vscode.RenameProvider {
 					return wsEdit;
 				}
 
-				let moduleStack: string[] = [];
+				const moduleStack: string[] = [];
 				let lastFullLabel: string | null = files[uri].labelPath[0];
 
 				for (let lineNumber = 0; lineNumber < doc.lineCount; lineNumber++) {
@@ -189,7 +189,7 @@ export class Z80RenameProvider implements vscode.RenameProvider {
 						lineText = lineText.replace(macroLineMatch[0], '');
 					}
 
-					let labelPath = [];
+					const labelPath = [];
 					if (labelMatch) {
 						labelPath.push(labelMatch[1]);
 
@@ -242,7 +242,7 @@ export class Z80RenameProvider implements vscode.RenameProvider {
 					}
 
 					let replacementPhrase =
-						wasLocalLabel ? `(?:(\\b\\w+)\\.|\\.)` : `(?:(\\b\\w+)\\.)?`;
+						wasLocalLabel ? '(?:(\\b\\w+)\\.|\\.)' : '(?:(\\b\\w+)\\.)?';
 					replacementPhrase += oldName + '\\b';
 
 					const matches = lineText.matchAll(RegExp(replacementPhrase, 'g'));
@@ -251,14 +251,14 @@ export class Z80RenameProvider implements vscode.RenameProvider {
 
 						const localLabel = (phrase[0] === '.');
 						if ((
-								localLabel && symbol.labelFull &&
+							localLabel && symbol.labelFull &&
 								!symbol.labelFull.endsWith(lastFullLabel + phrase)
-							) ||
+						) ||
 							(
 								!localLabel && !prefix &&
 									symbol.labelPart && symbol.path.length > 1 &&
 								!(phrase === symbol.labelPart &&
-									moduleStack[0] == symbol.path[0])
+									moduleStack[0] === symbol.path[0])
 							)) {
 
 							continue;

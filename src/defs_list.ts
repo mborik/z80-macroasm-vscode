@@ -1,3 +1,5 @@
+/* eslint-disable no-multi-spaces */
+
 export default {
 	// Z80 instruction set
 	instructions: [
@@ -28,4 +30,4 @@ export default {
 	// quick pointers into `registers`
 	regR16Index: 29,
 	regStackIndex: 35,
-}
+};

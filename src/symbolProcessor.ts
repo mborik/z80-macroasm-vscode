@@ -2,10 +2,9 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import regex from './defs_regex';
 
-
 export const enum ProcessorResult {
 	DEFINITION, HOVER, SYMBOL, SYMBOL_FULL
-};
+}
 
 export interface SymbolDescriptorExt {
 	kind: vscode.SymbolKind;
@@ -89,7 +88,7 @@ export class SymbolProcessor {
 	 * @param searched Paths of files that have already been searched.
 	 */
 	private async _seekSymbols(fsPath: string, output: SymbolMap,
-				prependPath: string[] = [], searched: string[] = []) {
+		prependPath: string[] = [], searched: string[] = []) {
 
 		let table = this.files[fsPath];
 
@@ -100,8 +99,8 @@ export class SymbolProcessor {
 
 				this._document(doc);
 				table = this.files[fsPath];
-
-			} catch(e) {
+			}
+			catch(e) {
 				// file not found, probably non-existent include
 				searched.push(fsPath);
 				return;
@@ -123,7 +122,7 @@ export class SymbolProcessor {
 		}
 
 		await Promise.all(table.includes.map(async include => {
-			if (searched.indexOf(include.fullPath) == -1) {
+			if (searched.indexOf(include.fullPath) < 0) {
 				await this._seekSymbols(include.fullPath, output, include.labelPath, searched);
 			}
 		}));
@@ -213,7 +212,7 @@ export class SymbolProcessor {
 	 * @param token Cancellation token object.
 	 * @returns Promise of SymbolInformation objects array.
 	 */
-	async provideSymbols (
+	async provideSymbols(
 		fileFilter: string | null,
 		query: string | null,
 		token: vscode.CancellationToken
@@ -265,7 +264,7 @@ export class SymbolProcessor {
 	 * @param hoverDocumentation Provide a hover object.
 	 * @returns Promise of T.
 	 */
-	getFullSymbolAtDocPosition<T = SymbolProcessorMultitype> (
+	getFullSymbolAtDocPosition<T = SymbolProcessorMultitype>(
 		context: vscode.TextDocument,
 		position: vscode.Position,
 		token: vscode.CancellationToken,
@@ -354,7 +353,7 @@ export class SymbolProcessor {
 			if (resultType === ProcessorResult.SYMBOL_FULL && lbPart[0] !== '.') {
 				const lbSplitted = lbFull.split('.');
 				if (lbSplitted.length >= 2) {
-					let testLb = symbols[lbSplitted[0]];
+					const testLb = symbols[lbSplitted[0]];
 					if (testLb) {
 						if (testLb.kind === vscode.SymbolKind.Module) {
 							lbModule = lbSplitted.shift();
@@ -374,7 +373,7 @@ export class SymbolProcessor {
 
 			if (!lbParent && !lbModule) {
 				for (let lineNumber = position.line - 1; lineNumber >= 0; lineNumber--) {
-					let line = context.lineAt(lineNumber);
+					const line = context.lineAt(lineNumber);
 					if (line.isEmptyOrWhitespace) {
 						continue;
 					}
@@ -434,7 +433,7 @@ export class SymbolProcessor {
 		const table = new FileTable();
 		this.files[document.uri.fsPath] = table;
 
-		let moduleStack: string[] = [];
+		const moduleStack: string[] = [];
 		let commentBuffer: string[] = [];
 		let lastFullLabel: string | null = null;
 
@@ -459,7 +458,7 @@ export class SymbolProcessor {
 				const moduleLineMatch = regex.moduleLine.exec(line.text);
 				const macroLineMatch = regex.macroLine.exec(line.text);
 				const labelMatch = regex.labelDefinition.exec(line.text);
-				let labelPath = [];
+				const labelPath = [];
 
 				if (labelMatch && !parseInt(labelMatch[1])) {
 					labelPath.push(labelMatch[1]);
@@ -489,11 +488,11 @@ export class SymbolProcessor {
 					const endCommentMatch = regex.endComment.exec(line.text);
 
 					if (defineExpressionMatch) {
-						let instruction = (defineExpressionMatch[2] + " ".repeat(8)).substr(0, 8);
-						commentBuffer.push("\n```\n" + instruction + defineExpressionMatch[3].trim() + "\n```");
+						const instruction = (defineExpressionMatch[2] + ' '.repeat(8)).substr(0, 8);
+						commentBuffer.push('\n```\n' + instruction + defineExpressionMatch[3].trim() + '\n```');
 					}
 					else if (evalExpressionMatch) {
-						commentBuffer.push("\n`" + evalExpressionMatch[3].trim() + "`");
+						commentBuffer.push('\n`' + evalExpressionMatch[3].trim() + '`');
 					}
 
 					if (endCommentMatch) {
@@ -505,13 +504,13 @@ export class SymbolProcessor {
 						labelPath,
 						location,
 						lineNumber,
-						commentBuffer.join("\n").trim() || undefined,
+						commentBuffer.join('\n').trim() || undefined,
 						vscode.SymbolKind.Variable,
 						localLabel
 					));
 				}
 
-				const pathFragment = [  ...moduleStack.slice(0, 1), ...labelPath.slice(-1) ];
+				const pathFragment = [ ...moduleStack.slice(0, 1), ...labelPath.slice(-1) ];
 
 				if (includeLineMatch) {
 					const filename = includeLineMatch[4];
@@ -549,7 +548,7 @@ export class SymbolProcessor {
 					}
 
 					if (macroLineMatch[3]) {
-						commentBuffer.unshift("\`" + macroLineMatch[3].trim() + "`\n");
+						commentBuffer.unshift('\`' + macroLineMatch[3].trim() + '`\n');
 					}
 
 					commentBuffer.unshift(`**macro ${declaration}**`);
@@ -560,7 +559,7 @@ export class SymbolProcessor {
 						pathFragment,
 						location,
 						lineNumber,
-						commentBuffer.join("\n").trim(),
+						commentBuffer.join('\n').trim(),
 						vscode.SymbolKind.Function
 					));
 				}
@@ -581,7 +580,7 @@ export class SymbolProcessor {
 						pathFragment,
 						location,
 						lineNumber,
-						commentBuffer.join("\n").trim(),
+						commentBuffer.join('\n').trim(),
 						vscode.SymbolKind.Module
 					));
 				}
