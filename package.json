@@ -94,7 +94,7 @@
             false
           ],
           "default": "auto",
-          "description": "Formatter: Uppercase all keywords, instructions and registers."
+          "description": "Formatter: Uppercase all keywords, instructions and registers (autodetect case by default)."
         },
         "z80-macroasm.format.bracketType": {
           "type": "string",
@@ -122,6 +122,32 @@
           ],
           "default": "no-change",
           "description": "Formatter: Put colon after each label or symbol (by default keep untouched)."
+        },
+        "z80-macroasm.format.hexaNumberStyle": {
+          "type": "string",
+          "enum": [
+            "no-change",
+            "hash",
+            "motorola",
+            "intel",
+            "intel-uppercase",
+            "c-style"
+          ],
+          "default": "no-change",
+          "description": "Formatter: Define which hexadecimal number format you prefer (disabled by default, see README for full specs)."
+        },
+        "z80-macroasm.format.hexaNumberCase": {
+          "type": [
+            "boolean",
+            "string"
+          ],
+          "enum": [
+            "no-change",
+            true,
+            false
+          ],
+          "default": "no-change",
+          "description": "Formatter: When formatting of hexadecimal numbers was enabled, whether it's to be additional case processing applied (by default keep untouched)."
         },
         "z80-macroasm.seekSymbolsThroughWorkspace": {
           "type": "boolean",

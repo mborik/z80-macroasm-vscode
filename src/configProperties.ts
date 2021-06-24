@@ -13,6 +13,8 @@ export interface ConfigProps {
 	bracketType: 'round' | 'square';
 	splitInstructionsByColon: boolean;
 	colonAfterLabels: 'no-change' | boolean;
+	hexaNumberStyle: 'no-change' | 'hash' | 'motorola' | 'intel' | 'intel-uppercase' | 'c-style';
+	hexaNumberCase: 'no-change' | boolean;
 }
 
 export abstract class ConfigPropsProvider {

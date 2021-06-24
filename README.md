@@ -42,6 +42,14 @@ These few options allows you to configure extension's behavior but primarily you
 - `z80-macroasm.format.bracketType` - Define which type of brackets around the instruction's arguments (pointers) you prefer: `(round)` or `[square]`.
   > default: `"round"`
 - `z80-macroasm.format.colonAfterLabels` - Put colon after each label or symbol (true or false, `"no-change"` keeps it untouched).
+- `z80-macroasm.format.hexaNumberStyle` - Define which hexadecimal number format you prefer to reformat:
+  >+ **"no-change"** - no reformat happen (default)
+  >+ **"hash"**: `#1fff` | `#B45D`
+  >+ **"motorola"**: `$1fff` | `$B45D`
+  >+ **"intel"**: `1fffh` | `0B45Dh`
+  >+ **"intel-uppercase"**: `1fffH` | `0B45DH`
+  >+ **"c-style"**: `0x1fff` | `0xB45D`
+- `z80-macroasm.format.hexaNumberCase` - When reformatting of hexadecimal numbers was enabled, whether it's to be additional case processing applied.
   > default: `"no-change"`
 - `z80-macroasm.format.splitInstructionsByColon` - Split colon separated instructions to lines.
   > default: `true`

@@ -281,6 +281,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 					}
 
 					args.forEach((value, idx) => {
+						let matcher;
 						const matchBrackets = regex.bracketsBounds.exec(value);
 						if (matchBrackets) {
 							const content = matchBrackets[2] || matchBrackets[1] || '';
@@ -288,6 +289,28 @@ export class FormatProcessor extends ConfigPropsProvider {
 								configProps.bracketType === 'round' ? '(' : '['}${
 								adjustKeywordCase(content, true)}${
 								configProps.bracketType === 'round' ? ')' : ']'}`;
+						}
+						else if (configProps.hexaNumberStyle !== 'no-change' &&
+							(matcher = regex.numerals.exec(value))) {
+
+							let hexa = (matcher[4] || matcher[5]);
+							if (hexa) {
+								const [, sign, reparsed ] = /^(\-?)(?:0x|[\$#])?(\w+)h?$/i.exec(hexa) || [ '', '', hexa ];
+								hexa = (configProps.hexaNumberCase === 'no-change') ? reparsed :
+									reparsed[configProps.hexaNumberCase ? 'toUpperCase' : 'toLowerCase']();
+								switch (configProps.hexaNumberStyle) {
+									case 'hash':
+										value = `${sign}#${hexa}`; break;
+									case 'motorola':
+										value = `${sign}$${hexa}`; break;
+									case 'intel':
+										value = `${sign}${hexa.charCodeAt(0) > 64 ? '0' : ''}${hexa}h`; break;
+									case 'intel-uppercase':
+										value = `${sign}${hexa.charCodeAt(0) > 64 ? '0' : ''}${hexa}h`; break;
+									case 'c-style':
+										value = `${sign}0x${hexa}`; break;
+								}
+							}
 						}
 						else {
 							value = adjustKeywordCase(value, true);
