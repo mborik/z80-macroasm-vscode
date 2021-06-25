@@ -99,11 +99,12 @@
         "z80-macroasm.format.bracketType": {
           "type": "string",
           "enum": [
+            "no-change",
             "round",
             "square"
           ],
-          "default": "round",
-          "description": "Formatter: Define which type of brackets around the instruction's arguments (pointers) you prefer: `(hl)` or `[hl]`."
+          "default": "no-change",
+          "description": "Formatter: Define which type of brackets around the instruction's arguments (pointers) you prefer: `(hl)` or `[hl]` (by default keep untouched)."
         },
         "z80-macroasm.format.splitInstructionsByColon": {
           "type": "boolean",

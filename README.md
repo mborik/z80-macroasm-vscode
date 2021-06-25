@@ -40,7 +40,7 @@ These few options allows you to configure extension's behavior but primarily you
 - `z80-macroasm.format.uppercaseKeywords` - If true, uppercase all keywords, instructions and registers. False means all lowercased and `"auto"` tries to auto-detect your code-style while typing.
   > default: `"auto"`
 - `z80-macroasm.format.bracketType` - Define which type of brackets around the instruction's arguments (pointers) you prefer: `(round)` or `[square]`.
-  > default: `"round"`
+  > default: `"no-change"`
 - `z80-macroasm.format.colonAfterLabels` - Put colon after each label or symbol (true or false, `"no-change"` keeps it untouched).
 - `z80-macroasm.format.hexaNumberStyle` - Define which hexadecimal number format you prefer to reformat:
   >+ **"no-change"** - no reformat happen (default)
@@ -49,7 +49,7 @@ These few options allows you to configure extension's behavior but primarily you
   >+ **"intel"**: `1fffh` | `0B45Dh`
   >+ **"intel-uppercase"**: `1fffH` | `0B45DH`
   >+ **"c-style"**: `0x1fff` | `0xB45D`
-- `z80-macroasm.format.hexaNumberCase` - When reformatting of hexadecimal numbers was enabled, whether it's to be additional case processing applied.
+- `z80-macroasm.format.hexaNumberCase` - When reformatting of hexadecimal numbers was enabled, whether it's to be additional case processing applied when `true` means uppercased, `false` lowercased.
   > default: `"no-change"`
 - `z80-macroasm.format.splitInstructionsByColon` - Split colon separated instructions to lines.
   > default: `true`

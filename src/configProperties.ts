@@ -10,7 +10,7 @@ export interface ConfigProps {
 	whitespaceAfterInstruction: 'auto' | 'tab' | 'single-space';
 	spaceAfterArgument: boolean;
 	uppercaseKeywords: 'auto' | boolean;
-	bracketType: 'round' | 'square';
+	bracketType: 'no-change' | 'round' | 'square';
 	splitInstructionsByColon: boolean;
 	colonAfterLabels: 'no-change' | boolean;
 	hexaNumberStyle: 'no-change' | 'hash' | 'motorola' | 'intel' | 'intel-uppercase' | 'c-style';
