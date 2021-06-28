@@ -1,0 +1,11 @@
+{
+  "editor.tabSize": 4,
+  "editor.insertSpaces": false,
+  "editor.rulers": [120],
+  "files.eol": "\n",
+
+  "[json]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true
+  }
+}
