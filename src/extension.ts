@@ -39,7 +39,10 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 	const languageSelector: vscode.DocumentFilter = { language, scheme: 'file' };
 
 	// test if changing specific configuration
+	let formatterEnableDidChange = false;
 	if (event && event.affectsConfiguration(language)) {
+		formatterEnableDidChange = settings.format.enabled !== (formatProcessor?.settings.format.enabled || false);
+
 		if (symbolProcessor) {
 			symbolProcessor.settings = settings;
 		}
@@ -47,7 +50,9 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 			formatProcessor.settings = settings;
 		}
 
-		return;
+		if (!formatterEnableDidChange) {
+			return;
+		}
 	}
 
 	// dispose previously created providers
@@ -56,14 +61,16 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 		provider.dispose();
 	}
 
-	// dispose previously created symbol processor
-	if (symbolProcessor) {
-		symbolProcessor.destroy();
+	if (!formatterEnableDidChange || !symbolProcessor) {
+		// dispose previously created symbol processor
+		if (symbolProcessor) {
+			symbolProcessor.destroy();
+		}
+		symbolProcessor = new SymbolProcessor(settings);
 	}
-	symbolProcessor = new SymbolProcessor(settings);
 
 	if (settings.format.enabled) {
-		// dispose previously created format processor
+		// create format processor if not exists
 		if (!formatProcessor) {
 			formatProcessor = new FormatProcessor(settings);
 		}
