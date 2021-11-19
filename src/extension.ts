@@ -78,7 +78,7 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 		ctx.subscriptions.push(
 			vscode.languages.registerDocumentFormattingEditProvider(languageSelector, new Z80DocumentFormatter(formatProcessor)),
 			vscode.languages.registerDocumentRangeFormattingEditProvider(languageSelector, new Z80DocumentRangeFormatter(formatProcessor)),
-			vscode.languages.registerOnTypeFormattingEditProvider(languageSelector, new Z80TypingFormatter(formatProcessor), ' ', ',', ';', ':'),
+			vscode.languages.registerOnTypeFormattingEditProvider(languageSelector, new Z80TypingFormatter(formatProcessor), ' ', ',', ';', ':', '\n'),
 		);
 	}
 
