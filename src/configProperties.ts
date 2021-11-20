@@ -2,10 +2,13 @@ import * as vscode from 'vscode';
 import { EXTENSION_LANGUAGE_ID } from './extension';
 
 export interface ConfigProps {
+	eol: string;
+	formatOnType: boolean;
 	indentSpaces: boolean;
 	indentSize: number;
 	indentDetector: RegExp;
-	eol: string;
+
+	// format section
 	baseIndent: number;
 	controlIndent: number;
 	whitespaceAfterInstruction: 'auto' | 'tab' | 'single-space';
@@ -16,7 +19,6 @@ export interface ConfigProps {
 	colonAfterLabels: 'no-change' | boolean;
 	hexaNumberStyle: 'no-change' | 'hash' | 'motorola' | 'intel' | 'intel-uppercase' | 'c-style';
 	hexaNumberCase: 'no-change' | boolean;
-	formatOnType: boolean;
 }
 
 export abstract class ConfigPropsProvider {
@@ -25,20 +27,21 @@ export abstract class ConfigPropsProvider {
 	getConfigProps(document: vscode.TextDocument) {
 		const config = vscode.workspace.getConfiguration(undefined, { languageId: EXTENSION_LANGUAGE_ID });
 
+		const indentSize = parseInt(config.editor.tabSize, 10) || 8;
 		const result: ConfigProps = {
 			...this.settings?.format,
 
-			indentSpaces: (config.editor.insertSpaces === 'true'),
-			indentSize: parseInt(config.editor.tabSize as any, 10) || 8,
 			eol: (config.files.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n',
-			formatOnType: config.editor.formatOnType
-		};
+			formatOnType: config.editor.formatOnType === true,
+			indentSpaces: config.editor.insertSpaces === true,
+			indentSize,
 
-		result.indentDetector = RegExp('^' +
-			`(\t|${' '.repeat(result.indentSize)})?`.repeat(
-				Math.ceil(80 / result.indentSize)
+			indentDetector: RegExp('^' +
+				`(\t|${' '.repeat(indentSize)})?`.repeat(
+					Math.ceil(80 / indentSize)
+				)
 			)
-		);
+		};
 
 		// if this document is open, use the settings from that window
 		vscode.window.visibleTextEditors.some(editor => {

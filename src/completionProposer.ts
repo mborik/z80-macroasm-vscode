@@ -56,27 +56,28 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		return item;
 	}
 
-	private registerMapper(options: ConfigProps & { secondArgument?: boolean },
-		ucase: boolean, snippet: string, idx: number) {
-
+	private registerMapper(
+		options: ConfigProps & { secondArgument?: boolean },
+		ucase: boolean, snippet: string, idx: number
+	) {
 		snippet = uppercaseIfNeeded(snippet, ucase);
 
-		// Add space before selected autocompletion, unless user has formatOnType enabled; in this case, formatter will already add the space by the time intellisense menu is shown. If we also let space here, we'll end up with 2 spaces.
-		let prefix = '';
-		if (options.secondArgument && options.spaceAfterArgument && !options.formatOnType) {
-			prefix = ' ';
-		}
+		// add space before selected completion, unless user has `formatOnType` enabled,
+		// because in that case, formatter already added whitespace before the completion menu is shown.
+		const prefix = (
+			!options.formatOnType &&
+			options.secondArgument &&
+			options.spaceAfterArgument) ? ' ' : '';
 
-		// When formatOnType is enabled, don't add newline after the autocomplete, it will also create a new line in the editor where we only want enter to confirm the item.
-		let suffix = options.eol;
-		if (options.formatOnType) {
-			suffix = '';
-		}
+		// when `formatOnType` is enabled, we shouldn't add newline after the argument,
+		// because it will create a newline itself while we want enter just to confirm the item.
+		const suffix = options.formatOnType ? '' : options.eol;
 
-		// Commit characters are slightly different: for first character, comma is accepted, for second space. And for both tab and enter as well.
-		let commitChars = [' ', '\t', '\n'];
+		// commit characters are slightly different for second argument:
+		// comma is accepted in addition to space, tab and enter.
+		const commitChars = [' ', '\t', '\n'];
 		if (!options.secondArgument) {
-			commitChars = [',', '\t', '\n'];
+			commitChars.unshift(',');
 		}
 
 		if (options.bracketType === 'square' && snippet.indexOf('(') === 0) {
@@ -102,7 +103,6 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		position: vscode.Position,
 		token: vscode.CancellationToken
 	) {
-
 		const configProps = this.getConfigProps(document);
 		const line: string = document.lineAt(position.line).text;
 		const shouldSuggestInstructionMatch = regex.shouldSuggestInstruction.exec(line);
@@ -110,7 +110,6 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		const shouldKeywordUppercase = (part: string) =>
 			configProps.uppercaseKeywords === 'auto' ? isFirstLetterUppercase(part) :
 			configProps.uppercaseKeywords as boolean;
-
 
 		let output: vscode.CompletionItem[] = [];
 

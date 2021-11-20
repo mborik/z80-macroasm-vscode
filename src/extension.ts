@@ -1,6 +1,10 @@
 import * as vscode from 'vscode';
-import { FormatProcessor,
-	Z80DocumentFormatter, Z80DocumentRangeFormatter, Z80TypingFormatter } from './formatProcessor';
+import {
+	FormatProcessor,
+	Z80DocumentFormatter,
+	Z80DocumentRangeFormatter,
+	Z80TypingFormatter
+} from './formatProcessor';
 import { SymbolProcessor } from './symbolProcessor';
 import { Z80CompletionProposer } from './completionProposer';
 import { Z80DefinitionProvider } from './definitionProvider';
@@ -8,12 +12,11 @@ import { Z80HoverProvider } from './hover';
 import { Z80RenameProvider } from './renameProvider';
 import { Z80DocumentSymbolProvider, Z80WorkspaceSymbolProvider } from './symbolProvider';
 
+export const EXTENSION_LANGUAGE_ID = 'z80-macroasm';
 
 let changeConfigSubscription: vscode.Disposable | undefined;
 let symbolProcessor: SymbolProcessor | undefined;
 let formatProcessor: FormatProcessor | undefined;
-
-export const EXTENSION_LANGUAGE_ID = 'z80-macroasm';
 
 export function activate(ctx: vscode.ExtensionContext) {
 	configure(ctx);
