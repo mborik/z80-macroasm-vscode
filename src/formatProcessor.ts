@@ -14,16 +14,11 @@ interface LineParts extends LinePartFrag {
 	fragments?: LinePartFrag[];
 }
 
-interface SourceInfo {
-	isOnType: boolean;
-	char: string;
-}
-
 type FormatProcessorOutput = vscode.ProviderResult<vscode.TextEdit[]>;
 type EvalSpecificRegExpExecArray = RegExpExecArray & { notIndented?: boolean } | null;
 
 export class FormatProcessor extends ConfigPropsProvider {
-	format(document: vscode.TextDocument, range: vscode.Range, sourceInfo?: SourceInfo): FormatProcessorOutput {
+	format(document: vscode.TextDocument, range: vscode.Range, isOnType: boolean = false): FormatProcessorOutput {
 		const configProps = this.getConfigProps(document);
 		const startLineNumber = document.lineAt(range.start).lineNumber;
 		const endLineNumber = document.lineAt(range.end).lineNumber;
@@ -325,11 +320,11 @@ export class FormatProcessor extends ConfigPropsProvider {
 					});
 				}
 			);
- 
-			var result = newText.join('');
+
+			let result = newText.join('');
 
 			// Don't trim for on-type formatting, it interferes with typing, much more fluent this way.
-			if (!sourceInfo?.isOnType) {
+			if (!isOnType) {
 				result = result.trimEnd();
 			}
 
@@ -362,12 +357,11 @@ export class Z80TypingFormatter implements vscode.OnTypeFormattingEditProvider {
 
 	provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string): FormatProcessorOutput {
 		// If enter is pressed, we should format the line that was being edited before, not the new line.
-		var line = position.line;
-		if (ch == '\n' && line > 0) {
+		let line = position.line;
+		if (ch === '\n' && line > 0) {
 			line--;
 		}
 
-		const sourceInfo: SourceInfo = { isOnType: true, char: ch };
-		return this.formatter.format(document, document.lineAt(line).range, sourceInfo);
+		return this.formatter.format(document, document.lineAt(line).range, true);
 	}
 }
