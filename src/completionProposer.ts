@@ -113,6 +113,11 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 
 		let output: vscode.CompletionItem[] = [];
 
+		const endCommentMatch = regex.endComment.exec(line);
+		if (endCommentMatch && endCommentMatch.index < position.character) {
+			return;
+		}
+
 		if (shouldSuggestInstructionMatch) {
 			const uc = shouldKeywordUppercase(shouldSuggestInstructionMatch[4]);
 
