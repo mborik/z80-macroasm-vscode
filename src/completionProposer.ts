@@ -61,8 +61,9 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 
 		snippet = uppercaseIfNeeded(snippet, ucase);
 
+		// Add space before selected autocompletion, unless user has formatOnType enabled; in this case, formatter will already add the space by the time intellisense menu is shown. If we also let space here, we'll end up with 2 spaces.
 		let prefix = '';
-		if (options.secondArgument && options.spaceAfterArgument) {
+		if (options.secondArgument && options.spaceAfterArgument && !options.formatOnType) {
 			prefix = ' ';
 		}
 
