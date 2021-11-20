@@ -5,15 +5,27 @@ import { isFirstLetterUppercase, uppercaseIfNeeded, pad } from './utils';
 import regex from './defs_regex';
 import set from './defs_list';
 
+interface InstructionMapperProps extends ConfigProps {
+	snippet: string;
+	uppercase: boolean;
+	z80n?: boolean;
+}
+
+interface RegisterMapperProps extends ConfigProps {
+	snippet: string;
+	index: number;
+	uppercase: boolean;
+	secondArgument?: boolean;
+}
 
 export class Z80CompletionProposer extends ConfigPropsProvider implements vscode.CompletionItemProvider {
 	constructor(public symbolProcessor: SymbolProcessor) {
 		super(symbolProcessor.settings);
 	}
 
-	private instructionMapper(opt: ConfigProps, ucase: boolean, z80n: boolean, snippet: string) {
+	private instructionMapper({ snippet, uppercase, z80n, ...opt }: InstructionMapperProps) {
 		const delimiter = snippet.substr(-1);
-		snippet = uppercaseIfNeeded(snippet, ucase).trim();
+		snippet = uppercaseIfNeeded(snippet, uppercase).trim();
 
 		const item = new vscode.CompletionItem(snippet, vscode.CompletionItemKind.Keyword);
 		const snip = new vscode.SnippetString(snippet);
@@ -56,31 +68,25 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		return item;
 	}
 
-	private registerMapper(
-		options: ConfigProps & { secondArgument?: boolean },
-		ucase: boolean, snippet: string, idx: number
-	) {
-		snippet = uppercaseIfNeeded(snippet, ucase);
+	private registerMapper({ snippet, uppercase, index, secondArgument, ...opt }: RegisterMapperProps) {
+		snippet = uppercaseIfNeeded(snippet, uppercase);
 
 		// add space before selected completion, unless user has `formatOnType` enabled,
 		// because in that case, formatter already added whitespace before the completion menu is shown.
-		const prefix = (
-			!options.formatOnType &&
-			options.secondArgument &&
-			options.spaceAfterArgument) ? ' ' : '';
+		const prefix = (!opt.formatOnType && secondArgument && opt.spaceAfterArgument) ? ' ' : '';
 
 		// when `formatOnType` is enabled, we shouldn't add newline after the second argument,
 		// because it will create a newline itself while we want Enter key just to confirm the item.
-		const suffix = (!options.formatOnType && options.secondArgument) ? options.eol : '';
+		const suffix = (!opt.formatOnType && secondArgument) ? opt.eol : '';
 
 		// commit characters are slightly different for second argument:
 		// comma is accepted in addition to space, tab and enter.
 		const commitChars = [' ', '\t', '\n'];
-		if (!options.secondArgument) {
+		if (!secondArgument) {
 			commitChars.unshift(',');
 		}
 
-		if (options.bracketType === 'square' && snippet.indexOf('(') === 0) {
+		if (opt.bracketType === 'square' && snippet.indexOf('(') === 0) {
 			snippet = snippet.replace('(', '[').replace(')', ']');
 		}
 
@@ -91,7 +97,7 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		snip.appendTabstop(0);
 
 		// put on the top of the list...
-		item.sortText = `!${pad(idx)}`;
+		item.sortText = `!${pad(index)}`;
 		item.insertText = snip;
 		item.commitCharacters = commitChars;
 		return item;
@@ -119,11 +125,20 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		}
 
 		if (shouldSuggestInstructionMatch) {
-			const uc = shouldKeywordUppercase(shouldSuggestInstructionMatch[4]);
+			const uppercase = shouldKeywordUppercase(shouldSuggestInstructionMatch[4]);
 
 			output = [
-				...set.instructions.map(this.instructionMapper.bind(this, configProps, uc, false)),
-				...set.nextInstructions.map(this.instructionMapper.bind(this, configProps, uc, true))
+				...set.instructions.map((snippet) => this.instructionMapper({
+					...configProps,
+					uppercase,
+					snippet
+				})),
+				...set.nextInstructions.map((snippet) => this.instructionMapper({
+					...configProps,
+					z80n: true,
+					uppercase,
+					snippet
+				}))
 			];
 		}
 		else {
@@ -131,12 +146,12 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 			const shouldSuggest2ArgRegisterMatch = regex.shouldSuggest2ArgRegister.exec(line);
 
 			if (shouldSuggest2ArgRegisterMatch) {
-				const uc = shouldKeywordUppercase(shouldSuggest2ArgRegisterMatch[1]);
+				const uppercase = shouldKeywordUppercase(shouldSuggest2ArgRegisterMatch[1]);
 
 				if (shouldSuggest2ArgRegisterMatch[1].toLowerCase() === 'ex' &&
 					shouldSuggest2ArgRegisterMatch[2].toLowerCase() === 'af') {
 
-					const text = uppercaseIfNeeded("af'", uc);
+					const text = uppercaseIfNeeded("af'", uppercase);
 					const item = new vscode.CompletionItem(text, vscode.CompletionItemKind.Value);
 					item.insertText = new vscode.SnippetString(text)
 						.appendText(configProps.eol)
@@ -146,14 +161,17 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 					return [item];
 				}
 				else {
-					output = set.registers.map(this.registerMapper.bind(this, {
+					output = set.registers.map((snippet, index) => this.registerMapper({
 						...configProps,
-						secondArgument: true
-					}, uc));
+						secondArgument: true,
+						uppercase,
+						snippet,
+						index
+					}));
 				}
 			}
 			else if (shouldSuggest1ArgRegisterMatch) {
-				const uc = shouldKeywordUppercase(shouldSuggest1ArgRegisterMatch[0]);
+				const uppercase = shouldKeywordUppercase(shouldSuggest1ArgRegisterMatch[0]);
 				let idxStart = 0, idxEnd = undefined;
 
 				if (shouldSuggest1ArgRegisterMatch[1]) {
@@ -164,9 +182,16 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 					idxEnd = set.regR16Index;
 				}
 
-				output = set.registers.slice(idxStart, idxEnd).map(
-					this.registerMapper.bind(this, configProps, uc)
-				);
+				output = set.registers
+					.slice(idxStart, idxEnd)
+					.map(
+						(snippet, index) => this.registerMapper({
+							...configProps,
+							uppercase,
+							snippet,
+							index
+						})
+					);
 			}
 		}
 
