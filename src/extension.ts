@@ -13,6 +13,8 @@ let changeConfigSubscription: vscode.Disposable | undefined;
 let symbolProcessor: SymbolProcessor | undefined;
 let formatProcessor: FormatProcessor | undefined;
 
+export const EXTENSION_LANGUAGE_ID = 'z80-macroasm';
+
 export function activate(ctx: vscode.ExtensionContext) {
 	configure(ctx);
 
@@ -34,13 +36,12 @@ export function deactivate() {
 }
 
 function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationChangeEvent) {
-	const language = 'z80-macroasm';
-	const settings = vscode.workspace.getConfiguration(language);
-	const languageSelector: vscode.DocumentFilter = { language, scheme: 'file' };
+	const settings = vscode.workspace.getConfiguration(EXTENSION_LANGUAGE_ID);
+	const languageSelector: vscode.DocumentFilter = { language: EXTENSION_LANGUAGE_ID, scheme: 'file' };
 
 	// test if changing specific configuration
 	let formatterEnableDidChange = false;
-	if (event && event.affectsConfiguration(language)) {
+	if (event && event.affectsConfiguration(EXTENSION_LANGUAGE_ID)) {
 		formatterEnableDidChange = settings.format.enabled !== (formatProcessor?.settings.format.enabled || false);
 
 		if (symbolProcessor) {
@@ -78,7 +79,7 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 		ctx.subscriptions.push(
 			vscode.languages.registerDocumentFormattingEditProvider(languageSelector, new Z80DocumentFormatter(formatProcessor)),
 			vscode.languages.registerDocumentRangeFormattingEditProvider(languageSelector, new Z80DocumentRangeFormatter(formatProcessor)),
-			vscode.languages.registerOnTypeFormattingEditProvider(languageSelector, new Z80TypingFormatter(formatProcessor), ' ', ',', ';', ':'),
+			vscode.languages.registerOnTypeFormattingEditProvider(languageSelector, new Z80TypingFormatter(formatProcessor), ' ', ',', ';', ':', '\n'),
 		);
 	}
 

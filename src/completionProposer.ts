@@ -61,9 +61,22 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 
 		snippet = uppercaseIfNeeded(snippet, ucase);
 
+		// Add space before selected autocompletion, unless user has formatOnType enabled; in this case, formatter will already add the space by the time intellisense menu is shown. If we also let space here, we'll end up with 2 spaces.
 		let prefix = '';
-		if (options.secondArgument && options.spaceAfterArgument) {
+		if (options.secondArgument && options.spaceAfterArgument && !options.formatOnType) {
 			prefix = ' ';
+		}
+
+		// When formatOnType is enabled, don't add newline after the autocomplete, it will also create a new line in the editor where we only want enter to confirm the item.
+		let suffix = options.eol;
+		if (options.formatOnType) {
+			suffix = '';
+		}
+
+		// Commit characters are slightly different: for first character, comma is accepted, for second space. And for both tab and enter as well.
+		let commitChars = [' ', '\t', '\n'];
+		if (!options.secondArgument) {
+			commitChars = [',', '\t', '\n'];
 		}
 
 		if (options.bracketType === 'square' && snippet.indexOf('(') === 0) {
@@ -73,13 +86,13 @@ export class Z80CompletionProposer extends ConfigPropsProvider implements vscode
 		const item = new vscode.CompletionItem(snippet, vscode.CompletionItemKind.Value);
 		const snip = new vscode.SnippetString(prefix + snippet.replace('*', '${1:0}'));
 
-		snip.appendText(options.eol);
+		snip.appendText(suffix);
 		snip.appendTabstop(0);
 
 		// put on the top of the list...
 		item.sortText = `!${pad(idx)}`;
 		item.insertText = snip;
-		item.commitCharacters = ['\n'];
+		item.commitCharacters = commitChars;
 		return item;
 	}
 

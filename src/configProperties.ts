@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { EXTENSION_LANGUAGE_ID } from './extension';
 
 export interface ConfigProps {
 	indentSpaces: boolean;
@@ -15,20 +16,22 @@ export interface ConfigProps {
 	colonAfterLabels: 'no-change' | boolean;
 	hexaNumberStyle: 'no-change' | 'hash' | 'motorola' | 'intel' | 'intel-uppercase' | 'c-style';
 	hexaNumberCase: 'no-change' | boolean;
+	formatOnType: boolean;
 }
 
 export abstract class ConfigPropsProvider {
 	constructor(public settings: vscode.WorkspaceConfiguration) {}
 
 	getConfigProps(document: vscode.TextDocument) {
-		const config = vscode.workspace.getConfiguration();
+		const config = vscode.workspace.getConfiguration(undefined, { languageId: EXTENSION_LANGUAGE_ID });
 
 		const result: ConfigProps = {
 			...this.settings?.format,
 
 			indentSpaces: (config.editor.insertSpaces === 'true'),
 			indentSize: parseInt(config.editor.tabSize as any, 10) || 8,
-			eol: (config.files.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n'
+			eol: (config.files.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n',
+			formatOnType: config.editor.formatOnType
 		};
 
 		result.indentDetector = RegExp('^' +
