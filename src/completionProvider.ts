@@ -23,7 +23,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		super(symbolProcessor.settings);
 	}
 
-	private instructionMapper({ snippet, uppercase, z80n, ...opt }: InstructionMapperProps) {
+	private _instructionMapper({ snippet, uppercase, z80n, ...opt }: InstructionMapperProps) {
 		const delimiter = snippet.substr(-1);
 		snippet = uppercaseIfNeeded(snippet, uppercase).trim();
 
@@ -68,7 +68,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		return item;
 	}
 
-	private registerMapper({ snippet, uppercase, index, secondArgument, ...opt }: RegisterMapperProps) {
+	private _registerMapper({ snippet, uppercase, index, secondArgument, ...opt }: RegisterMapperProps) {
 		snippet = uppercaseIfNeeded(snippet, uppercase);
 
 		// add space before selected completion, unless user has `formatOnType` enabled,
@@ -128,12 +128,12 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 			const uppercase = shouldKeywordUppercase(shouldSuggestInstructionMatch[4]);
 
 			output = [
-				...set.instructions.map((snippet) => this.instructionMapper({
+				...set.instructions.map((snippet) => this._instructionMapper({
 					...configProps,
 					uppercase,
 					snippet
 				})),
-				...set.nextInstructions.map((snippet) => this.instructionMapper({
+				...set.nextInstructions.map((snippet) => this._instructionMapper({
 					...configProps,
 					z80n: true,
 					uppercase,
@@ -161,7 +161,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 					return [item];
 				}
 				else {
-					output = set.registers.map((snippet, index) => this.registerMapper({
+					output = set.registers.map((snippet, index) => this._registerMapper({
 						...configProps,
 						secondArgument: true,
 						uppercase,
@@ -185,7 +185,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 				output = set.registers
 					.slice(idxStart, idxEnd)
 					.map(
-						(snippet, index) => this.registerMapper({
+						(snippet, index) => this._registerMapper({
 							...configProps,
 							uppercase,
 							snippet,

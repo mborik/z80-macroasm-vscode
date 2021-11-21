@@ -70,7 +70,7 @@ export class Z80RenameProvider implements vscode.RenameProvider {
 		token: vscode.CancellationToken
 	): Thenable<vscode.WorkspaceEdit> {
 
-		return this.processSymbolAtDocPosition(document, position, newName, token);
+		return this._processSymbolAtDocPosition(document, position, newName, token);
 	}
 
 
@@ -82,7 +82,7 @@ export class Z80RenameProvider implements vscode.RenameProvider {
 	 * @param token Cancellation token object.
 	 * @returns Promise.
 	 */
-	private async processSymbolAtDocPosition(
+	private async _processSymbolAtDocPosition(
 		document: vscode.TextDocument,
 		position: vscode.Position,
 		newName: string,
