@@ -18,7 +18,7 @@ interface RegisterMapperProps extends ConfigProps {
 	secondArgument?: boolean;
 }
 
-export class Z80CompletionProposer extends ConfigPropsProvider implements vscode.CompletionItemProvider {
+export class Z80CompletionProvider extends ConfigPropsProvider implements vscode.CompletionItemProvider {
 	constructor(public symbolProcessor: SymbolProcessor) {
 		super(symbolProcessor.settings);
 	}

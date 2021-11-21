@@ -6,7 +6,7 @@ import {
 	Z80TypingFormatter
 } from './formatProcessor';
 import { SymbolProcessor } from './symbolProcessor';
-import { Z80CompletionProposer } from './completionProposer';
+import { Z80CompletionProvider } from './completionProvider';
 import { Z80DefinitionProvider } from './definitionProvider';
 import { Z80HoverProvider } from './hover';
 import { Z80RenameProvider } from './renameProvider';
@@ -88,7 +88,7 @@ function configure(ctx: vscode.ExtensionContext, event?: vscode.ConfigurationCha
 
 	// create subscriptions for all providers
 	ctx.subscriptions.push(
-		vscode.languages.registerCompletionItemProvider(languageSelector, new Z80CompletionProposer(symbolProcessor), ',', '.', ' '),
+		vscode.languages.registerCompletionItemProvider(languageSelector, new Z80CompletionProvider(symbolProcessor), ',', '.', ' '),
 		vscode.languages.registerDefinitionProvider(languageSelector, new Z80DefinitionProvider(symbolProcessor)),
 		vscode.languages.registerDocumentSymbolProvider(languageSelector, new Z80DocumentSymbolProvider(symbolProcessor)),
 		vscode.languages.registerHoverProvider(languageSelector, new Z80HoverProvider(symbolProcessor)),
