@@ -102,10 +102,15 @@ These values can be used in `.vscode/tasks.json` of your project's build task.
 
 ## ⌨️ Credits
 
-This extension was done by **Martin Bórik** with some inspirations from these VS Code extensions:
+**Martin Bórik** is leading the development of this extension with some inspirations from these VS Code extensions:
 - [`z80asm-vscode`](https://github.com/Imanolea/z80asm-vscode) by **Imanol Barriuso**
 - [`vscode-pasmo`](https://github.com/BouKiCHi/vscode-pasmo) by **BouKiCHi**
 - [`rgbds-vscode`](https://github.com/DonaldHays/rgbds-vscode) by **Donald Hays**
+
+#### Contributors:
+- [Krusty of Benediction](https://github.com/rgiot)
+- [Néstor Sancho](https://github.com/theNestruo)
+- [Tomaz Kragelj](https://github.com/tomaz)
 
 ## 📋 License
 
