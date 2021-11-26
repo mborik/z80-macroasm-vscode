@@ -38,12 +38,12 @@ export default {
 	evalExpression: /^\@?([\w\.]+)((?:\:?\s*)=\s*|(?:\:\s*|\s+)(?:(?:equ|eval)\s+))(.+)(;.*)?$/i,
 	shouldSuggestInstruction: /^(\@?((\$\$(?!\.))?[\w\.]+)[:\s])?\s*(\w+)?(?!.+)$/,
 	shouldSuggest1ArgRegister: mkRegex`
-		(?:
+		((?:
 			(pop|push)|
 			(cp|in|s[lr]a|s[lr]l|slia|sl1|sub|and|te?st|x?or|mul)|
 			(ex|ld|inc|dec|adc|add|sbc)
 		)
-		\s+[[(]?([a-z]\w*)?$`,
+		\s+)[[(]?([a-z]\w*)?$`,
 	shouldSuggest2ArgRegister: mkRegex`
 		(
 			adc|add|bit|ex|ld|out|res|r[lr]c?|set|

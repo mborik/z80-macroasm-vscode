@@ -16,6 +16,7 @@ interface RegisterMapperProps extends ConfigProps {
 	index: number;
 	uppercase: boolean;
 	secondArgument?: boolean;
+	range?: vscode.Range;
 }
 
 export class Z80CompletionProvider extends ConfigPropsProvider implements vscode.CompletionItemProvider {
@@ -58,7 +59,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		snip.appendTabstop(0);
 
 		item.insertText = snip;
-		item.commitCharacters = ['\t'];
+		item.commitCharacters = [' ', '\t'];
 
 		if (z80n) {
 			item.documentation = new vscode.MarkdownString('(Z80N)');
@@ -68,7 +69,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		return item;
 	}
 
-	private _registerMapper({ snippet, uppercase, index, secondArgument, ...opt }: RegisterMapperProps) {
+	private _registerMapper({ snippet, uppercase, index, secondArgument, range, ...opt }: RegisterMapperProps) {
 		snippet = uppercaseIfNeeded(snippet, uppercase);
 
 		// add space before selected completion, unless user has `formatOnType` enabled,
@@ -100,6 +101,11 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		item.sortText = `!${pad(index)}`;
 		item.insertText = snip;
 		item.commitCharacters = commitChars;
+
+		if (range) {
+			item.range = range;
+		}
+
 		return item;
 	}
 
@@ -110,7 +116,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		token: vscode.CancellationToken
 	) {
 		const configProps = this.getConfigProps(document);
-		const line: string = document.lineAt(position.line).text;
+		const line = document.lineAt(position.line).text;
 		const shouldSuggestInstructionMatch = regex.shouldSuggestInstruction.exec(line);
 
 		const shouldKeywordUppercase = (part: string) =>
@@ -171,16 +177,28 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 				}
 			}
 			else if (shouldSuggest1ArgRegisterMatch) {
-				const uppercase = shouldKeywordUppercase(shouldSuggest1ArgRegisterMatch[0]);
+				const {
+					index,
+					1: instruction,
+					2: instructionR16,
+					3: instructionR8
+				} = shouldSuggest1ArgRegisterMatch;
+
+				const uppercase = shouldKeywordUppercase(instruction);
 				let idxStart = 0, idxEnd = undefined;
 
-				if (shouldSuggest1ArgRegisterMatch[1]) {
+				if (instructionR16) {
 					idxStart = set.regR16Index;
 					idxEnd = set.regStackIndex;
 				}
-				else if (shouldSuggest1ArgRegisterMatch[2]) {
+				else if (instructionR8) {
 					idxEnd = set.regR16Index;
 				}
+
+				const range = new vscode.Range(
+					position.line, index + instruction.length,
+					position.line, position.character
+				);
 
 				output = set.registers
 					.slice(idxStart, idxEnd)
@@ -189,7 +207,8 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 							...configProps,
 							uppercase,
 							snippet,
-							index
+							index,
+							range
 						})
 					);
 			}

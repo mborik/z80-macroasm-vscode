@@ -333,8 +333,8 @@ export class SymbolProcessor {
 						regex.keyword.test(keywordMatch[4])) ||
 					(arg2RegisterMatch && arg2RegisterMatch[3] &&
 						regex.registers.test(arg2RegisterMatch[3])) ||
-					(arg1RegisterMatch && arg1RegisterMatch[4] &&
-						regex.registers.test(arg1RegisterMatch[4]))) {
+					(arg1RegisterMatch && arg1RegisterMatch[5] &&
+						regex.registers.test(arg1RegisterMatch[5]))) {
 
 					return;
 				}
