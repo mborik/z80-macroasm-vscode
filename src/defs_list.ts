@@ -5,13 +5,14 @@ export default {
 	instructions: [
 		'adc\t',  'add\t',  'and\t',  'bit\t',  'call\t', 'ccf\n',  'cp\t',   'cpd\n',
 		'cpdr\n', 'cpi\n',  'cpir\n', 'cpl\n',  'daa\n',  'dec\t',  'di\n',   'ei\n',
-		'djnz\t', 'ex\t',   'exx\n',  'halt\n', 'im\t',   'in\t',   'inc\t',  'ind\n',
-		'indr\n', 'ini\n',  'inir\n', 'jp\t',   'jr\t',   'ld\t',   'ldd\n',  'lddr\n',
-		'ldi\n',  'ldir\n', 'neg\n',  'nop\n',  'or\t',   'otdr\n', 'otir\n', 'out\t',
-		'outd\n', 'outi\n', 'pop\t',  'push\t', 'res\t',  'ret\t',  'reti\n', 'retn\n',
-		'rl\t',   'rla\n',  'rlc\t',  'rlca\n', 'rld\n',  'rr\t',   'rra\n',  'rrc\t',
-		'rrca\n', 'rrd\n',  'rst\t',  'sbc\t',  'scf\n',  'set\t',  'sla\t',  'slia\t',
-		'sll\t',  'sl1\t',  'swap\t', 'sra\t',  'srl\t',  'sub\t',  'xor\t'
+		'djnz\t', 'ex\t',   'exa\n',  'exd\n',  'exx\n',  'halt\n', 'im\t',   'in\t',
+		'inc\t',  'ind\n',  'indr\n', 'ini\n',  'inir\n', 'jp\t',   'jr\t',   'ld\t',
+		'ldd\n',  'lddr\n', 'ldi\n',  'ldir\n', 'neg\n',  'nop\n',  'or\t',   'otdr\n',
+		'otir\n', 'out\t',  'outd\n', 'outi\n', 'pop\t',  'push\t', 'res\t',  'ret\t',
+		'reti\n', 'retn\n', 'rl\t',   'rla\n',  'rlc\t',  'rlca\n', 'rld\n',  'rr\t',
+		'rra\n',  'rrc\t',  'rrca\n', 'rrd\n',  'rst\t',  'sbc\t',  'scf\n',  'set\t',
+		'sla\t',  'slia\t', 'sll\t',  'sl1\t',  'swap\t', 'sra\t',  'srl\t',  'sub\t',
+		'xor\t'
 	],
 	// Z80N - ZX-Spectrum Next extended instruction set
 	nextInstructions: [
