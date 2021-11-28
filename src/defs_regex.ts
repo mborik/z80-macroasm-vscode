@@ -74,7 +74,7 @@ export default {
 		bank|bankset|limit|protect|write\s+direct|str|
 		def[bdlmswir]|d[bcdszw]|abyte[cz]?|byte|d?word|hex|
 		if|ifn?def|ifn?used|ifn?exist|else(?:if)?|endif|
-		ad[cd]|and|bit|call|ccf|cp|cp[di]r?|cpl|daa|dec|[de]i|djnz|exx?|halt|
+		ad[cd]|and|bit|call|ccf|cp|cp[di]r?|cpl|daa|dec|[de]i|djnz|ex[adx]?|halt|
 		i[mn]|inc|in[di]r?|j[pr]|ld|ld[di]r?|neg|nop|ot[di]r|out|out[di]|
 		pop|push|res|ret[in]?|rla?|rlca?|r[lr]d|rra?|rrca?|rst|sbc|scf|set|
 		s[lr]a|s[lr]l|slia|sl1|sub|x?or|
