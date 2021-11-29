@@ -111,6 +111,7 @@ These values can be used in `.vscode/tasks.json` of your project's build task.
 - [Krusty of Benediction](https://github.com/rgiot)
 - [Néstor Sancho](https://github.com/theNestruo)
 - [Tomaz Kragelj](https://github.com/tomaz)
+- [Alexander Kovalenko](https://github.com/alexanderk23)
 
 ## 📋 License
 
