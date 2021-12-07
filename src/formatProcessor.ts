@@ -80,8 +80,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 		if (typeof rest === 'string') {
 			if (rest.includes(',')) {
 				this._safeSplitStringByChar(rest, ',').forEach((arg, idx) => {
-					const ret = arg.trimEnd();
-					args.push(idx ? ret.trimStart() : ret);
+					args.push(idx ? arg.trimStart() : arg);
 				});
 			}
 			else {
@@ -186,7 +185,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				text = text.replace(fullMatch, '').trim();
 			}
 
-			const trimmedText = text.trim();
+			const trimmedText = text.trimStart();
 			const moduleLineMatch = regex.moduleLine.exec(trimmedText);
 			const macroLineMatch = regex.macroLine.exec(trimmedText);
 			const controlKeywordMatch = regex.controlKeywordLine.exec(trimmedText);
@@ -240,7 +239,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				}
 
 				if (!lineParts.fragments) {
-					const { keyword, args } = this._processFragment(text.trim());
+					const { keyword, args } = this._processFragment(text.trimStart());
 					lineParts.keyword = keyword;
 					lineParts.args = args;
 				}
