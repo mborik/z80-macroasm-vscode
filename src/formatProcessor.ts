@@ -185,7 +185,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				text = text.replace(fullMatch, '').trim();
 			}
 
-			const trimmedText = text.trimStart();
+			const trimmedText = isOnType ? text.trimStart() : text.trim();
 			const moduleLineMatch = regex.moduleLine.exec(trimmedText);
 			const macroLineMatch = regex.macroLine.exec(trimmedText);
 			const controlKeywordMatch = regex.controlKeywordLine.exec(trimmedText);
@@ -229,7 +229,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 					indentLevel = configProps.baseIndent;
 				}
 
-				if (configProps.splitInstructionsByColon && text.includes(':')) {
+				if (configProps.splitInstructionsByColon && !isOnType && text.includes(':')) {
 					const splitLine = this._safeSplitStringByChar(text, ':');
 					if (splitLine.length > 1) {
 						lineParts.fragments = splitLine.map(
@@ -239,7 +239,8 @@ export class FormatProcessor extends ConfigPropsProvider {
 				}
 
 				if (!lineParts.fragments) {
-					const { keyword, args } = this._processFragment(text.trimStart());
+					const trimmedText = isOnType ? text.trimStart() : text.trim();
+					const { keyword, args } = this._processFragment(trimmedText);
 					lineParts.keyword = keyword;
 					lineParts.args = args;
 				}
