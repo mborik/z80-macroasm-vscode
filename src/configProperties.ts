@@ -13,6 +13,7 @@ export interface ConfigProps {
 	controlIndent: number;
 	whitespaceAfterInstruction: 'auto' | 'tab' | 'single-space';
 	spaceAfterArgument: boolean;
+	spaceAfterInstruction: boolean;
 	uppercaseKeywords: 'auto' | boolean;
 	bracketType: 'no-change' | 'round' | 'square';
 	splitInstructionsByColon: boolean;

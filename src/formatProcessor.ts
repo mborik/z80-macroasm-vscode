@@ -1,9 +1,11 @@
 import * as vscode from 'vscode';
 import { ConfigProps, ConfigPropsProvider } from './configProperties';
 import regex from './defs_regex';
+import { safeSplitStringByChar } from './utils';
 
 interface LinePartFrag {
 	keyword: string;
+	fillSpace?: boolean;
 	firstParam?: string;
 	args?: string[];
 }
@@ -79,7 +81,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 		const args: string[] = [];
 		if (typeof rest === 'string') {
 			if (rest.includes(',')) {
-				this._safeSplitStringByChar(rest, ',').forEach((arg, idx) => {
+				safeSplitStringByChar(rest, ',').forEach((arg, idx) => {
 					args.push(idx ? arg.trimStart() : arg);
 				});
 			}
@@ -88,21 +90,6 @@ export class FormatProcessor extends ConfigPropsProvider {
 			}
 		}
 		return { keyword, args };
-	}
-
-	private _safeSplitStringByChar(input: string, splitter: string) {
-		const stringsMatches: string[] = [];
-		return input
-			.replaceAll(regex.stringBounds, (match) => {
-				const i = stringsMatches.push(match);
-				return `【${i.toString().padStart(3, '0')}】`;
-			})
-			.split(splitter)
-			.map((fragment) =>
-				fragment.replaceAll(/【(\d+)】/g, (_, counter) => {
-					return stringsMatches[parseInt(counter) - 1];
-				})
-			);
 	}
 
 //---------------------------------------------------------------------------------------
@@ -115,6 +102,8 @@ export class FormatProcessor extends ConfigPropsProvider {
 		const startLineNumber = document.lineAt(range.start).lineNumber;
 		const endLineNumber = document.lineAt(range.end).lineNumber;
 		const commaAfterArgument = ',' + (configProps.spaceAfterArgument ? ' ' : '');
+		const fragmentSeparator = `${configProps.spaceAfterInstruction ? ' ' : ''}: `;
+
 		const output: vscode.TextEdit[] = [];
 
 		for (let lineNumber = startLineNumber; lineNumber <= endLineNumber; ++lineNumber) {
@@ -148,7 +137,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				}
 
 				range = new vscode.Range(range.start, range.end.translate(0, idx - text.length));
-				text = text.substr(0, idx);
+				text = text.substring(0, idx);
 			}
 
 			const evalMatch: EvalSpecificRegExpExecArray = regex.evalExpression.exec(text);
@@ -189,6 +178,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 			const moduleLineMatch = regex.moduleLine.exec(trimmedText);
 			const macroLineMatch = regex.macroLine.exec(trimmedText);
 			const controlKeywordMatch = regex.controlKeywordLine.exec(trimmedText);
+			const trailingWhitespaceMatch = /\S(\s*)$/.exec(text);
 
 			if (moduleLineMatch?.index === 0) {
 				const [, keyword ] = moduleLineMatch;
@@ -208,7 +198,7 @@ export class FormatProcessor extends ConfigPropsProvider {
 				lineParts.args = [];
 				if (typeof rest === 'string') {
 					if (rest.includes(',')) {
-						this._safeSplitStringByChar(rest, ',').forEach((arg, idx) => {
+						safeSplitStringByChar(rest, ',').forEach((arg, idx) => {
 							const ret = arg.trimEnd();
 							lineParts.args?.push(idx ? ret.trimStart() : ret);
 						});
@@ -229,12 +219,24 @@ export class FormatProcessor extends ConfigPropsProvider {
 					indentLevel = configProps.baseIndent;
 				}
 
-				if (configProps.splitInstructionsByColon && !isOnType && text.includes(':')) {
-					const splitLine = this._safeSplitStringByChar(text, ':');
+				if (text.includes(':')) {
+					// stop processing multi-instruction lines on type when it should be splitted
+					if (configProps.splitInstructionsByColon && isOnType) {
+						continue;
+					}
+
+					const splitLine = safeSplitStringByChar(text, ':');
 					if (splitLine.length > 1) {
 						lineParts.fragments = splitLine.map(
 							frag => this._processFragment(frag.trim())
 						);
+
+						// test if user just not starting to type an instruction at the end of line
+						const trailingColonMatch = /:\s*$/.exec(text);
+						if (!configProps.splitInstructionsByColon && isOnType && trailingColonMatch) {
+							const lastFragmentIndex = lineParts.fragments.length - 1;
+							lineParts.fragments[lastFragmentIndex].fillSpace = true;
+						}
 					}
 				}
 
@@ -281,37 +283,53 @@ export class FormatProcessor extends ConfigPropsProvider {
 			}
 
 			(lineParts.fragments || [{ ...lineParts }]).forEach(
-				({ keyword, firstParam, args = [] }, index) => {
-					if (!keyword) {
+				({ keyword, firstParam, fillSpace, args = [] }, index) => {
+					if (!keyword && fillSpace == null) {
 						return;
 					}
 
 					if (index) {
-						newText.push(
-							configProps.splitInstructionsByColon ?
+						const lastFrag = newText.pop();
+						if (lastFrag) {
+							newText.push(lastFrag.trimEnd());
+						}
+
+						if (configProps.splitInstructionsByColon) {
+							newText.push(
 								(configProps.eol + this._generateIndent({
 									...configProps,
 									level: indentLevel,
-								})) : ': '
-						);
-					}
-
-					if (configProps.whitespaceAfterInstruction === 'single-space' ||
-						evalMatch?.notIndented) {
+								}))
+							);
+						}
+						else if (fillSpace) {
+							newText.push(fragmentSeparator.trimEnd());
+							return;
+						}
+						else {
+							newText.push(fragmentSeparator);
+						}
 
 						newText.push(`${this._adjustKeywordCase({ ...configProps, keyword })} `);
 					}
-					else if (configProps.whitespaceAfterInstruction === 'tab') {
-						newText.push(`${this._adjustKeywordCase({ ...configProps, keyword })}\t`);
-					}
 					else {
-						newText.push(
-							this._generateIndent({
-								...configProps,
-								level: 1,
-								snippet: this._adjustKeywordCase({ ...configProps, keyword })
-							})
-						);
+						if (configProps.whitespaceAfterInstruction === 'single-space' ||
+							evalMatch?.notIndented) {
+
+							newText.push(`${this._adjustKeywordCase({ ...configProps, keyword })} `);
+						}
+						else if (configProps.whitespaceAfterInstruction === 'tab') {
+							newText.push(`${this._adjustKeywordCase({ ...configProps, keyword })}\t`);
+						}
+						else {
+							newText.push(
+								this._generateIndent({
+									...configProps,
+									level: 1,
+									snippet: this._adjustKeywordCase({ ...configProps, keyword })
+								})
+							);
+						}
 					}
 
 					if (firstParam) {
@@ -369,11 +387,9 @@ export class FormatProcessor extends ConfigPropsProvider {
 				}
 			);
 
-			let result = newText.join('');
-
-			// Don't trim for on-type formatting, it interferes with typing, much more fluent this way.
-			if (!isOnType) {
-				result = result.trimEnd();
+			let result = newText.join('').trimEnd();
+			if (isOnType && trailingWhitespaceMatch) {
+				result += trailingWhitespaceMatch[1];
 			}
 
 			output.push(new vscode.TextEdit(range, result));
@@ -404,12 +420,12 @@ export class Z80TypingFormatter implements vscode.OnTypeFormattingEditProvider {
 	constructor(public formatter: FormatProcessor) {}
 
 	provideOnTypeFormattingEdits(document: vscode.TextDocument, position: vscode.Position, ch: string): FormatProcessorOutput {
-		// If enter is pressed, we should format the line that was being edited before, not the new line.
+		// if enter is pressed, format line that was being edited before, not the new line
 		let line = position.line;
 		if (ch === '\n' && line > 0) {
 			line--;
 		}
 
-		return this.formatter.format(document, document.lineAt(line).range, true);
+		return this.formatter.format(document, document.lineAt(line).range, ch !== '\n');
 	}
 }

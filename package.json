@@ -83,6 +83,11 @@
           "default": false,
           "description": "Formatter: If you want to put a single space character after comma (instruction's argument)."
         },
+        "z80-macroasm.format.spaceAfterInstruction": {
+          "type": "boolean",
+          "default": true,
+          "description": "Formatter: If you want to put a single space character after instruction (before colon separator)."
+        },
         "z80-macroasm.format.uppercaseKeywords": {
           "type": [
             "boolean",
