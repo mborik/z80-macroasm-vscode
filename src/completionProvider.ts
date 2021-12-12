@@ -88,7 +88,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 
 		// when `formatOnType` is enabled, we shouldn't add newline after the second argument,
 		// because it will create a newline itself while we want Enter key just to confirm the item.
-		const suffix = (!opt.formatOnType && secondArgument) ? opt.eol : '';
+		const suffix = (!opt.formatOnType && secondArgument && opt.splitInstructionsByColon) ? opt.eol : '';
 
 		// commit characters are slightly different for second argument:
 		// comma is accepted in addition to space, tab and enter.
