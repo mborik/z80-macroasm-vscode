@@ -110,10 +110,11 @@ These values can be used in `.vscode/tasks.json` of your project's build task.
 - [`rgbds-vscode`](https://github.com/DonaldHays/rgbds-vscode) by **Donald Hays**
 
 #### Contributors:
-- [Krusty of Benediction](https://github.com/rgiot)
+- [Romain Giot](https://github.com/rgiot)
 - [Néstor Sancho](https://github.com/theNestruo)
 - [Tomaz Kragelj](https://github.com/tomaz)
 - [Alexander Kovalenko](https://github.com/alexanderk23)
+- [Alexander Kolnogorov](https://github.com/kolnogorov)
 
 ## 📋 License
 
