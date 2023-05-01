@@ -39,6 +39,8 @@ These few options allows you to configure extension's behavior but primarily you
   > default: `false`
 - `z80-macroasm.format.spaceAfterInstruction` - If you want to put a single space character after instruction (before colon separator).
   > default: `true`
+- `z80-macroasm.format.spacesAroundOperators` - If you want to wrap an operators with spaces.
+  > default: `false`
 - `z80-macroasm.format.uppercaseKeywords` - If true, uppercase all keywords, instructions and registers. False means all lowercased and `"auto"` tries to auto-detect your code-style while typing.
   > default: `"auto"`
 - `z80-macroasm.format.bracketType` - Define which type of brackets around the instruction's arguments (pointers) you prefer: `(round)` or `[square]`.

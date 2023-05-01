@@ -336,9 +336,35 @@ export class FormatProcessor extends ConfigPropsProvider {
 						newText.push(`${firstParam} `);
 					}
 
-					args.forEach((value, idx) => {
-						let result, matcher;
+					let wasOperator = false;
+					args.flatMap(arg => {
+						const matches = arg.matchAll(regex.operators);
+						const results = [];
+						let beginIndex = 0;
+						for (const match of matches) {
+							const { [1]: operator, input, index } = match;
+							if (input && index !== undefined) {
+								results.push(input.slice(beginIndex, index), `⨂${operator.trim()}`);
+								beginIndex = index + operator.length;
+							}
+						}
+						results.push(arg.slice(beginIndex));
+						return results;
 
+					}).forEach((value, idx) => {
+						if (value[0] === '⨂') {
+							const operator = value.slice(1).trim();
+							const space = (
+								configProps.spacesAroundOperators ||
+								/[a-z]+/i.test(operator) ? ' ' : ''
+							);
+
+							newText.push(space + value.slice(1) + space);
+							wasOperator = true;
+							return;
+						}
+
+						let result, matcher;
 						if (configProps.bracketType !== 'no-change' &&
 							(matcher = regex.bracketsBounds.exec(value))) {
 
@@ -375,13 +401,15 @@ export class FormatProcessor extends ConfigPropsProvider {
 							}
 						}
 
+						if (idx && !wasOperator) {
+							newText.push(commaAfterArgument);
+						}
 						newText.push(
-							(idx ? commaAfterArgument : '') +
-								(result || this._adjustKeywordCase({
-									...configProps,
-									keyword: value,
-									checkRegsOrConds: true
-								}))
+							(result || this._adjustKeywordCase({
+								...configProps,
+								keyword: value,
+								checkRegsOrConds: true
+							}))
 						);
 					});
 				}

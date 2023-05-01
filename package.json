@@ -88,6 +88,11 @@
           "default": true,
           "description": "Formatter: If you want to put a single space character after instruction (before colon separator)."
         },
+        "z80-macroasm.format.spacesAroundOperators": {
+          "type": "boolean",
+          "default": false,
+          "description": "Formatter: If you want to wrap an operators with spaces."
+        },
         "z80-macroasm.format.uppercaseKeywords": {
           "type": [
             "boolean",

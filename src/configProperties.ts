@@ -14,6 +14,7 @@ export interface ConfigProps {
 	whitespaceAfterInstruction: 'auto' | 'tab' | 'single-space';
 	spaceAfterArgument: boolean;
 	spaceAfterInstruction: boolean;
+	spacesAroundOperators: boolean;
 	uppercaseKeywords: 'auto' | boolean;
 	bracketType: 'no-change' | 'round' | 'square';
 	splitInstructionsByColon: boolean;

@@ -33,6 +33,7 @@ export default {
 	registers: /\b(?:[abcdefhlir]|ix|iy|af'?|bc|de|hl|pc|sp|ix[hlu]|iy[hlu]|[lh]x|x[lh]|[lh]y|y[lh])\b/i,
 	condFlags: /\b(j[pr]|call|ret)(?:\s+([cmpz]|n[cz]|p[eo]))$/i,
 	regsOrConds: /^([abcdefhlimprz]|ix|iy|af'?|bc|de|hl|pc|sp|ix[hlu]|iy[hlu]|[lh]x|x[lh]|[lh]y|y[lh]|n[cz]|p[eo])\b/i,
+	operators: /(?<=["'\w)])\s*([+\-\/%\^#]|[><=~&!\^\|\*]{1,2}|>>>|>=|<=|=>|<>|!=|mod|shl|shr|and|or|xor)\s*(?=[\w\$#%\.('"])/gi,
 	labelDefinition: /^\@?((\$\$(?!\.))?[\w\.]+)(:|\s|$)/,
 	parentLabel: /^(((\@|\$\$)(?!\.))?\w[\w\.]*)(?::|\s|$)/,
 	evalExpression: /^\@?([\w\.]+)((?:\:?\s*)=\s*|(?:\:\s*|\s+)(?:(?:equ|eval)\s+))(.+)(;.*)?$/i,
