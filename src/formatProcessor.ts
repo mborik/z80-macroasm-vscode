@@ -338,18 +338,29 @@ export class FormatProcessor extends ConfigPropsProvider {
 
 					let wasOperator = false;
 					args.flatMap(arg => {
-						const matches = arg.matchAll(regex.operators);
-						const results = [];
+						const stringsMatches: string[] = [];
+						const safeArg = arg.replaceAll(regex.stringBounds, (match) => {
+							const i = stringsMatches.push(match);
+							return `【${i.toString().padStart(3, '0')}】`;
+						});
+
+						const results: string[] = [];
+						const matches = safeArg.matchAll(regex.operators);
 						let beginIndex = 0;
 						for (const match of matches) {
 							const { [1]: operator, input, index } = match;
-							if (input && index !== undefined) {
+							if (input && index) {
 								results.push(input.slice(beginIndex, index), `⨂${operator.trim()}`);
 								beginIndex = index + operator.length;
 							}
 						}
-						results.push(arg.slice(beginIndex));
-						return results;
+						results.push(safeArg.slice(beginIndex));
+
+						return results.map((fragment) =>
+							fragment.replaceAll(/【(\d+)】/g, (_, counter) => {
+								return stringsMatches[parseInt(counter) - 1];
+							})
+						);
 
 					}).forEach((value, idx) => {
 						if (value[0] === '⨂') {
@@ -411,6 +422,8 @@ export class FormatProcessor extends ConfigPropsProvider {
 								checkRegsOrConds: true
 							}))
 						);
+
+						wasOperator = false;
 					});
 				}
 			);
