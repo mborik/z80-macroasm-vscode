@@ -2,7 +2,7 @@
   "name": "z80-macroasm",
   "displayName": "Z80 Macro-Assembler",
   "description": "Support for Z80 macro-assemblers in Visual Studio Code",
-  "version": "0.7.8",
+  "version": "0.7.9",
   "icon": "logo.png",
   "publisher": "mborik",
   "categories": [
@@ -26,13 +26,14 @@
     "type": "git",
     "url": "https://github.com/mborik/z80-macroasm-vscode.git"
   },
+  "pricing": "Free",
   "license": "MIT",
   "engines": {
     "vscode": "^1.52.0",
     "node": "^16.2.0"
   },
   "activationEvents": [
-    "onLanguage:z80-macroasm"
+    "onLanguage"
   ],
   "main": "./out/src/extension",
   "contributes": {
@@ -194,7 +195,7 @@
         "name": "errmatcher-sjasmplus",
         "owner": "z80-macroasm",
         "fileLocation": [
-          "autodetect",
+          "autoDetect",
           "${workspaceFolder}"
         ],
         "pattern": [
