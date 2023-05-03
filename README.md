@@ -55,6 +55,8 @@ These few options allows you to configure extension's behavior but primarily you
   >+ **"c-style"**: `0x1fff` | `0xB45D`
 - `z80-macroasm.format.hexaNumberCase` - When reformatting of hexadecimal numbers was enabled, whether it's to be additional case processing applied when `true` means uppercased, `false` lowercased.
   > default: `"no-change"`
+- `z80-macroasm.format.suggestOnInstructions` - Extension will suggest also basic instruction mnemonics for the auto-completion, not only instruction arguments.
+  > default: `false`
 - `z80-macroasm.format.splitInstructionsByColon` - Split colon separated instructions to lines.
   > default: `true`
 

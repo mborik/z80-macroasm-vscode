@@ -52,6 +52,7 @@ export default {
 			nextreg|bs[lr]a|bsr[lf]|brlc
 		)
 		\s+(\w+|\([^\)]+?\)|\[[^\]]+?\]),\s*?[[(]?([^[(\n]*)$`,
+	shouldSuggestConditionals: /(j[pr]|call|ret)\s+$/,
 	defineExpression: mkRegex`
 		^\@?([\w\.]+)\:?\s+(
 			inc(?:bin|hob|trd)|b?include|includelua|insert|binary|

@@ -179,6 +179,10 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 
 		const shouldSuggestInstructionMatch = regex.shouldSuggestInstruction.exec(fragment);
 		if (shouldSuggestInstructionMatch) {
+			if (!configProps.suggestOnInstructions) {
+				vscode.commands.executeCommand('editor.action.triggerSuggest', { auto: false });
+			}
+
 			const [ fullMatch,,,, instructionPart ] = shouldSuggestInstructionMatch;
 			const uppercase = this._shouldKeywordUppercase(
 				instructionPart,
@@ -218,6 +222,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		else {
 			const shouldSuggest1ArgRegisterMatch = regex.shouldSuggest1ArgRegister.exec(fragment);
 			const shouldSuggest2ArgRegisterMatch = regex.shouldSuggest2ArgRegister.exec(fragment);
+			const shouldSuggestConditionalsMatch = regex.shouldSuggestConditionals.exec(fragment);
 
 			if (shouldSuggest2ArgRegisterMatch) {
 				const uppercase = this._shouldKeywordUppercase(
@@ -285,6 +290,22 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 							range
 						})
 					);
+			}
+			else if (shouldSuggestConditionalsMatch) {
+				const { 1: instruction } = shouldSuggestConditionalsMatch;
+				const uppercase = this._shouldKeywordUppercase(
+					instruction,
+					configProps.uppercaseKeywords
+				);
+
+				output = set.conditionals.map(
+					(snippet, index) => this._registerMapper({
+						...configProps,
+						uppercase,
+						snippet,
+						index,
+					})
+				);
 			}
 		}
 

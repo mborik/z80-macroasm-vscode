@@ -28,6 +28,8 @@ export default {
 		/* 29 */ 'hl', 'de', 'bc', 'af', 'ix', 'iy',
 		/* 35 */ 'sp', '(sp)', '(ix)', '(iy)'
 	],
+	conditionals: ['c', 'nc', 'z', 'nz', 'p', 'm', 'po', 'pe'],
+
 	// quick pointers into `registers`
 	regR16Index: 29,
 	regStackIndex: 35,

@@ -160,6 +160,11 @@
           "default": "no-change",
           "description": "Formatter: When formatting of hexadecimal numbers was enabled, whether it's to be additional case processing applied (by default keep untouched)."
         },
+        "z80-macroasm.suggestOnInstructions": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, extension will suggest basic instruction mnemonics for the auto-completion. Otherwise, only instruction arguments will be suggested."
+        },
         "z80-macroasm.seekSymbolsThroughWorkspace": {
           "type": "boolean",
           "default": false,

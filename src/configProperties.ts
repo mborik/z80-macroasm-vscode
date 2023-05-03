@@ -7,6 +7,7 @@ export interface ConfigProps {
 	indentSpaces: boolean;
 	indentSize: number;
 	indentDetector: RegExp;
+	suggestOnInstructions: boolean;
 
 	// format section
 	baseIndent: number;
@@ -32,6 +33,8 @@ export abstract class ConfigPropsProvider {
 		const indentSize = parseInt(config.editor.tabSize, 10) || 8;
 		const result: ConfigProps = {
 			...this.settings?.format,
+
+			suggestOnInstructions: this.settings?.suggestOnInstructions === true,
 
 			eol: (config.files.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n',
 			formatOnType: config.editor.formatOnType === true,
