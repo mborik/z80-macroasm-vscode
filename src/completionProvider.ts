@@ -91,8 +91,8 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		const suffix = (!opt.formatOnType && secondArgument && opt.splitInstructionsByColon) ? opt.eol : '';
 
 		// commit characters are slightly different for second argument:
-		// comma is accepted in addition to space, tab and enter.
-		const commitChars = [' ', '\t', '\n'];
+		// comma is accepted in addition tab or enter.
+		const commitChars = ['\t', '\n'];
 		if (!secondArgument) {
 			commitChars.unshift(',');
 		}
