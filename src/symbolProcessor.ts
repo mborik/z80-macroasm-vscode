@@ -460,6 +460,8 @@ export class SymbolProcessor {
 				const labelMatch = regex.labelDefinition.exec(line.text);
 				const labelPath = [];
 
+				let symbolKind = vscode.SymbolKind.Function;
+
 				if (labelMatch && !parseInt(labelMatch[1])) {
 					labelPath.push(labelMatch[1]);
 
@@ -490,9 +492,14 @@ export class SymbolProcessor {
 					if (defineExpressionMatch) {
 						const instruction = (defineExpressionMatch[2] + ' '.repeat(8)).substr(0, 8);
 						commentBuffer.push('\n```\n' + instruction + defineExpressionMatch[3].trim() + '\n```');
+						symbolKind = vscode.SymbolKind.Variable;
 					}
 					else if (evalExpressionMatch) {
 						commentBuffer.push('\n`' + evalExpressionMatch[3].trim() + '`');
+						symbolKind = vscode.SymbolKind.Constant;
+					}
+					else if (includeLineMatch) {
+						symbolKind = vscode.SymbolKind.File;
 					}
 
 					if (endCommentMatch) {
@@ -505,7 +512,7 @@ export class SymbolProcessor {
 						location,
 						lineNumber,
 						commentBuffer.join('\n').trim() || undefined,
-						vscode.SymbolKind.Variable,
+						symbolKind,
 						localLabel
 					));
 				}
@@ -535,6 +542,8 @@ export class SymbolProcessor {
 					));
 				}
 				else if (macroLineMatch) {
+					symbolKind = vscode.SymbolKind.Event;
+
 					const declaration = macroLineMatch[2];
 					const start = line.firstNonWhitespaceCharacterIndex + macroLineMatch[1].length;
 					const location = new vscode.Location(document.uri, new vscode.Range(
@@ -560,10 +569,12 @@ export class SymbolProcessor {
 						location,
 						lineNumber,
 						commentBuffer.join('\n').trim(),
-						vscode.SymbolKind.Function
+						symbolKind
 					));
 				}
 				else if (moduleLineMatch) {
+					symbolKind = vscode.SymbolKind.Module;
+
 					const declaration = moduleLineMatch[2];
 					const start = line.firstNonWhitespaceCharacterIndex + moduleLineMatch[1].length;
 					const location = new vscode.Location(document.uri, new vscode.Range(
@@ -581,7 +592,7 @@ export class SymbolProcessor {
 						location,
 						lineNumber,
 						commentBuffer.join('\n').trim(),
-						vscode.SymbolKind.Module
+						symbolKind
 					));
 				}
 				else if (regex.endmoduleLine.test(line.text)) {
