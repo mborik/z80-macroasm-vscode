@@ -59,6 +59,7 @@ export default {
 			inc(?:l4[89]|lz4|zx7|exo)|read|
 			def[bdghlmswir]|d[bcghmswz]|abyte[cz]?|byte|d?word|hex
 		)\s+([^\$;]+)(;.*)?$`,
+	defineFileExpression: /^(inc\w*|insert|binary|read)$/i,
 	keyword: mkRegex`^(
 		equ|eval|[fr]?org|end|end?t|align|(?:de|un)?phase|shift|
 		save(?:bin|dev|hob|nex|sna|tap|trd)|empty(?:tap|trd)|

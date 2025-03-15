@@ -492,14 +492,13 @@ export class SymbolProcessor {
 					if (defineExpressionMatch) {
 						const instruction = (defineExpressionMatch[2] + ' '.repeat(8)).substr(0, 8);
 						commentBuffer.push('\n```\n' + instruction + defineExpressionMatch[3].trim() + '\n```');
-						symbolKind = vscode.SymbolKind.Variable;
+						symbolKind = regex.defineFileExpression.exec(defineExpressionMatch[2]) ?
+							vscode.SymbolKind.File :
+							vscode.SymbolKind.Variable;
 					}
 					else if (evalExpressionMatch) {
 						commentBuffer.push('\n`' + evalExpressionMatch[3].trim() + '`');
 						symbolKind = vscode.SymbolKind.Constant;
-					}
-					else if (includeLineMatch) {
-						symbolKind = vscode.SymbolKind.File;
 					}
 
 					if (endCommentMatch) {
