@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
   <Metadata>
-    <Identity Language="en-US" Id="z80-macroasm" Version="0.7.10" Publisher="mborik"/>
+    <Identity Language="en-US" Id="z80-macroasm" Version="0.8.0" Publisher="mborik"/>
     <DisplayName>Z80 Macro-Assembler</DisplayName>
     <Description xml:space="preserve">Support for Z80 macro-assemblers in Visual Studio Code</Description>
     <Tags>assembly,macro,assembler,Zilog,Z80,Sinclair,ZX-Spectrum,Amstrad,CPC</Tags>

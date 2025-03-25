@@ -57,6 +57,8 @@ These few options allows you to configure extension's behavior but primarily you
   > default: `"no-change"`
 - `z80-macroasm.format.suggestOnInstructions` - Extension will suggest also basic instruction mnemonics for the auto-completion, not only instruction arguments.
   > default: `false`
+- `z80-macroasm.format.suggestCommitWithCustomKeys` - Extension will commit suggesttions with extension's custom keys (enter, tab, or comma). Otherwise, only predefined shortcut will commit suggestion.
+  > default: `false`
 - `z80-macroasm.format.splitInstructionsByColon` - Split colon separated instructions to lines.
   > default: `true`
 
