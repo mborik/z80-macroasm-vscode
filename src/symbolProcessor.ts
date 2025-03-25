@@ -87,26 +87,39 @@ export class SymbolProcessor {
 	 * @param prependPath Path fragments which should be prepended.
 	 * @param searched Paths of files that have already been searched.
 	 */
-	private async _seekSymbols(fsPath: string, output: SymbolMap,
-		prependPath: string[] = [], searched: string[] = []) {
-
-		let table = this.files[fsPath];
-
-		if (!table) {
-			try {
-				// Open missing document and process...
-				const doc = await vscode.workspace.openTextDocument(fsPath);
-
-				this._document(doc);
-				table = this.files[fsPath];
-			}
-			catch(e) {
-				// file not found, probably non-existent include
+	private async _seekSymbols(
+		fsPath: string,
+		output: SymbolMap,
+		prependPath: string[] = [],
+		searched: string[] = []
+	) {
+		try {
+			// Open missing document and process...
+			const doc = await vscode.workspace.openTextDocument(fsPath);
+			if (doc.isClosed) {
+				// This shouldn't happen, but just in case...
 				searched.push(fsPath);
 				return;
 			}
+			if (fsPath !== doc.uri.fsPath) {
+				console.warn(`Fixing file path: "${fsPath}" => "${doc.uri.fsPath}"`);
+				if (this.files[fsPath]) {
+					// Something went wrong, remove invalid indexed entry
+					delete this.files[fsPath];
+				}
+				fsPath = doc.uri.fsPath;
+			}
+			if (!this.files[fsPath]) {
+				this._document(doc);
+			}
+		}
+		catch(e) {
+			// File not found, probably non-existent include
+			searched.push(fsPath);
+			return;
 		}
 
+		const table = this.files[fsPath];
 		searched.push(fsPath);
 
 		for (const symbol of table.symbols) {

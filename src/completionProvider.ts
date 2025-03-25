@@ -213,7 +213,7 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 
 			if (instructionPart) {
 				const instructionToFind = uppercaseIfNeeded(instructionPart, uppercase);
-				const preselected = output.find(snip => snip.label.startsWith(instructionToFind));
+				const preselected = output.find(snip => snip.label.toString().startsWith(instructionToFind));
 				if (preselected) {
 					preselected.preselect = true;
 				}
