@@ -8,6 +8,7 @@ export interface ConfigProps {
 	indentSize: number;
 	indentDetector: RegExp;
 	suggestOnInstructions: boolean;
+	suggestCommitWithCustomKeys: boolean;
 
 	// format section
 	baseIndent: number;
@@ -35,6 +36,7 @@ export abstract class ConfigPropsProvider {
 			...this.settings?.format,
 
 			suggestOnInstructions: this.settings?.suggestOnInstructions === true,
+			suggestCommitWithCustomKeys: this.settings?.suggestCommitWithCustomKeys === true,
 
 			eol: (config.files.eol === vscode.EndOfLine.CRLF) ? '\r\n' : '\n',
 			formatOnType: config.editor.formatOnType === true,

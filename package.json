@@ -166,6 +166,11 @@
           "default": false,
           "description": "If true, extension will suggest basic instruction mnemonics for the auto-completion. Otherwise, only instruction arguments will be suggested."
         },
+        "z80-macroasm.suggestCommitWithCustomKeys": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, extension will commit suggesttions with extension's custom keys (enter, tab, or comma). Otherwise, only predefined `acceptSelectedSuggestion` shortcut will commit suggestion."
+        },
         "z80-macroasm.seekSymbolsThroughWorkspace": {
           "type": "boolean",
           "default": false,

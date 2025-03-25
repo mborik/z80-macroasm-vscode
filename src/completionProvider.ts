@@ -63,15 +63,15 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		}
 
 		snip.appendTabstop(0);
-
 		item.insertText = snip;
-		item.commitCharacters = ['\t'];
 
+		if (opt.suggestCommitWithCustomKeys) {
+			item.commitCharacters = ['\t'];
+		}
 		if (z80n) {
 			item.documentation = new vscode.MarkdownString('(Z80N)');
 			item.sortText = `z${snippet}`; // put on bottom...
 		}
-
 		if (range) {
 			item.range = range;
 		}
@@ -110,8 +110,10 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 		// put on the top of the list...
 		item.sortText = `!${pad(index)}`;
 		item.insertText = snip;
-		item.commitCharacters = commitChars;
 
+		if (opt.suggestCommitWithCustomKeys) {
+			item.commitCharacters = commitChars;
+		}
 		if (range) {
 			item.range = range;
 		}
@@ -239,7 +241,9 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 						.appendText(configProps.eol)
 						.appendTabstop(0);
 
-					item.commitCharacters = ['\n'];
+					if (configProps.suggestCommitWithCustomKeys) {
+						item.commitCharacters = ['\n'];
+					}
 					return [item];
 				}
 				else {
@@ -364,7 +368,10 @@ export class Z80CompletionProvider extends ConfigPropsProvider implements vscode
 				);
 			}
 
-			item.commitCharacters = ['\n'];
+			if (configProps.suggestCommitWithCustomKeys) {
+				item.commitCharacters = ['\n'];
+			}
+
 			output.push(item);
 		}
 
