@@ -25,6 +25,10 @@ These few options allows you to configure extension's behavior but primarily you
   > default: `"**/*.{a80,asm,inc,s}"`
 - `z80-macroasm.seekSymbolsThroughWorkspace` - If true, extension will crawl through all your workspace files to document all symbols. Otherwise, only includes are taken into account.
   > default: `false`
+- `z80-macroasm.suggestOnInstructions` - Extension will suggest also basic instruction mnemonics for the auto-completion, not only instruction arguments.
+  > default: `false`
+- `z80-macroasm.suggestCommitWithCustomKeys` - Extension will commit suggesttions with extension's custom keys (enter, tab, or comma). Otherwise, only predefined shortcut will commit suggestion.
+  > default: `false`
 
 ### Formatter:
 - `z80-macroasm.format.enabled` - Turn on the experimental feature of format on-type or on-save.
@@ -55,10 +59,6 @@ These few options allows you to configure extension's behavior but primarily you
   >+ **"c-style"**: `0x1fff` | `0xB45D`
 - `z80-macroasm.format.hexaNumberCase` - When reformatting of hexadecimal numbers was enabled, whether it's to be additional case processing applied when `true` means uppercased, `false` lowercased.
   > default: `"no-change"`
-- `z80-macroasm.format.suggestOnInstructions` - Extension will suggest also basic instruction mnemonics for the auto-completion, not only instruction arguments.
-  > default: `false`
-- `z80-macroasm.format.suggestCommitWithCustomKeys` - Extension will commit suggesttions with extension's custom keys (enter, tab, or comma). Otherwise, only predefined shortcut will commit suggestion.
-  > default: `false`
 - `z80-macroasm.format.splitInstructionsByColon` - Split colon separated instructions to lines.
   > default: `true`
 
