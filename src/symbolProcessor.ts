@@ -56,21 +56,45 @@ export class SymbolProcessor {
 
 
 	constructor(public settings: vscode.WorkspaceConfiguration) {
-		const fileUriHandler = ((uri: vscode.Uri) => {
-			vscode.workspace.openTextDocument(uri).then(doc => this._document(doc));
-		});
+		// `null` means "no exclusions" for findFiles, `undefined` applies VS Code defaults
+		const exclude: string | undefined = settings.files.exclude || undefined;
+
+		const fileUriHandler = (uri: vscode.Uri) =>
+			Promise.resolve(vscode.workspace.openTextDocument(uri))
+				.then(doc => this._document(doc))
+				.then(undefined, () => { /* ignore unreadable files */ });
+
+		const watcherHandler = async (uri: vscode.Uri) => {
+			const found = await vscode.workspace.findFiles(
+				new vscode.RelativePattern(path.dirname(uri.fsPath), path.basename(uri.fsPath)),
+				exclude,
+				1
+			);
+			if (found.length) {
+				await fileUriHandler(uri);
+			}
+		};
 
 		vscode.workspace
-			.findFiles(settings.files.include, settings.files.exclude)
-			.then(files => files.forEach(fileUriHandler));
+			.findFiles(settings.files.include, exclude)
+			.then(async files => {
+				const limit = 8;
+				let index = 0;
+				const worker = async () => {
+					while (index < files.length) {
+						await fileUriHandler(files[index++]);
+					}
+				};
+				await Promise.all(Array.from({ length: Math.min(limit, files.length) }, worker));
+			});
 
 		vscode.workspace.onDidChangeTextDocument(
 			(event: vscode.TextDocumentChangeEvent) => this._document(event.document)
 		);
 
 		this._watcher = vscode.workspace.createFileSystemWatcher(settings.files.include);
-		this._watcher.onDidChange(fileUriHandler);
-		this._watcher.onDidCreate(fileUriHandler);
+		this._watcher.onDidChange(watcherHandler);
+		this._watcher.onDidCreate(watcherHandler);
 		this._watcher.onDidDelete((uri) => {
 			delete this.files[uri.fsPath];
 		});
