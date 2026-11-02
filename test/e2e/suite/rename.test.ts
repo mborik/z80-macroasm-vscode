@@ -23,12 +23,17 @@ const positionOf = (doc: vscode.TextDocument, needle: string, inner = 1) => {
 
 /** Asks the extension's rename provider for edits through the public VS Code command. */
 const provideRename = async (doc: vscode.TextDocument, position: vscode.Position, newName: string) => {
-	// the symbol index is filled asynchronously after activation
+	// the provider registration and the symbol index are filled asynchronously after activation
 	let edit: vscode.WorkspaceEdit | undefined;
-	for (let attempt = 0; attempt < 20; attempt++) {
-		edit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
-			'vscode.executeDocumentRenameProvider', doc.uri, position, newName
-		);
+	for (let attempt = 0; attempt < 40; attempt++) {
+		try {
+			edit = await vscode.commands.executeCommand<vscode.WorkspaceEdit>(
+				'vscode.executeDocumentRenameProvider', doc.uri, position, newName
+			);
+		}
+		catch {
+			edit = undefined; // provider not registered yet ("No result")
+		}
 		if (edit && edit.size) {
 			break;
 		}
