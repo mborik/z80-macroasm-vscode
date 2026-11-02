@@ -1,0 +1,24 @@
+		device	zxspectrum48
+		include "backend/sinclairBASIC.inc"
+
+		org	23755
+
+@start
+
+	module bas
+line1:		db	0, 1
+		dw	line1.len
+line1.cmds	; CLEAR VAL "x":
+		db	C_CLEAR
+		VAL	$6000 - 1, ':'
+		; LOAD *"x" CODE:
+		db	C_LOAD, '*"NOTER.COD"', C_CODE, ':'
+		; RANDOMIZE USR VAL "x"
+		db	C_RANDOMIZE, C_USR
+		VAL	$6000, EOL
+line1.len = $ - line1.cmds
+	endmod
+
+@total = $ - start
+
+		save3dos "autoboot.bas", start, total, 0, 1

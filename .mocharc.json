@@ -1,0 +1,6 @@
+{
+  "require": ["out/test/unit/setup.js"],
+  "spec": ["out/test/unit/**/*.test.js"],
+  "timeout": 5000,
+  "ui": "bdd"
+}
