@@ -96,20 +96,20 @@ describe('E2E: rename provider', () => {
 
 		assert.deepStrictEqual([...texts.keys()].sort(), ['loader.a80', 'sinclairBASIC.inc']);
 		assert.ok(texts.get('loader.a80')!.includes('db\tC_RAND, C_USR'));
-		assert.ok(texts.get('sinclairBASIC.inc')!.includes('C_RAND\t\t= #F9'));
+		assert.ok(texts.get('sinclairBASIC.inc')!.includes('C_RAND\t= #F9'));
 		assert.ok(!/C_RANDOMIZE/.test(texts.get('loader.a80')!.replace(/; RANDOMIZE USR VAL "x"/, '')));
 		assert.ok(texts.get('loader.a80')!.includes('; RANDOMIZE USR VAL "x"'), 'comment untouched');
 		assert.ok(!texts.get('sinclairBASIC.inc')!.includes('C_RANDOMIZE'));
 	});
 
-	it('renames when the cursor is inside the included file', async () => {
-		await openFixture('loader.a80');
+	it('renames only within the included file tree when the cursor is inside the included file', async () => {
 		const inc = await openFixture('backend/sinclairBASIC.inc');
 		const edit = await provideRename(inc, positionOf(inc, 'C_RANDOMIZE'), 'C_RAND');
 		const texts = await applyToText(edit);
 
-		assert.ok(texts.has('loader.a80'));
-		assert.ok(texts.has('sinclairBASIC.inc'));
+		// the provider follows includes downwards only, so the including file is not touched
+		assert.deepStrictEqual([...texts.keys()], ['sinclairBASIC.inc']);
+		assert.ok(texts.get('sinclairBASIC.inc')!.includes('C_RAND\t= #F9'));
 	});
 
 	it('rejects renaming of comments, strings, numbers, keywords and includes', async () => {
