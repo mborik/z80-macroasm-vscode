@@ -29,8 +29,9 @@
   "pricing": "Free",
   "license": "MIT",
   "engines": {
-    "vscode": "^1.52.0",
-    "node": "^16.2.0"
+    "vscode": "^10.0.0",
+    "node": "^22.0.0",
+    "npm": "^10.0.0"
   },
   "activationEvents": [
     "onLanguage"
@@ -326,7 +327,7 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "lint": "eslint -c .eslintrc.json src/**/*.ts",
+    "lint": "eslint src/**/*.ts",
     "pretest": "npm run compile",
     "test": "npm run test:unit",
     "test:unit": "mocha",
@@ -335,13 +336,14 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
-    "@types/node": "^15.6.1",
+    "@types/node": "^22.20.5",
     "@types/vscode": "^1.52.0",
-    "@typescript-eslint/eslint-plugin": "^4.28.0",
-    "@typescript-eslint/parser": "^4.28.0",
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
     "@vscode/test-electron": "^3.1.0",
-    "eslint": "^7.29.0",
-    "mocha": "^10.8.2",
-    "typescript": "^4.1.3"
+    "eslint": "^10.14.0",
+    "mocha": "^5.0.5",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1"
   }
 }

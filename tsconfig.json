@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "moduleResolution": "node",
     "target": "esnext",
     "outDir": "out",
     "lib": [ "esnext" ],
+    "types": [ "node" ],
     "sourceMap": true,
     "skipLibCheck": true,
     "rootDir": ".",
