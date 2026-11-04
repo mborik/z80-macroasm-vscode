@@ -137,7 +137,7 @@ export class SymbolProcessor {
 				this._document(doc);
 			}
 		}
-		catch(e) {
+		catch {
 			// File not found, probably non-existent include
 			searched.push(fsPath);
 			return;
