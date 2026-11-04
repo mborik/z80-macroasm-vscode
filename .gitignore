@@ -1,7 +1,5 @@
 /node_modules
 /out
-/package-lock.json
-/yarn.lock
 
 # OS generated files #
 ######################
@@ -12,3 +10,4 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
+/.vscode-test

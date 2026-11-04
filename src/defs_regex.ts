@@ -4,7 +4,7 @@ const mkRegex = (str: TemplateStringsArray, opts: string = 'i') =>
 export default {
 	commentLine: /^(?:\s*;+|\/{2,})\s*(.*)$/,
 	endComment: /(?:;+|\/{2,})\s*(.*)$/,
-	includeLine: /(\binclude\s+)((["'])([^\3]+)\3).*$/i,
+	includeLine: /(\binclude\s+)((["'])((?:(?!\3).)+)\3).*$/i,
 	macroLine: /\b(macro\s+)(\w+)(?:\s+([^\/;$]+))?/i,
 	moduleLine: /\b(module\s+)(\w+)\b/i,
 	endmoduleLine: /\bendmod(ule)?\b/i,

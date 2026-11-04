@@ -30,7 +30,8 @@
   "license": "MIT",
   "engines": {
     "vscode": "^1.52.0",
-    "node": "^16.2.0"
+    "node": "^22.0.0",
+    "npm": "^10.0.0"
   },
   "activationEvents": [
     "onLanguage"
@@ -326,15 +327,23 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "eslint -c .eslintrc.json src/**/*.ts"
+    "lint": "eslint src/**/*.ts",
+    "pretest": "npm run compile",
+    "test": "npm run test:unit",
+    "test:unit": "mocha --require out/test/unit/setup.js --timeout 5000 --ui bdd \"out/test/unit/**/*.test.js\"",
+    "test:e2e": "node out/test/e2e/runTest.js",
+    "test:unit:watch": "mocha --watch --watch-files out/**/*.js"
   },
   "devDependencies": {
-    "@types/node": "^15.6.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.20.5",
     "@types/vscode": "^1.52.0",
-    "@typescript-eslint/eslint-plugin": "^4.28.0",
-    "@typescript-eslint/parser": "^4.28.0",
-    "eslint": "^7.29.0",
-    "typescript": "^4.1.3",
-    "vscode-test": "^1.5.2"
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
+    "@vscode/test-electron": "^3.1.0",
+    "eslint": "^10.14.0",
+    "mocha": "^12.0.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.1"
   }
 }
