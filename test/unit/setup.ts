@@ -1,6 +1,6 @@
 // Mocha `--require` hook: resolves `import 'vscode'` to the in-memory mock,
 // because the real module exists only inside the VS Code Extension Host.
-import * as Module from 'module';
+import Module = require('module');
 import * as vscodeMock from './mocks/vscode';
 
 const m = Module as any;
