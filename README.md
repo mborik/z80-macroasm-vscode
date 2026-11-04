@@ -11,7 +11,7 @@ The **Z80 Macro-Assembler** extension for Visual Studio Code provides the follow
 * [problem matchers](#problem-matchers) for **SjASMPlus**, **Macroassembler AS**, **Pasmo**, **rasm** and **tniASM** compilation output
 * label or symbol [defintion documentation](#definitions), suggestions on hover or typing
 * macro documentation and argument definition suggestions
-* semi-automatic [completition](#completion) with formatting
+* semi-automatic [completion](#completion) with formatting
 * [renaming](#renaming) of labels or symbols
 * [formatting](#formatter) of block or whole document (experimental feature)
 * snippets for macros and source control keywords
